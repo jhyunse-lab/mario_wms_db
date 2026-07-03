@@ -7,8 +7,8 @@ import {
 import { UploadCloud, Zap, Box, Snowflake, Search as SearchIcon, LayoutDashboard, MapPin, Package, Truck } from 'lucide-react';
 import './App.css';
 
-const STACK_COLORS = ['#FF8A00', '#00E5FF', '#D500F9', '#FF4081', '#00E676'];
-const DONUT_COLORS = ['#FF8A00', '#00E5FF', '#D500F9', '#FF4081', '#00E676'];
+const STACK_COLORS = ['#FF8A00', '#B4F557', '#00E5FF', '#FF61A6', '#818CF8'];
+const DONUT_COLORS = ['#FF8A00', '#B4F557', '#00E5FF', '#FF61A6', '#818CF8'];
 
 const formatNumber = (num) => new Intl.NumberFormat('en-US').format(num);
 const formatK = (num) => num > 1000 ? (num / 1000).toFixed(1) + 'K' : num;
