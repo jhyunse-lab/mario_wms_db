@@ -418,7 +418,7 @@ function App() {
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={metrics.topDestChannels} layout="vertical" margin={{ top:5, right:30, left:10, bottom:5 }}>
                     <XAxis type="number" hide />
-                    <YAxis dataKey="name" type="category" stroke="var(--text-muted)" tick={{fill:'var(--text-main)', fontSize:13, fontWeight:500}} width={140} />
+                    <YAxis dataKey="name" type="category" interval={0} stroke="var(--text-muted)" tick={{fill:'var(--text-main)', fontSize:13, fontWeight:500}} width={140} />
                     <RechartsTooltip cursor={{fill:'rgba(255,255,255,0.05)'}} contentStyle={{ backgroundColor:'var(--card-bg)', border:'1px solid var(--card-border)', borderRadius:8 }} />
                     <Legend verticalAlign="bottom" wrapperStyle={{ color:'var(--text-main)', fontSize:'0.8rem' }} />
                     {metrics.allChannelNames.map((ch, i) => (
@@ -630,11 +630,11 @@ function ChannelTab({ metrics, filteredData }) {
 
           {subTab === 'item' && (
             <div>
-              <div style={{ height: Math.min(itemRows.slice(0,20).length * 40 + 40, 480), marginBottom:20 }}>
+              <div style={{ height: Math.max(itemRows.slice(0,20).length * 36, 300), marginBottom:20 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={itemRows.slice(0,20).map(it => ({ name:it.name, qty:it.qty }))} layout="vertical" margin={{ top:5, right:30, left:10, bottom:5 }}>
                     <XAxis type="number" stroke="var(--text-muted)" tick={{fill:'var(--text-main)', fontSize:13, fontWeight:500}} />
-                    <YAxis dataKey="name" type="category" stroke="var(--text-muted)" width={200} tick={{fill:'var(--text-main)', fontSize:13, fontWeight:500}} />
+                    <YAxis dataKey="name" type="category" interval={0} stroke="var(--text-muted)" width={200} tick={{fill:'var(--text-main)', fontSize:13, fontWeight:500}} />
                     <RechartsTooltip cursor={{fill:'rgba(255,255,255,0.05)'}} contentStyle={{ backgroundColor:'var(--card-bg)', border:'1px solid var(--card-border)', borderRadius:8 }} />
                     <Bar dataKey="qty" name="출고수량" fill="#2DD4BF" radius={[0,4,4,0]} />
                   </BarChart>
@@ -675,7 +675,7 @@ function DestTab({ allDestinations, topDestChannels, allChannelNames }) {
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={topDestChannels} layout="vertical" margin={{ top:5, right:30, left:10, bottom:5 }}>
               <XAxis type="number" hide />
-              <YAxis dataKey="name" type="category" stroke="var(--text-muted)" tick={{fill:'var(--text-main)', fontSize:13, fontWeight:500}} width={160} />
+              <YAxis dataKey="name" type="category" interval={0} stroke="var(--text-muted)" tick={{fill:'var(--text-main)', fontSize:13, fontWeight:500}} width={160} />
               <RechartsTooltip cursor={{fill:'rgba(255,255,255,0.05)'}} contentStyle={{ backgroundColor:'var(--card-bg)', border:'1px solid var(--card-border)', borderRadius:8 }} />
               <Legend verticalAlign="bottom" wrapperStyle={{ color:'var(--text-main)', fontSize:'0.8rem' }} />
               {allChannelNames.map((ch,i) => <Bar key={ch} dataKey={ch} stackId="a" fill={STACK_COLORS[i%STACK_COLORS.length]} />)}
@@ -756,7 +756,7 @@ function ItemTab({ allItems }) {
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={displayed.slice(0,50)} layout="vertical" margin={{ top:5, right:30, left:10, bottom:5 }}>
               <XAxis type="number" stroke="var(--text-muted)" tick={{fill:'var(--text-main)', fontSize:13, fontWeight:500}} />
-              <YAxis dataKey="name" type="category" stroke="var(--text-muted)" width={220} tick={{fill:'var(--text-main)', fontSize:13, fontWeight:500}} />
+              <YAxis dataKey="name" type="category" interval={0} stroke="var(--text-muted)" width={220} tick={{fill:'var(--text-main)', fontSize:13, fontWeight:500}} />
               <RechartsTooltip cursor={{fill:'rgba(255,255,255,0.05)'}} contentStyle={{ backgroundColor:'var(--card-bg)', border:'1px solid var(--card-border)', borderRadius:8 }} />
               <Bar dataKey="qty" name="출고수량" radius={[0,4,4,0]}>
                 {displayed.slice(0,50).map((item,i) => (
@@ -830,11 +830,11 @@ function DestDrillDown({ destRows, channelDetail, filteredData, selectedChannel 
   return (
     <div>
       {/* Top bar chart */}
-      <div style={{ height: Math.min(destRows.slice(0,15).length * 42 + 40, 380), marginBottom:20 }}>
+      <div style={{ height: Math.max(destRows.slice(0,15).length * 36, 300), marginBottom:20 }}>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={destRows.slice(0,15).map(d => ({ name:d.name, qty:d.qty, orders:d.orders }))} layout="vertical" margin={{ top:5, right:30, left:10, bottom:5 }}>
             <XAxis type="number" stroke="var(--text-muted)" tick={{fill:'var(--text-main)', fontSize:13, fontWeight:500}} />
-            <YAxis dataKey="name" type="category" stroke="var(--text-muted)" width={180} tick={{fill:'var(--text-main)', fontSize:13, fontWeight:500}} />
+            <YAxis dataKey="name" type="category" interval={0} stroke="var(--text-muted)" width={180} tick={{fill:'var(--text-main)', fontSize:13, fontWeight:500}} />
             <RechartsTooltip cursor={{fill:'rgba(255,255,255,0.05)'}} contentStyle={{ backgroundColor:'var(--card-bg)', border:'1px solid var(--card-border)', borderRadius:8 }} />
             <Bar dataKey="qty" name="출고수량" fill="var(--accent-neon)" radius={[0,4,4,0]} />
             <Bar dataKey="orders" name="납품횟수" fill="#38BDF8" radius={[0,4,4,0]} />
