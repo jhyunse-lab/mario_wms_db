@@ -55,6 +55,7 @@ function App() {
   const [currentMonth, setCurrentMonth] = useState('전체');
   const [searchQuery, setSearchQuery] = useState('');
   const [isDragging, setIsDragging] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleDragOver = (e) => { e.preventDefault(); setIsDragging(true); };
   const handleDragLeave = (e) => { e.preventDefault(); setIsDragging(false); };
@@ -65,16 +66,20 @@ function App() {
   const handleFileChange = (e) => { if (e.target.files[0]) loadFile(e.target.files[0]); };
 
   const loadFile = (file) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const wb = XLSX.read(e.target.result, { type: 'binary' });
-      const ws = wb.Sheets[wb.SheetNames[0]];
-      setData(XLSX.utils.sheet_to_json(ws).map(processRow));
-      setCurrentMonth('전체');
-      setSearchQuery('');
-      setActiveTab('overview');
-    };
-    reader.readAsBinaryString(file);
+    setIsProcessing(true);
+    setTimeout(() => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const wb = XLSX.read(e.target.result, { type: 'binary' });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        setData(XLSX.utils.sheet_to_json(ws).map(processRow));
+        setCurrentMonth('전체');
+        setSearchQuery('');
+        setActiveTab('overview');
+        setIsProcessing(false);
+      };
+      reader.readAsBinaryString(file);
+    }, 50);
   };
 
   const availableMonths = useMemo(() => {
@@ -150,8 +155,7 @@ function App() {
     const channelDetailMap = {};
     const gTrips = {};
 
-    // Use ALL data for channel breakdown
-    (data || []).forEach(d => {
+    filteredData.forEach(d => {
       const tk = `${d.date}||${d.destination}`;
       if (!typeMap[d.type]) typeMap[d.type] = { name: d.type, qty: 0, orders: 0 };
       typeMap[d.type].qty += d.quantity;
@@ -234,9 +238,19 @@ function App() {
           onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}
           onClick={() => document.getElementById('fileUpload').click()}
         >
-          <UploadCloud className="upload-icon" size={64} />
-          <div className="upload-text">엑셀 파일을 드래그하거나 클릭하여 업로드</div>
-          <div className="upload-subtext">지원 포맷: .xlsx, .xls, .csv</div>
+          {isProcessing ? (
+            <>
+              <div className="spinner" style={{ marginBottom: 20 }}></div>
+              <div className="upload-text">데이터를 분석하고 있습니다...</div>
+              <div className="upload-subtext">잠시만 기다려주세요</div>
+            </>
+          ) : (
+            <>
+              <UploadCloud className="upload-icon" size={64} />
+              <div className="upload-text">엑셀 파일을 드래그하거나 클릭하여 업로드</div>
+              <div className="upload-subtext">지원 포맷: .xlsx, .xls, .csv</div>
+            </>
+          )}
           <input id="fileUpload" type="file" accept=".csv,.xlsx,.xls" style={{ display: 'none' }} onChange={handleFileChange} />
         </div>
       </div>
