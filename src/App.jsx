@@ -296,9 +296,9 @@ function App() {
           <button key={m} onClick={() => setCurrentMonth(m)} style={{
             padding:'6px 14px', borderRadius:8, fontSize:'0.85rem',
             border:`1px solid ${currentMonth===m ? 'var(--accent-neon)' : 'var(--card-border)'}`,
-            background: currentMonth===m ? 'var(--accent-neon)' : 'transparent',
-            color: currentMonth===m ? '#000' : 'var(--text-main)',
-            cursor:'pointer', fontWeight: currentMonth===m ? 700 : 400, transition:'all 0.2s'
+            background: currentMonth===m ? 'rgba(255,138,0,0.15)' : 'transparent',
+            color: currentMonth===m ? 'var(--accent-neon)' : 'var(--text-main)',
+            cursor:'pointer', fontWeight: currentMonth===m ? 700 : 500, transition:'all 0.2s'
           }}>{m === '전체' ? '전체 기간' : m}</button>
         ))}
         {searchQuery && <span style={{ marginLeft:8, color:'var(--accent-neon)', fontSize:'0.82rem' }}>검색 중: "{searchQuery}"</span>}
@@ -314,7 +314,7 @@ function App() {
             { label:'납품처 수', value: formatNumber(metrics.allDestinations.length) + '개소' },
           ].map((k,i) => (
             <div key={i} className="card" style={{ padding:'16px 20px', borderLeft: k.accent ? '3px solid var(--accent-neon)' : '3px solid var(--card-border)' }}>
-              <div style={{ fontSize:'0.78rem', color:'var(--text-muted)', fontWeight:600, textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:4 }}>{k.label}</div>
+              <div style={{ fontSize:'0.9rem', color:'var(--text-main)', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:4 }}>{k.label}</div>
               <div style={{ fontSize:'1.6rem', fontWeight:800, color: k.accent ? 'var(--accent-neon)' : 'var(--text-main)', fontFamily:'monospace' }}>{k.value}</div>
             </div>
           ))}
@@ -732,10 +732,10 @@ function ItemTab({ allItems }) {
           {/* Grade filter */}
           {grades.map(g => (
             <button key={g} onClick={() => setFilterGrade(g)} style={{
-              padding:'6px 14px', fontSize:'0.82rem',
-              background: filterGrade===g ? 'var(--accent-neon)' : 'transparent',
-              color: filterGrade===g ? '#000' : 'var(--text-main)',
-              border:'1px solid var(--accent-neon)', borderRadius:8, cursor:'pointer', fontWeight:600, transition:'all 0.2s'
+              padding:'6px 14px', fontSize:'0.9rem',
+              background: filterGrade===g ? 'rgba(255,138,0,0.15)' : 'transparent',
+              color: filterGrade===g ? 'var(--accent-neon)' : 'var(--text-main)',
+              border:'1px solid var(--accent-neon)', borderRadius:8, cursor:'pointer', fontWeight:700, transition:'all 0.2s'
             }}>{g}</button>
           ))}
           <span style={{ width:1, background:'var(--card-border)', margin:'0 4px' }}/>
