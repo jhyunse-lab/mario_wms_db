@@ -7,8 +7,8 @@ import {
 import { UploadCloud, Zap, Box, Snowflake, Search as SearchIcon, LayoutDashboard, MapPin, Package, Truck } from 'lucide-react';
 import './App.css';
 
-const STACK_COLORS = ['#B4F557', '#4ADE80', '#2DD4BF', '#38BDF8', '#818CF8'];
-const DONUT_COLORS = ['#B4F557', '#4ADE80', '#2DD4BF', '#38BDF8', '#818CF8'];
+const STACK_COLORS = ['#2DD4BF', '#4ADE80', '#2DD4BF', '#38BDF8', '#818CF8'];
+const DONUT_COLORS = ['#2DD4BF', '#4ADE80', '#2DD4BF', '#38BDF8', '#818CF8'];
 
 const formatNumber = (num) => new Intl.NumberFormat('en-US').format(num);
 const formatK = (num) => num > 1000 ? (num / 1000).toFixed(1) + 'K' : num;
@@ -535,7 +535,7 @@ function ChannelTab({ metrics, filteredData }) {
               {metrics.allChannels.map((c, i) => (
                 <tr key={i}
                   onClick={() => { setSelectedChannel(selectedChannel === c.name ? null : c.name); setSubTab('monthly'); setExpandedMonth(null); }}
-                  style={{ cursor:'pointer', background: selectedChannel===c.name ? 'rgba(180,245,87,0.08)' : 'transparent', borderLeft: selectedChannel===c.name ? '3px solid var(--accent-neon)' : '3px solid transparent', transition:'all 0.2s' }}
+                  style={{ cursor:'pointer', background: selectedChannel===c.name ? 'rgba(45,212,191,0.08)' : 'transparent', borderLeft: selectedChannel===c.name ? '3px solid var(--accent-neon)' : '3px solid transparent', transition:'all 0.2s' }}
                 >
                   <td style={{ fontWeight:700, color: selectedChannel===c.name ? 'var(--accent-neon)' : 'var(--text-main)' }}>
                     {c.name} {selectedChannel===c.name ? '▼' : '▶'}
@@ -590,7 +590,7 @@ function ChannelTab({ metrics, filteredData }) {
                   {monthlyRows.map((row, i) => (
                     <React.Fragment key={i}>
                       <tr onClick={() => setExpandedMonth(expandedMonth===row.month ? null : row.month)}
-                        style={{ cursor:'pointer', background: expandedMonth===row.month ? 'rgba(180,245,87,0.06)' : 'transparent' }}
+                        style={{ cursor:'pointer', background: expandedMonth===row.month ? 'rgba(45,212,191,0.06)' : 'transparent' }}
                       >
                         <td style={{ fontWeight:700 }}>{row.month}</td>
                         <td>{formatNumber(row.orders)}회</td>
@@ -600,12 +600,12 @@ function ChannelTab({ metrics, filteredData }) {
                         <td style={{ color:'var(--accent-neon)', fontSize:'0.82rem' }}>{expandedMonth===row.month ? '접기 ▲' : '▼'}</td>
                       </tr>
                       {expandedMonth===row.month && (
-                        <tr><td colSpan={6} style={{ background:'rgba(180,245,87,0.04)', padding:'14px 20px' }}>
+                        <tr><td colSpan={6} style={{ background:'rgba(45,212,191,0.04)', padding:'14px 20px' }}>
                           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:20 }}>
                             <div>
                               <div style={{ color:'var(--text-muted)', fontWeight:600, fontSize:'0.82rem', marginBottom:6 }}>🏢 납품처</div>
                               <div style={{ display:'flex', flexWrap:'wrap', gap:5 }}>
-                                {row.destList.map((d,j) => <span key={j} style={{ background:'rgba(180,245,87,0.15)', color:'var(--accent-neon)', padding:'3px 10px', borderRadius:999, fontSize:'0.8rem', border:'1px solid rgba(180,245,87,0.3)' }}>{d}</span>)}
+                                {row.destList.map((d,j) => <span key={j} style={{ background:'rgba(45,212,191,0.15)', color:'var(--accent-neon)', padding:'3px 10px', borderRadius:999, fontSize:'0.8rem', border:'1px solid rgba(45,212,191,0.3)' }}>{d}</span>)}
                               </div>
                             </div>
                             <div>
@@ -853,7 +853,7 @@ function DestDrillDown({ destRows, channelDetail, filteredData, selectedChannel 
             <React.Fragment key={idx}>
               <tr
                 onClick={() => setSelectedDest(selectedDest===d.name ? null : d.name)}
-                style={{ cursor:'pointer', background: selectedDest===d.name ? 'rgba(180,245,87,0.08)' : 'transparent', borderLeft: selectedDest===d.name ? '3px solid var(--accent-neon)' : '3px solid transparent', transition:'all 0.2s' }}
+                style={{ cursor:'pointer', background: selectedDest===d.name ? 'rgba(45,212,191,0.08)' : 'transparent', borderLeft: selectedDest===d.name ? '3px solid var(--accent-neon)' : '3px solid transparent', transition:'all 0.2s' }}
               >
                 <td>{idx+1}</td>
                 <td style={{ fontWeight:700, color: selectedDest===d.name ? 'var(--accent-neon)' : 'var(--text-main)' }}>
@@ -865,7 +865,7 @@ function DestDrillDown({ destRows, channelDetail, filteredData, selectedChannel 
 
               {selectedDest===d.name && (
                 <tr><td colSpan={4} style={{ padding:0 }}>
-                  <div style={{ background:'rgba(180,245,87,0.03)', border:'1px solid rgba(180,245,87,0.15)', borderRadius:10, margin:'6px 4px 14px', padding:'18px 22px' }}>
+                  <div style={{ background:'rgba(45,212,191,0.03)', border:'1px solid rgba(45,212,191,0.15)', borderRadius:10, margin:'6px 4px 14px', padding:'18px 22px' }}>
 
                     {selectedDest==='LS' ? (
                       /* LS: Date → Division → Items */
