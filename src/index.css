@@ -1,16 +1,16 @@
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
 
 :root {
-  --bg-dark: #070B14;
-  --card-bg: #111520;
-  --card-border: #1E293B;
-  --accent-neon: #B4F557;
-  --accent-neon-dim: rgba(180, 245, 87, 0.2);
-  --text-main: #F8FAFC;
-  --text-muted: #94A3B8;
+  --bg-dark: #191A1C;
+  --card-bg: #232428;
+  --card-border: #33343A;
+  --accent-neon: #FF8A00;
+  --accent-neon-dim: rgba(255, 138, 0, 0.2);
+  --text-main: #E5E7EB;
+  --text-muted: #9CA3AF;
   --danger: #EF4444;
   --warning: #F59E0B;
-  --border-radius: 12px;
+  --border-radius: 8px;
 }
 
 * {
