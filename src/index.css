@@ -1,16 +1,16 @@
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
 
 :root {
-  --bg-dark: #050B14;
-  --card-bg: rgba(17, 25, 40, 0.65);
-  --card-border: rgba(255, 255, 255, 0.08);
-  --accent-neon: #2DD4BF;
-  --accent-neon-dim: rgba(45, 212, 191, 0.2);
-  --text-main: #F8FAFC;
-  --text-muted: #94A3B8;
+  --bg-dark: #F1F5F9;
+  --card-bg: #FFFFFF;
+  --card-border: #E2E8F0;
+  --accent-neon: #2563EB;
+  --accent-neon-dim: rgba(37, 99, 235, 0.15);
+  --text-main: #0F172A;
+  --text-muted: #64748B;
   --danger: #EF4444;
   --warning: #F59E0B;
-  --border-radius: 16px;
+  --border-radius: 12px;
 }
 
 * {
@@ -67,12 +67,10 @@ h2::before {
 /* Cards */
 .card {
   background-color: var(--card-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--card-border);
   border-radius: var(--border-radius);
   padding: 24px;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.25);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 .card:hover {

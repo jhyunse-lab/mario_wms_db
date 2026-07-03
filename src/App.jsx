@@ -7,8 +7,8 @@ import {
 import { UploadCloud, Zap, Box, Snowflake, Search as SearchIcon, LayoutDashboard, MapPin, Package, Truck } from 'lucide-react';
 import './App.css';
 
-const STACK_COLORS = ['#2DD4BF', '#4ADE80', '#2DD4BF', '#38BDF8', '#818CF8'];
-const DONUT_COLORS = ['#2DD4BF', '#4ADE80', '#2DD4BF', '#38BDF8', '#818CF8'];
+const STACK_COLORS = ['#2563EB', '#F97316', '#3B82F6', '#FBBF24', '#10B981'];
+const DONUT_COLORS = ['#2563EB', '#F97316', '#3B82F6', '#FBBF24', '#10B981'];
 
 const formatNumber = (num) => new Intl.NumberFormat('en-US').format(num);
 const formatK = (num) => num > 1000 ? (num / 1000).toFixed(1) + 'K' : num;
@@ -378,7 +378,7 @@ function App() {
                   <BarChart data={metrics.weekdayTrend} margin={{ top:10, right:10, left:-10, bottom:0 }}>
                     <XAxis dataKey="name" stroke="var(--text-muted)" tick={{fill:'var(--text-muted)'}} />
                     <YAxis stroke="var(--text-muted)" tick={{fill:'var(--text-muted)', fontSize:11}} />
-                    <RechartsTooltip cursor={{fill:'rgba(255,255,255,0.05)'}} contentStyle={{ backgroundColor:'var(--card-bg)', border:'1px solid var(--card-border)', borderRadius:8 }} />
+                    <RechartsTooltip cursor={{fill:'rgba(0,0,0,0.04)'}} contentStyle={{ backgroundColor:'var(--card-bg)', border:'1px solid var(--card-border)', borderRadius:8 }} />
                     <Bar dataKey="value" name="출고수량" radius={[4,4,0,0]}>
                       {metrics.weekdayTrend.map((entry, i) => (
                         <Cell key={i} fill={entry.value === Math.max(...metrics.weekdayTrend.map(r=>r.value)) ? 'var(--accent-neon)' : '#2DD4BF'} />
@@ -419,7 +419,7 @@ function App() {
                   <BarChart data={metrics.topDestChannels} layout="vertical" margin={{ top:5, right:30, left:10, bottom:5 }}>
                     <XAxis type="number" hide />
                     <YAxis dataKey="name" type="category" stroke="var(--text-muted)" tick={{fill:'var(--text-muted)', fontSize:11}} width={120} />
-                    <RechartsTooltip cursor={{fill:'rgba(255,255,255,0.05)'}} contentStyle={{ backgroundColor:'var(--card-bg)', border:'1px solid var(--card-border)', borderRadius:8 }} />
+                    <RechartsTooltip cursor={{fill:'rgba(0,0,0,0.04)'}} contentStyle={{ backgroundColor:'var(--card-bg)', border:'1px solid var(--card-border)', borderRadius:8 }} />
                     <Legend verticalAlign="bottom" wrapperStyle={{ color:'var(--text-main)', fontSize:'0.8rem' }} />
                     {metrics.allChannelNames.map((ch, i) => (
                       <Bar key={ch} dataKey={ch} stackId="a" fill={STACK_COLORS[i % STACK_COLORS.length]} />
@@ -535,7 +535,7 @@ function ChannelTab({ metrics, filteredData }) {
               {metrics.allChannels.map((c, i) => (
                 <tr key={i}
                   onClick={() => { setSelectedChannel(selectedChannel === c.name ? null : c.name); setSubTab('monthly'); setExpandedMonth(null); }}
-                  style={{ cursor:'pointer', background: selectedChannel===c.name ? 'rgba(45,212,191,0.08)' : 'transparent', borderLeft: selectedChannel===c.name ? '3px solid var(--accent-neon)' : '3px solid transparent', transition:'all 0.2s' }}
+                  style={{ cursor:'pointer', background: selectedChannel===c.name ? 'rgba(37,99,235,0.08)' : 'transparent', borderLeft: selectedChannel===c.name ? '3px solid var(--accent-neon)' : '3px solid transparent', transition:'all 0.2s' }}
                 >
                   <td style={{ fontWeight:700, color: selectedChannel===c.name ? 'var(--accent-neon)' : 'var(--text-main)' }}>
                     {c.name} {selectedChannel===c.name ? '▼' : '▶'}
@@ -590,7 +590,7 @@ function ChannelTab({ metrics, filteredData }) {
                   {monthlyRows.map((row, i) => (
                     <React.Fragment key={i}>
                       <tr onClick={() => setExpandedMonth(expandedMonth===row.month ? null : row.month)}
-                        style={{ cursor:'pointer', background: expandedMonth===row.month ? 'rgba(45,212,191,0.06)' : 'transparent' }}
+                        style={{ cursor:'pointer', background: expandedMonth===row.month ? 'rgba(37,99,235,0.06)' : 'transparent' }}
                       >
                         <td style={{ fontWeight:700 }}>{row.month}</td>
                         <td>{formatNumber(row.orders)}회</td>
@@ -600,12 +600,12 @@ function ChannelTab({ metrics, filteredData }) {
                         <td style={{ color:'var(--accent-neon)', fontSize:'0.82rem' }}>{expandedMonth===row.month ? '접기 ▲' : '▼'}</td>
                       </tr>
                       {expandedMonth===row.month && (
-                        <tr><td colSpan={6} style={{ background:'rgba(45,212,191,0.04)', padding:'14px 20px' }}>
+                        <tr><td colSpan={6} style={{ background:'rgba(37,99,235,0.04)', padding:'14px 20px' }}>
                           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:20 }}>
                             <div>
                               <div style={{ color:'var(--text-muted)', fontWeight:600, fontSize:'0.82rem', marginBottom:6 }}>🏢 납품처</div>
                               <div style={{ display:'flex', flexWrap:'wrap', gap:5 }}>
-                                {row.destList.map((d,j) => <span key={j} style={{ background:'rgba(45,212,191,0.15)', color:'var(--accent-neon)', padding:'3px 10px', borderRadius:999, fontSize:'0.8rem', border:'1px solid rgba(45,212,191,0.3)' }}>{d}</span>)}
+                                {row.destList.map((d,j) => <span key={j} style={{ background:'rgba(37,99,235,0.15)', color:'var(--accent-neon)', padding:'3px 10px', borderRadius:999, fontSize:'0.8rem', border:'1px solid rgba(37,99,235,0.3)' }}>{d}</span>)}
                               </div>
                             </div>
                             <div>
@@ -635,7 +635,7 @@ function ChannelTab({ metrics, filteredData }) {
                   <BarChart data={itemRows.slice(0,20).map(it => ({ name:it.name, qty:it.qty }))} layout="vertical" margin={{ top:5, right:30, left:10, bottom:5 }}>
                     <XAxis type="number" stroke="var(--text-muted)" tick={{fill:'var(--text-muted)',fontSize:11}} />
                     <YAxis dataKey="name" type="category" stroke="var(--text-muted)" width={160} tick={{fill:'var(--text-muted)',fontSize:11}} />
-                    <RechartsTooltip cursor={{fill:'rgba(255,255,255,0.05)'}} contentStyle={{ backgroundColor:'var(--card-bg)', border:'1px solid var(--card-border)', borderRadius:8 }} />
+                    <RechartsTooltip cursor={{fill:'rgba(0,0,0,0.04)'}} contentStyle={{ backgroundColor:'var(--card-bg)', border:'1px solid var(--card-border)', borderRadius:8 }} />
                     <Bar dataKey="qty" name="출고수량" fill="#2DD4BF" radius={[0,4,4,0]} />
                   </BarChart>
                 </ResponsiveContainer>
@@ -676,7 +676,7 @@ function DestTab({ allDestinations, topDestChannels, allChannelNames }) {
             <BarChart data={topDestChannels} layout="vertical" margin={{ top:5, right:30, left:10, bottom:5 }}>
               <XAxis type="number" hide />
               <YAxis dataKey="name" type="category" stroke="var(--text-muted)" tick={{fill:'var(--text-muted)',fontSize:11}} width={130} />
-              <RechartsTooltip cursor={{fill:'rgba(255,255,255,0.05)'}} contentStyle={{ backgroundColor:'var(--card-bg)', border:'1px solid var(--card-border)', borderRadius:8 }} />
+              <RechartsTooltip cursor={{fill:'rgba(0,0,0,0.04)'}} contentStyle={{ backgroundColor:'var(--card-bg)', border:'1px solid var(--card-border)', borderRadius:8 }} />
               <Legend verticalAlign="bottom" wrapperStyle={{ color:'var(--text-main)', fontSize:'0.8rem' }} />
               {allChannelNames.map((ch,i) => <Bar key={ch} dataKey={ch} stackId="a" fill={STACK_COLORS[i%STACK_COLORS.length]} />)}
             </BarChart>
@@ -757,7 +757,7 @@ function ItemTab({ allItems }) {
             <BarChart data={displayed.slice(0,50)} layout="vertical" margin={{ top:5, right:30, left:10, bottom:5 }}>
               <XAxis type="number" stroke="var(--text-muted)" tick={{fill:'var(--text-muted)',fontSize:11}} />
               <YAxis dataKey="name" type="category" stroke="var(--text-muted)" width={170} tick={{fill:'var(--text-muted)',fontSize:11}} />
-              <RechartsTooltip cursor={{fill:'rgba(255,255,255,0.05)'}} contentStyle={{ backgroundColor:'var(--card-bg)', border:'1px solid var(--card-border)', borderRadius:8 }} />
+              <RechartsTooltip cursor={{fill:'rgba(0,0,0,0.04)'}} contentStyle={{ backgroundColor:'var(--card-bg)', border:'1px solid var(--card-border)', borderRadius:8 }} />
               <Bar dataKey="qty" name="출고수량" radius={[0,4,4,0]}>
                 {displayed.slice(0,50).map((item,i) => (
                   <Cell key={i} fill={item.category==='A등급' ? 'var(--accent-neon)' : item.category==='B등급' ? '#38BDF8' : '#64748b'} />
@@ -835,7 +835,7 @@ function DestDrillDown({ destRows, channelDetail, filteredData, selectedChannel 
           <BarChart data={destRows.slice(0,15).map(d => ({ name:d.name, qty:d.qty, orders:d.orders }))} layout="vertical" margin={{ top:5, right:30, left:10, bottom:5 }}>
             <XAxis type="number" stroke="var(--text-muted)" tick={{fill:'var(--text-muted)',fontSize:11}} />
             <YAxis dataKey="name" type="category" stroke="var(--text-muted)" width={140} tick={{fill:'var(--text-muted)',fontSize:11}} />
-            <RechartsTooltip cursor={{fill:'rgba(255,255,255,0.05)'}} contentStyle={{ backgroundColor:'var(--card-bg)', border:'1px solid var(--card-border)', borderRadius:8 }} />
+            <RechartsTooltip cursor={{fill:'rgba(0,0,0,0.04)'}} contentStyle={{ backgroundColor:'var(--card-bg)', border:'1px solid var(--card-border)', borderRadius:8 }} />
             <Bar dataKey="qty" name="출고수량" fill="var(--accent-neon)" radius={[0,4,4,0]} />
             <Bar dataKey="orders" name="납품횟수" fill="#38BDF8" radius={[0,4,4,0]} />
             <Legend wrapperStyle={{ color:'var(--text-main)', fontSize:'0.82rem' }} />
@@ -853,7 +853,7 @@ function DestDrillDown({ destRows, channelDetail, filteredData, selectedChannel 
             <React.Fragment key={idx}>
               <tr
                 onClick={() => setSelectedDest(selectedDest===d.name ? null : d.name)}
-                style={{ cursor:'pointer', background: selectedDest===d.name ? 'rgba(45,212,191,0.08)' : 'transparent', borderLeft: selectedDest===d.name ? '3px solid var(--accent-neon)' : '3px solid transparent', transition:'all 0.2s' }}
+                style={{ cursor:'pointer', background: selectedDest===d.name ? 'rgba(37,99,235,0.08)' : 'transparent', borderLeft: selectedDest===d.name ? '3px solid var(--accent-neon)' : '3px solid transparent', transition:'all 0.2s' }}
               >
                 <td>{idx+1}</td>
                 <td style={{ fontWeight:700, color: selectedDest===d.name ? 'var(--accent-neon)' : 'var(--text-main)' }}>
@@ -865,7 +865,7 @@ function DestDrillDown({ destRows, channelDetail, filteredData, selectedChannel 
 
               {selectedDest===d.name && (
                 <tr><td colSpan={4} style={{ padding:0 }}>
-                  <div style={{ background:'rgba(45,212,191,0.03)', border:'1px solid rgba(45,212,191,0.15)', borderRadius:10, margin:'6px 4px 14px', padding:'18px 22px' }}>
+                  <div style={{ background:'rgba(37,99,235,0.03)', border:'1px solid rgba(37,99,235,0.15)', borderRadius:10, margin:'6px 4px 14px', padding:'18px 22px' }}>
 
                     {selectedDest==='LS' ? (
                       /* LS: Date → Division → Items */
@@ -938,9 +938,9 @@ function DestDrillDown({ destRows, channelDetail, filteredData, selectedChannel 
                         <div style={{ color:'var(--text-muted)', fontWeight:700, fontSize:'0.82rem', marginBottom:8 }}>📦 납품 품목 ({itemRows.length}종)</div>
                         <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
                           {itemRows.map((it,i) => (
-                            <span key={i} style={{ background:'rgba(45,212,191,0.1)', color:'#2DD4BF', padding:'4px 10px', borderRadius:999, fontSize:'0.79rem', border:'1px solid rgba(45,212,191,0.25)', display:'flex', alignItems:'center', gap:5 }}>
+                            <span key={i} style={{ background:'rgba(37,99,235,0.1)', color:'#2DD4BF', padding:'4px 10px', borderRadius:999, fontSize:'0.79rem', border:'1px solid rgba(37,99,235,0.25)', display:'flex', alignItems:'center', gap:5 }}>
                               {it.name}
-                              <span style={{ background:'rgba(45,212,191,0.2)', padding:'0 6px', borderRadius:999, fontSize:'0.73rem', fontWeight:700 }}>{it.orders}회</span>
+                              <span style={{ background:'rgba(37,99,235,0.2)', padding:'0 6px', borderRadius:999, fontSize:'0.73rem', fontWeight:700 }}>{it.orders}회</span>
                             </span>
                           ))}
                         </div>
