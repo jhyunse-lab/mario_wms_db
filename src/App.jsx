@@ -505,6 +505,34 @@ function ChannelTab({ metrics, filteredData }) {
   const destRows = cd ? Object.values(cd.destMap).sort((a,b) => b.qty - a.qty) : [];
   const itemRows = cd ? Object.values(cd.itemMap).sort((a,b) => b.qty - a.qty) : [];
 
+  const isMonthlyView = Object.keys(cd?.monthlyMap || {}).length !== 1;
+  const timeSeriesRows = useMemo(() => {
+    if (!cd || !selectedChannel) return [];
+    if (isMonthlyView) {
+      return Object.keys(cd.monthlyMap).sort().map(m => ({
+        name: m, qty: cd.monthlyMap[m].qty, orders: cd.monthlyMap[m].orders
+      }));
+    } else {
+      const dailyMap = {};
+      filteredData.forEach(d => {
+        if (d.type === selectedChannel && d.date) {
+          if (!dailyMap[d.date]) dailyMap[d.date] = { qty: 0, orders: 0, trips: new Set() };
+          dailyMap[d.date].qty += d.quantity;
+          const tk = `${d.date}||${d.destination}`;
+          if (!dailyMap[d.date].trips.has(tk)) {
+            dailyMap[d.date].orders++;
+            dailyMap[d.date].trips.add(tk);
+          }
+        }
+      });
+      return Object.keys(dailyMap).sort().map(d => ({
+        name: (d.split('.')[2] || d) + '일',
+        qty: dailyMap[d].qty,
+        orders: dailyMap[d].orders
+      }));
+    }
+  }, [cd, selectedChannel, filteredData, isMonthlyView]);
+
   return (
     <div>
       {/* Channel Overview Chart + Table side-by-side */}
@@ -555,7 +583,7 @@ function ChannelTab({ metrics, filteredData }) {
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:20, flexWrap:'wrap', gap:12 }}>
             <h2 style={{ margin:0 }}>📦 <span style={{ color:'var(--accent-neon)' }}>{selectedChannel}</span> 상세 분석</h2>
             <div style={{ display:'flex', gap:8 }}>
-              {[['monthly','📅 월별'], ['dest','🏢 납품처'], ['item','📋 품목']].map(([id, label]) => (
+              {[['monthly', isMonthlyView ? '📅 월별' : '📅 일별'], ['dest','🏢 납품처'], ['item','📋 품목']].map(([id, label]) => (
                 <button key={id} onClick={() => setSubTab(id)} style={{
                   padding:'7px 16px', background: subTab===id ? 'rgba(255,138,0,0.15)' : 'transparent',
                   color: subTab===id ? 'var(--accent-neon)' : 'var(--text-main)', border:'1px solid var(--accent-neon)',
@@ -569,7 +597,7 @@ function ChannelTab({ metrics, filteredData }) {
             <div>
               <div style={{ height:220, marginBottom:20 }}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={monthlyRows.map(r => ({ name:r.month, qty:r.qty, orders:r.orders }))} margin={{ top:10, right:20, left:0, bottom:0 }}>
+                  <AreaChart data={timeSeriesRows} margin={{ top:10, right:20, left:0, bottom:0 }}>
                     <defs>
                       <linearGradient id="chGrad" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="var(--accent-neon)" stopOpacity={0.35}/>
