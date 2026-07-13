@@ -1407,6 +1407,18 @@
             rebuildBinsFromInventory();
         });
 
+        const elByABC = document.getElementById("colorByABC");
+        if(elByABC) {
+            elByABC.addEventListener("change", (e) => {
+                if (!e.target.checked) return;
+                colorMode = "abc";
+                ownerColorMap = {};
+                const panelSubEl = document.querySelector("#panelSub[data-mode-text]");
+                if (panelSubEl) panelSubEl.innerHTML = "WMS Excel 기반 3D 로케이션 · <b>ABC 등급별</b> 색상 뷰어";
+                rebuildBinsFromInventory();
+            });
+        }
+
         // ===== 7. 선택/하이라이트 & 우클릭 메뉴 =====
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
