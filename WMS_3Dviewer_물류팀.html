@@ -1,0 +1,1882 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>WMS 3D Viewer by Jhs</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #0d1117;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        #info,
+        #status {
+            display: none;
+        }
+
+        /* 우측 패널 */
+        #rightPanel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 380px;
+            height: 100vh;
+            background: radial-gradient(circle at top left, #1f2933 0, #050816 55%);
+            color: #f9fafb;
+            z-index: 20;
+            padding: 14px 14px 10px;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid rgba(148, 163, 184, 0.4);
+            box-shadow: -8px 0 20px rgba(0, 0, 0, 0.6);
+            overflow: auto;
+            min-width: 260px;
+            max-width: 700px;
+        }
+
+        /* 패널 폭 조절용 드래그 바 */
+        #panelResizer {
+            position: absolute;
+            left: -4px;
+            top: 0;
+            width: 8px;
+            height: 100%;
+            cursor: ew-resize;
+            z-index: 21;
+            background: transparent;
+        }
+
+        #panelHeader {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-bottom: 8px;
+        }
+
+        #panelTitle {
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+        }
+
+        #panelTitle span {
+            font-size: 11px;
+            color: #9ca3af;
+            margin-left: 4px;
+            font-weight: 400;
+        }
+
+        #panelSub {
+            font-size: 11px;
+            color: #9ca3af;
+        }
+
+        #legend {
+            margin-top: 2px;
+            font-size: 10px;
+            color: #9ca3af;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px 8px;
+            align-items: center;
+        }
+
+        .legend-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 4px;
+        }
+
+        #colorModeRow,
+        #opacityRow,
+        #labelToggleRow,
+        #frameToggleRow,
+        #ksRow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #9ca3af;
+            margin-top: 6px;
+        }
+
+        #colorModeRow>div,
+        #frameToggleRow>div {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        #colorModeRow label,
+        #frameToggleRow label,
+        #ksRow label {
+            font-size: 11px;
+        }
+
+        #opacityRow input[type="range"] {
+            width: 160px;
+        }
+
+        /* 선택 카드 */
+        #selectionCard {
+            margin-top: 8px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            background: rgba(15, 23, 42, 0.96);
+            border: 1px solid rgba(56, 189, 248, 0.6);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        #selectionCardTitle {
+            font-size: 14px;
+            font-weight: 700;
+            color: #fcd34d;
+            margin-bottom: 4px;
+        }
+
+        /* 업로드 영역 */
+        #uploadArea {
+            margin-top: 8px;
+            margin-bottom: 6px;
+            padding: 8px;
+            border-radius: 8px;
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px dashed rgba(148, 163, 184, 0.7);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            font-size: 11px;
+            color: #e5e7eb;
+        }
+
+        .uploadLabel {
+            font-size: 10px;
+            color: #9ca3af;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            font-size: 11px;
+            color: #e5e7eb;
+        }
+
+        input[type="file"]::file-selector-button {
+            padding: 4px 10px;
+            border-radius: 999px;
+            border: none;
+            background: #2563eb;
+            color: #f9fafb;
+            font-size: 11px;
+            cursor: pointer;
+            margin-right: 6px;
+        }
+
+        /* 필터 & 검색 */
+        #filterRow {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 4px;
+        }
+
+        #manufacturerFilter,
+        #partnerFilter {
+            flex: 1;
+            padding: 4px 6px;
+            font-size: 11px;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.6);
+            background: rgba(15, 23, 42, 0.9);
+            color: #e5e7eb;
+            outline: none;
+        }
+
+        #searchWrapper {
+            margin-top: 2px;
+            position: relative;
+            width: 100%;
+        }
+
+        #searchBox {
+            width: 100%;
+            padding: 6px 22px 6px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.6);
+            background: rgba(15, 23, 42, 0.9);
+            color: #e5e7eb;
+            font-size: 12px;
+            outline: none;
+        }
+
+        #searchBox::placeholder {
+            color: #6b7280;
+        }
+
+        #clearSearch {
+            position: absolute;
+            right: 6px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: none;
+            background: #6b7280;
+            color: #f9fafb;
+            font-size: 10px;
+            line-height: 14px;
+            padding: 0;
+            cursor: pointer;
+            display: none;
+        }
+
+        /* 테이블 */
+        #tableContainer {
+            margin-top: 8px;
+            flex: 1;
+            overflow: hidden;
+            border-radius: 8px;
+            background: rgba(15, 23, 42, 0.96);
+            border: 1px solid rgba(31, 41, 55, 0.9);
+            display: flex;
+            flex-direction: column;
+        }
+
+        #tableHeader {
+            padding: 6px 10px;
+            font-size: 11px;
+            color: #9ca3af;
+            border-bottom: 1px solid rgba(31, 41, 55, 0.9);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #tableHeader span strong {
+            color: #e5e7eb;
+        }
+
+        #exportBtn {
+            padding: 3px 8px;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.7);
+            background: rgba(15, 23, 42, 0.9);
+            color: #e5e7eb;
+            font-size: 10px;
+            cursor: pointer;
+        }
+
+        #inventoryTable {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+            color: #e5e7eb;
+        }
+
+        #inventoryTable thead {
+            position: sticky;
+            top: 0;
+            background: rgba(17, 24, 39, 0.98);
+            z-index: 1;
+        }
+
+        #inventoryTable th,
+        #inventoryTable td {
+            padding: 4px 6px;
+            border-bottom: 1px solid rgba(31, 41, 55, 0.9);
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        #inventoryTable tbody tr {
+            cursor: pointer;
+            transition: background 0.12s ease;
+        }
+
+        #inventoryTable tbody tr:hover {
+            background: rgba(55, 65, 81, 0.6);
+        }
+
+        .highlightRow {
+            background: rgba(56, 189, 248, 0.25) !important;
+        }
+
+        #tableScroll {
+            flex: 1;
+            overflow: auto;
+        }
+
+        #tableScroll::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #tableScroll::-webkit-scrollbar-thumb {
+            background: rgba(55, 65, 81, 0.9);
+            border-radius: 999px;
+        }
+
+        /* 우클릭 메뉴 */
+        #contextMenu {
+            position: fixed;
+            display: none;
+            background: #111827;
+            color: #f9fafb;
+            border: 1px solid #4b5563;
+            border-radius: 6px;
+            font-size: 12px;
+            z-index: 9999;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+            min-width: 140px;
+        }
+
+        .contextItem {
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+
+        .contextItem:hover {
+            background: #1f2937;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="info"></div>
+    <div id="status"></div>
+
+    <!-- 우측 패널 -->
+    <div id="rightPanel">
+        <div id="panelResizer"></div>
+
+        <div id="panelHeader">
+            <div id="panelTitle">WMS 3D Viewer <span>by Jhs</span></div>
+            <div id="panelSub" data-mode-text>WMS Excel 기반 3D 로케이션 · <b>제조사별</b> 색상 뷰어</div>
+
+            <div id="legend">
+                <span><span class="legend-dot" style="background:#9ca3af;"></span>기본(값 미지정)</span>
+                <span>색상 기준: <b>제조사별 / 거래처별</b></span>
+            </div>
+
+            <div id="colorModeRow">
+                <span>색상 기준(Color by)</span>
+                <div>
+                    <label><input type="radio" name="colorMode" id="colorByManufacturer" value="manufacturer" checked />
+                        제조사별</label>
+                    <label><input type="radio" name="colorMode" id="colorByPartner" value="partner" /> 거래처별</label>
+                    <label><input type="radio" name="colorMode" id="colorByABC" value="abc" /> ABC등급별(장기재고)</label>
+                </div>
+            </div>
+
+            <div id="opacityRow">
+                <span>품목 박스 투명도</span>
+                <input type="range" id="boxOpacity" min="0.1" max="1" step="0.05" value="1" />
+            </div>
+
+            <div id="labelToggleRow">
+                <span>영역 라벨 표시</span>
+                <label><input type="checkbox" id="toggleLabels" checked /> 표시</label>
+            </div>
+
+            <div id="frameToggleRow">
+                <span>랙 프레임</span>
+                <div>
+                    <label><input type="checkbox" id="toggleShelves" checked /> 선반</label>
+                    <label><input type="checkbox" id="togglePosts" checked /> 기둥</label>
+                </div>
+            </div>
+
+            <div id="ksRow">
+                <span>주요 영역 표시</span>
+                <div style="display:flex; gap:8px;">
+                    <label><input type="checkbox" id="toggleKS" /> 경신</label>
+                    <label><input type="checkbox" id="toggleGNN" /> GNN</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- 선택 카드 -->
+        <div id="selectionCard">
+            <div id="selectionCardTitle">선택된 객체</div>
+            <div id="sel_type">종류: -</div>
+            <div id="sel_location">로케이션: -</div>
+            <div id="sel_item">품목명: -</div>
+            <div id="sel_abc" style="font-weight:bold; color:#fcd34d;">ABC 등급: -</div>
+            <div id="sel_manu">제조사명: -</div>
+            <div id="sel_partner">거래처명: -</div>
+            <div id="sel_qty">수량: -</div>
+        </div>
+
+        <!-- 엑셀 업로드 -->
+        <div id="uploadArea">
+            <div class="uploadLabel">① 현재고 엑셀 (로케이션, 품목코드, 품목명, 제조사명 등)</div>
+            <input type="file" id="excelInventoryUpload" accept=".xlsx,.xls" />
+            <div class="uploadLabel" style="margin-top:4px;">② 거래처 엑셀 (파일명, 거래처명)</div>
+            <input type="file" id="excelPartnerUpload" accept=".xlsx,.xls" />
+        </div>
+
+        <!-- 필터 -->
+        <div id="filterRow">
+            <select id="manufacturerFilter">
+                <option value="__ALL__">제조사: 전체</option>
+            </select>
+            <select id="partnerFilter">
+                <option value="__ALL__">거래처: 전체</option>
+            </select>
+        </div>
+
+        <!-- 검색 + X 버튼 -->
+        <div id="searchWrapper">
+            <input id="searchBox" placeholder="검색: 로케이션 / 품목명 / 코드 / 제조사명 / 거래처명 / 고객명" />
+            <button id="clearSearch" type="button">×</button>
+        </div>
+
+        <!-- 테이블 -->
+        <div id="tableContainer">
+            <div id="tableHeader">
+                <span>Inventory <strong id="rowCount">0</strong> rows</span>
+                <button id="exportBtn">엑셀로 내보내기</button>
+            </div>
+            <div id="tableScroll">
+                <table id="inventoryTable">
+                    <thead>
+                        <tr>
+                            <th>로케이션</th>
+                            <th>품목명</th>
+                            <th>제조사명</th>
+                            <th>거래처명</th>
+                            <th>고객명</th>
+                            <th>수량</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 우클릭 메뉴 -->
+    <div id="contextMenu">
+        <div class="contextItem" id="menuSelectShelf">선반 선택 모드</div>
+        <div class="contextItem" id="menuSelectItem">품목 선택 모드</div>
+    </div>
+
+    <!-- THREE & XLSX -->
+    <script src="https://unpkg.com/three@0.142.0/build/three.min.js">
+        window.shipmentData = {};
+        fetch('./shipmentData.json')
+            .then(res => res.json())
+            .then(data => {
+                window.shipmentData = data;
+                console.log('Loaded shipment data for ABC Pareto:', Object.keys(data).length, 'items');
+            })
+            .catch(err => console.warn('shipmentData.json fetch error', err));
+
+    </script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <script>
+        // ===== 0. 위치 코드 변환 =====
+        function normalizeLocationCode(raw) {
+            if (!raw) return "";
+            const s = raw.toString().trim();
+
+            // AA 전용: AA03012 → AA-03-01-2
+            if (s.startsWith("AA") && s.length === 7 && /^\d{5}$/.test(s.slice(2))) {
+                const zone = "AA";
+                const row = s.slice(2, 4);
+                const col = s.slice(4, 6);
+                const lvl = s.slice(6);
+                return `${zone}-${row}-${col}-${lvl}`;
+            }
+
+            // 일반: B0206041 → B02-06-04-1
+            const regex = /^[A-Z][0-9]{7}$/;
+            if (!regex.test(s)) {
+                return s;
+            }
+            const zone = s.slice(0, 3);
+            const row = s.slice(3, 5);
+            const col = s.slice(5, 7);
+            const lvl = s.slice(7);
+            return `${zone}-${row}-${col}-${lvl}`;
+        }
+
+        // ===== 1. THREE 기본 세팅 =====
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x050816);
+
+        const camera = new THREE.PerspectiveCamera(
+            60,
+            window.innerWidth / window.innerHeight,
+            0.1,
+            1000
+        );
+        camera.position.set(40, 26, 52);
+        camera.lookAt(0, 5, 0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: false });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(1);
+        document.body.appendChild(renderer.domElement);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.08;
+        controls.target.set(0, 5, 0);
+
+        // 마우스 설정: 가운데 = 팬, 오른쪽 = 우클릭 메뉴만 사용
+        controls.mouseButtons = {
+            LEFT: THREE.MOUSE.ROTATE,
+            MIDDLE: THREE.MOUSE.PAN,
+            RIGHT: null
+        };
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.7);
+        dirLight.position.set(35, 45, 20);
+        scene.add(dirLight);
+
+        const grid = new THREE.GridHelper(200, 200, 0x444444, 0x333333);
+        scene.add(grid);
+
+        // ===== 2. 공통 파라미터 =====
+        const POST_THICK = 0.035;
+        const SHELF_THICK = 0.02;
+        const LEVEL_HEIGHT = 0.8;
+
+        const shelfBaseColor = 0xd4d4d4;
+        const postBaseColor = 0xe5e7eb;
+
+        const shelfMaterialTemplate = new THREE.MeshStandardMaterial({
+            color: shelfBaseColor,
+            metalness: 0.2,
+            roughness: 0.6
+        });
+
+        const metalPostMaterialTemplate = new THREE.MeshStandardMaterial({
+            color: postBaseColor,
+            metalness: 0.35,
+            roughness: 0.35
+        });
+
+        const allShelves = [];
+        const allPosts = [];
+        const allBins = [];
+        const labelSprites = [];
+
+        const locationSlots = {};
+
+        let colorMode = "manufacturer";
+        let boxOpacity = 1.0;
+
+        let ownerColorMap = {};
+        const ownerPalette = [
+            0x60a5fa, 0xf97316, 0x22c55e, 0xa855f7, 0x14b8a6,
+            0xfacc15, 0xf472b6, 0x6366f1, 0x0ea5e9, 0x84cc16,
+            0xec4899, 0x10b981, 0x3b82f6, 0x8b5cf6, 0xf59e0b,
+            0x22c55e, 0x6b7280, 0x0f766e, 0xfb7185, 0x4f46e5
+        ];
+        const defaultOwnerColor = new THREE.Color(0x9ca3af);
+
+        function getOwnerColor(keyName) {
+            const key = keyName || "";
+            if (!key) return defaultOwnerColor;
+            if (!ownerColorMap[key]) {
+                const keys = Object.keys(ownerColorMap);
+                const idx = keys.length % ownerPalette.length;
+                ownerColorMap[key] = new THREE.Color(ownerPalette[idx]);
+            }
+            return ownerColorMap[key];
+        }
+
+        function createTextSprite(text, options = {}) {
+            const {
+                fontSize = 48,
+                fontFace = "Segoe UI",
+                textColor = "#000000",
+                bgColor = "#FFE066"
+            } = options;
+
+            const w = 256, h = 128;
+            const canvas = document.createElement("canvas");
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext("2d");
+
+            ctx.clearRect(0, 0, w, h);
+            ctx.fillStyle = bgColor;
+            ctx.fillRect(0, 0, w, h);
+
+            ctx.font = `bold ${fontSize}px ${fontFace}`;
+            ctx.fillStyle = textColor;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(text, w / 2, h / 2);
+
+            const texture = new THREE.CanvasTexture(canvas);
+            const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
+            const sprite = new THREE.Sprite(material);
+            return sprite;
+        }
+
+        // ===== 3. 랙 생성 =====
+        function createRackFromFootprint(params) {
+            const {
+                codePrefix,
+                centerX, centerZ,
+                width, depth,
+                cols, levels, spans,
+                heightScale,
+                withAisles = false,
+                aisleRatio = 2,
+                flushTop = false,
+                rowOffset = 0
+            } = params;
+
+            const baseX = centerX - width / 2;
+            const baseZ = centerZ - depth / 2;
+
+            const bayWidth = width / cols;
+            const levelSpacing = LEVEL_HEIGHT * heightScale;
+
+            let rowCenters = [];
+            let zBoundaries = [];
+            let aisleCenters = [];
+            let shelfDepth, aisleDepth;
+
+            if (withAisles) {
+                const logicalRows = spans;
+                const cycles = logicalRows / 2;
+                const d_shelf = depth / (cycles * (2 + aisleRatio));
+                const d_aisle = d_shelf * aisleRatio;
+
+                shelfDepth = d_shelf;
+                aisleDepth = d_aisle;
+
+                let curZ = baseZ;
+                zBoundaries.push(curZ);
+
+                for (let c = 0; c < cycles; c++) {
+                    curZ += shelfDepth;
+                    zBoundaries.push(curZ);
+                    rowCenters.push(curZ - shelfDepth / 2);
+
+                    curZ += shelfDepth;
+                    zBoundaries.push(curZ);
+                    rowCenters.push(curZ - shelfDepth / 2);
+
+                    curZ += d_aisle;
+                    zBoundaries.push(curZ);
+                    aisleCenters.push(curZ - d_aisle / 2);
+                }
+            } else {
+                const bayDepth = depth / spans;
+                shelfDepth = bayDepth;
+                let curZ = baseZ;
+                zBoundaries.push(curZ);
+
+                for (let i = 0; i < spans; i++) {
+                    curZ += bayDepth;
+                    zBoundaries.push(curZ);
+                    rowCenters.push(curZ - bayDepth / 2);
+                }
+            }
+
+            const shelfYs = [];
+            for (let level = 0; level < levels; level++) {
+                shelfYs.push(SHELF_THICK / 2 + level * levelSpacing);
+            }
+            const topShelfY = shelfYs[shelfYs.length - 1];
+
+            let rackHeight;
+            if (flushTop) {
+                rackHeight = topShelfY + SHELF_THICK / 2;
+            } else {
+                rackHeight = levels * levelSpacing;
+            }
+
+            const POST_GEOMETRY = new THREE.BoxGeometry(
+                POST_THICK,
+                rackHeight,
+                POST_THICK
+            );
+
+            const isBC = codePrefix.startsWith("B") || codePrefix.startsWith("C");
+            const isAorD = ["A01", "A02", "A03", "A04", "D01"].includes(codePrefix);
+
+            // 기둥
+            for (let i = 0; i <= cols; i++) {
+                const x = baseX + i * bayWidth;
+
+                for (let j = 0; j < zBoundaries.length; j++) {
+                    if (isBC && j === zBoundaries.length - 1) continue;
+
+                    if (isAorD) {
+                        const isEdgeRow = (j === 0 || j === zBoundaries.length - 1);
+                        if (!isEdgeRow && (j % 2 !== 0)) continue;
+                    }
+
+                    const z = zBoundaries[j];
+                    const postMat = metalPostMaterialTemplate.clone();
+                    postMat.color.set(postBaseColor);
+                    const post = new THREE.Mesh(POST_GEOMETRY, postMat);
+                    post.position.set(x, rackHeight / 2, z);
+                    post.userData.baseColor = postMat.color.clone();
+                    post.userData.isKS = false;
+                    scene.add(post);
+                    allPosts.push(post);
+                }
+            }
+
+            // 선반 + 슬롯
+            const shelfWidthEffective = bayWidth * 0.98;
+            const shelfDepthEffective = shelfDepth * 0.98;
+            const SHELF_GEOMETRY = new THREE.BoxGeometry(
+                shelfWidthEffective,
+                SHELF_THICK,
+                shelfDepthEffective
+            );
+
+            const BOX_HEIGHT = levelSpacing * 0.9;
+            const BOX_WIDTH = shelfWidthEffective * 0.9;
+            const BOX_DEPTH = shelfDepthEffective * 0.9;
+
+            const rowCount = rowCenters.length;
+
+            for (let level = 0; level < levels; level++) {
+                const shelfY = shelfYs[level];
+
+                for (let col = 0; col < cols; col++) {
+                    const colCenterX = baseX + col * bayWidth + bayWidth / 2;
+
+                    for (let idx = 0; idx < rowCenters.length; idx++) {
+                        const zCenter = rowCenters[idx];
+
+                        const shelfMat = shelfMaterialTemplate.clone();
+                        shelfMat.color.set(shelfBaseColor);
+                        const shelf = new THREE.Mesh(SHELF_GEOMETRY, shelfMat);
+                        shelf.position.set(colCenterX, shelfY, zCenter);
+                        shelf.userData.baseColor = shelfMat.color.clone();
+                        shelf.userData.isKS = false;
+
+                        scene.add(shelf);
+                        allShelves.push(shelf);
+
+                        let rowIdx = (rowCount + rowOffset) - idx;
+                        let colIdx;
+                        const tierIdx = level + 1;
+
+                        if (codePrefix === "AA") {
+                            colIdx = 1;
+                        } else if (["A04", "A03", "A02", "A01"].includes(codePrefix)) {
+                            const m = codePrefix.match(/\d+/);
+                            colIdx = m ? parseInt(m[0], 10) : (col + 1);
+                        } else if (codePrefix === "D01") {
+                            colIdx = col + 1;
+                        } else {
+                            colIdx = col + 1;
+                        }
+
+                        const code =
+                            codePrefix + "-" +
+                            String(rowIdx).padStart(2, "0") + "-" +
+                            String(colIdx).padStart(2, "0") + "-" +
+                            tierIdx;
+
+                        shelf.userData.code = code;
+                        shelf.userData.zone = codePrefix;
+                        shelf.userData.rowIdx = rowIdx;
+                        shelf.userData.colIdx = colIdx;
+                        shelf.userData.tierIdx = tierIdx;
+
+                        const baseY = shelfY + SHELF_THICK / 2 + BOX_HEIGHT / 2;
+                        locationSlots[code] = {
+                            x: colCenterX,
+                            y: baseY,
+                            z: zCenter,
+                            boxHeight: BOX_HEIGHT,
+                            boxWidth: BOX_WIDTH,
+                            boxDepth: BOX_DEPTH
+                        };
+                    }
+                }
+            }
+
+            if (withAisles && aisleCenters.length > 0) {
+                const aisleGeo = new THREE.PlaneGeometry(width * 0.96, aisleDepth * 0.95);
+                const aisleMat = new THREE.MeshBasicMaterial({
+                    color: 0x111827,
+                    side: THREE.DoubleSide
+                });
+
+                aisleCenters.forEach(az => {
+                    const aisle = new THREE.Mesh(aisleGeo, aisleMat);
+                    aisle.rotation.x = -Math.PI / 2;
+                    aisle.position.set(centerX, 0.002, az);
+                    scene.add(aisle);
+                });
+            }
+
+            const zoneLabel = createTextSprite(codePrefix, {
+                fontSize: 52,
+                textColor: "#000000",
+                bgColor: "#FFE066"
+            });
+            zoneLabel.position.set(centerX, rackHeight + 0.8, centerZ + depth / 2 + 0.8);
+            const zoneScale = 2.0;
+            zoneLabel.scale.set(zoneScale, zoneScale * 0.5, 1);
+            scene.add(zoneLabel);
+            labelSprites.push(zoneLabel);
+        }
+
+        // ===== 4. 구역 정의 & 생성 =====
+        let zones = [
+            {
+                codePrefix: "B02",
+                centerX: -13.62, centerZ: 7.545, width: 7.59, depth: 22.35,
+                cols: 5, levels: 3, spans: 22, heightScale: 1.0,
+                withAisles: true, aisleRatio: 2, flushTop: true
+            },
+            {
+                codePrefix: "B01",
+                centerX: -2.46, centerZ: 7.545, width: 7.59, depth: 22.35,
+                cols: 5, levels: 3, spans: 22, heightScale: 1.0,
+                withAisles: true, aisleRatio: 2, flushTop: true
+            },
+
+            {
+                codePrefix: "C02",
+                centerX: -13.62, centerZ: -10.875, width: 7.59, depth: 13.35,
+                cols: 5, levels: 3, spans: 14, heightScale: 1.0,
+                withAisles: true, aisleRatio: 2, flushTop: true
+            },
+            {
+                codePrefix: "C01",
+                centerX: -2.46, centerZ: -12.78, width: 7.59, depth: 9.54,
+                cols: 5, levels: 3, spans: 10, heightScale: 1.0,
+                withAisles: true, aisleRatio: 2, flushTop: true, rowOffset: 4
+            },
+
+            /* RCV 구역: B01 앞 */
+            {
+                codePrefix: "RCV",
+                centerX: -2.46,
+                centerZ: 26.0,  // B01(7.5+11=18.5)보다 앞쪽
+                width: 7.59,
+                depth: 6.0,
+                cols: 6,        // 6칸
+                levels: 1,      // 1단 (바닥)
+                spans: 4,       // 4줄
+                heightScale: 0.1, // 낮게
+                flushTop: false
+            },
+
+            {
+                codePrefix: "A04",
+                centerX: 5.58, centerZ: -0.855, width: 1.95, depth: 38.31,
+                cols: 1, levels: 3, spans: 28, heightScale: 1.95, flushTop: true
+            },
+            {
+                codePrefix: "A03",
+                centerX: 10.23, centerZ: -0.855, width: 1.89, depth: 38.31,
+                cols: 1, levels: 3, spans: 28, heightScale: 1.95, flushTop: true
+            },
+            {
+                codePrefix: "A02",
+                centerX: 12.36, centerZ: -0.855, width: 1.71, depth: 38.31,
+                cols: 1, levels: 2, spans: 28, heightScale: 1.95, flushTop: true
+            },
+            {
+                codePrefix: "A01",
+                centerX: 15.96 * 1.5, centerZ: -2.895, width: 1.95, depth: 42.39,
+                cols: 1, levels: 2, spans: 32, heightScale: 1.95, flushTop: true
+            },
+
+            /* AA: A01 첫 번째 칸과 1 grid(1.95) 만큼 간격 두고 바로 앞에 배치 */
+            {
+                codePrefix: "AA",
+                centerX: 15.96 * 1.5,
+                centerZ: 24.15,               // A01 front edge + 1 grid + AA half depth
+                width: 1.95,
+                depth: 1.95 * 4,
+                cols: 1,
+                levels: 2,
+                spans: 4,
+                heightScale: 1.95,
+                flushTop: true
+            },
+
+            {
+                codePrefix: "D01",
+                centerX: 4.17, centerZ: -23.175, width: 20.85, depth: 1.95,
+                cols: 12, levels: 2, spans: 1, heightScale: 1.95, flushTop: true
+            }
+        ];
+
+        // A02/A03를 A01 쪽으로 살짝 이동
+        (function adjustA02A03() {
+            const a1 = zones.find(z => z.codePrefix === "A01");
+            const a2 = zones.find(z => z.codePrefix === "A02");
+            const a3 = zones.find(z => z.codePrefix === "A03");
+            if (!a1 || !a2 || !a3) return;
+            const d2 = Math.abs(a1.centerX - a2.centerX);
+            const d3 = Math.abs(a1.centerX - a3.centerX);
+            const avg = (d2 + d3) / 2;
+            const shift = avg * 0.2;
+            if (a1.centerX > a2.centerX) a2.centerX += shift; else a2.centerX -= shift;
+            if (a1.centerX > a3.centerX) a3.centerX += shift; else a3.centerX -= shift;
+        })();
+
+        // 좌우 반전
+        zones.forEach(z => { z.centerX = -z.centerX; });
+        zones.forEach(z => createRackFromFootprint(z));
+
+        // F01 바닥
+        let F_centerX = -13.62;
+        const F_centerZ = -21.015;
+        const F_width = 7.59;
+        const F_depth = 5.55;
+        F_centerX = -F_centerX;
+        const fGeo = new THREE.PlaneGeometry(F_width, F_depth);
+        const fMat = new THREE.MeshBasicMaterial({ color: 0x166534, side: THREE.DoubleSide });
+        const f01 = new THREE.Mesh(fGeo, fMat);
+        f01.rotation.x = -Math.PI / 2;
+        f01.position.set(F_centerX, 0.002, F_centerZ);
+        scene.add(f01);
+
+        // ===== 5. 엑셀 & 데이터 구조 =====
+        let inventoryData = [];
+        let inventoryByLoc = {};
+        let partnerByFileName = {};
+
+        let currentTextFilter = "";
+        let currentManufacturerFilter = "__ALL__";
+        let currentPartnerFilter = "__ALL__";
+        let lastFilteredRows = [];
+        let priorityLocation = null;   // 선택한 선반/품목의 로케이션을 테이블 상단으로 정렬하기 위함
+
+        const rowCountSpan = document.getElementById("rowCount");
+        const manufacturerFilterEl = document.getElementById("manufacturerFilter");
+        const partnerFilterEl = document.getElementById("partnerFilter");
+        const panelSubEl = document.querySelector("#panelSub[data-mode-text]");
+
+        const selTypeEl = document.getElementById("sel_type");
+        const selLocEl = document.getElementById("sel_location");
+        const selItemEl = document.getElementById("sel_item");
+        const selManuEl = document.getElementById("sel_manu");
+        const selPartEl = document.getElementById("sel_partner");
+        const selQtyEl = document.getElementById("sel_qty");
+        const selAbcEl = document.getElementById("sel_abc");
+
+        const searchBoxEl = document.getElementById("searchBox");
+        const clearSearchEl = document.getElementById("clearSearch");
+
+        function clearSelectionCard() {
+            selTypeEl.textContent = "종류: -";
+            selLocEl.textContent = "로케이션: -";
+            selItemEl.textContent = "품목명: -";
+            selManuEl.textContent = "제조사명: -";
+            selPartEl.textContent = "거래처명: -";
+            selQtyEl.textContent = "수량: -";
+            if (selAbcEl) selAbcEl.textContent = "ABC 등급: -";
+        }
+
+        function applyPartnerMappingToInventory() {
+            if (!inventoryData || inventoryData.length === 0) return;
+            inventoryData.forEach(row => {
+                const key = (row._FILE_NAME || "").toString().trim();
+                if (!key) return;
+                const mapped = partnerByFileName[key];
+                if (mapped) row._PARTNER = mapped;
+            });
+        }
+
+        // 거래처 엑셀
+        document.getElementById("excelPartnerUpload").addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const data = new Uint8Array(ev.target.result);
+                const wb = XLSX.read(data, { type: "array" });
+                const sheet = wb.Sheets[wb.SheetNames[0]];
+                const json = XLSX.utils.sheet_to_json(sheet);
+
+                partnerByFileName = {};
+                json.forEach(row => {
+                    const fileName =
+                        row.FILE_NAME ||
+                        row["파일명"] ||
+                        row["FileName"] ||
+                        row["품목명"] ||
+                        "";
+                    const partnerName =
+                        row.PARTNER ||
+                        row["거래처명"] ||
+                        row["거래처"] ||
+                        row["BusinessPartner"] ||
+                        "";
+                    const key = (fileName || "").toString().trim();
+                    if (!key) return;
+                    partnerByFileName[key] = partnerName || "";
+                });
+
+                applyPartnerMappingToInventory();
+                rebuildFilters();
+                updateInventoryTable();
+                rebuildBinsFromInventory();
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        // 현재고 엑셀
+        document.getElementById("excelInventoryUpload").addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const data = new Uint8Array(ev.target.result);
+                const wb = XLSX.read(data, { type: "array" });
+                const sheet = wb.Sheets[wb.SheetNames[0]];
+                const json = XLSX.utils.sheet_to_json(sheet);
+
+                inventoryData = json;
+                inventoryByLoc = {};
+                ownerColorMap = {};
+
+                json.forEach(row => {
+                    const rawLoc =
+                        row.LOCATION_CODE ||
+                        row.Location ||
+                        row["로케이션"] ||
+                        row["LOCATION"] ||
+                        "";
+                    const loc = normalizeLocationCode(rawLoc);
+                    if (!loc) return;
+
+                    row._LOCATION = loc;
+                    row._ITEM_CODE = row.ITEM_CODE || row["품목코드"] || "";
+                    row._ITEM_NAME = row.ITEM_NAME || row["품목명"] || "";
+
+                    row._MANUFACTURER =
+                        row.MANUFACTURER ||
+                        row.MAKER ||
+                        row["제조사"] ||
+                        row["제조사명"] ||
+                        "";
+
+                    row._FILE_NAME =
+                        row.FILE_NAME ||
+                        row["파일명"] ||
+                        row["FileName"] ||
+                        row._ITEM_NAME ||
+                        "";
+
+                    row._PARTNER =
+                        row.BUSINESS_PARTNER ||
+                        row["거래처"] ||
+                        row["거래처명"] ||
+                        row.OWNER ||
+                        row["화주명"] ||
+                        row["화주"] ||
+                        "";
+
+                    row._CUSTOMER =
+                        row.CUSTOMER_CODE ||
+                        row["고객명"] ||
+                        row["고객코드"] ||
+                        row["Customer"] ||
+                        "";
+
+                    let qty =
+                        row.QTY ??
+                        row["재고수량"] ??
+                        row["가용수량"] ??
+                        row["재고"] ??
+                        0;
+                    qty = Number(qty) || 0;
+                    row._QTY = qty;
+
+                    if (!inventoryByLoc[loc]) inventoryByLoc[loc] = [];
+                    inventoryByLoc[loc].push(row);
+                });
+
+                applyPartnerMappingToInventory();
+                rebuildFilters();
+                updateInventoryTable();
+                rebuildBinsFromInventory();
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        function rebuildFilters() {
+            const manuSet = new Set();
+            const partnerSet = new Set();
+            inventoryData.forEach(row => {
+                if (row._MANUFACTURER) manuSet.add(row._MANUFACTURER);
+                if (row._PARTNER) partnerSet.add(row._PARTNER);
+            });
+
+            const manuArr = Array.from(manuSet).sort();
+            const partnerArr = Array.from(partnerSet).sort();
+
+            manufacturerFilterEl.innerHTML = '<option value="__ALL__">제조사: 전체</option>';
+            manuArr.forEach(m => {
+                const opt = document.createElement("option");
+                opt.value = m;
+                opt.textContent = m;
+                manufacturerFilterEl.appendChild(opt);
+            });
+
+            partnerFilterEl.innerHTML = '<option value="__ALL__">거래처: 전체</option>';
+            partnerArr.forEach(p => {
+                const opt = document.createElement("option");
+                opt.value = p;
+                opt.textContent = p;
+                partnerFilterEl.appendChild(opt);
+            });
+
+            currentManufacturerFilter = "__ALL__";
+            currentPartnerFilter = "__ALL__";
+        }
+
+        function rowMatchesFilter(row, textFilter, manuFilter, partnerFilter) {
+            const loc = (row._LOCATION || "").toString();
+            const item = (row._ITEM_NAME || "").toString();
+            const code = (row._ITEM_CODE || "").toString();
+            const manu = (row._MANUFACTURER || "").toString();
+            const partn = (row._PARTNER || "").toString();
+            const cust = (row._CUSTOMER || "").toString();
+
+            if (manuFilter && manuFilter !== "__ALL__" && manu !== manuFilter) return false;
+            if (partnerFilter && partnerFilter !== "__ALL__" && partn !== partnerFilter) return false;
+
+            if (textFilter) {
+                const hay = (loc + " " + item + " " + code + " " + manu + " " + partn + " " + cust).toLowerCase();
+                if (!hay.includes(textFilter.toLowerCase())) return false;
+            }
+            return true;
+        }
+
+        const rowCountSpanEl = document.getElementById("rowCount");
+
+        function updateInventoryTable() {
+            const tbody = document.querySelector("#inventoryTable tbody");
+            tbody.innerHTML = "";
+
+            let filtered = inventoryData.filter(row =>
+                rowMatchesFilter(row, currentTextFilter, currentManufacturerFilter, currentPartnerFilter)
+            );
+
+            // 선택된 선반/품목의 로케이션을 테이블 상단으로 정렬
+            if (priorityLocation) {
+                filtered = filtered.slice().sort((a, b) => {
+                    const aPri = (a._LOCATION === priorityLocation) ? 0 : 1;
+                    const bPri = (b._LOCATION === priorityLocation) ? 0 : 1;
+                    if (aPri !== bPri) return aPri - bPri;
+                    if (a._LOCATION !== b._LOCATION) return a._LOCATION.localeCompare(b._LOCATION);
+                    return 0;
+                });
+            }
+
+            lastFilteredRows = filtered;
+
+            filtered.forEach(row => {
+                const loc = row._LOCATION || "";
+                const item = row._ITEM_NAME || "";
+                const manu = row._MANUFACTURER || "";
+                const partn = row._PARTNER || "";
+                const cust = row._CUSTOMER || "";
+                const qty = row._QTY ?? "";
+
+                const tr = document.createElement("tr");
+                tr.dataset.code = loc;
+                tr.dataset.itemCode = row._ITEM_CODE || "";
+                tr.onclick = () => {
+                    selectItemFromRow(row);
+                };
+                tr.innerHTML = `
+        <td>${loc}</td>
+        <td>${item}</td>
+        <td>${manu}</td>
+        <td>${partn}</td>
+        <td>${cust}</td>
+        <td>${qty}</td>
+      `;
+                tbody.appendChild(tr);
+            });
+
+            rowCountSpanEl.textContent = filtered.length;
+            applyFiltersToBins();
+        }
+
+        function updateClearSearchVisibility() {
+            clearSearchEl.style.display = searchBoxEl.value ? "block" : "none";
+        }
+
+        searchBoxEl.addEventListener("input", (e) => {
+            currentTextFilter = e.target.value || "";
+            updateClearSearchVisibility();
+            updateInventoryTable();
+        });
+
+        clearSearchEl.addEventListener("click", () => {
+            searchBoxEl.value = "";
+            currentTextFilter = "";
+            updateClearSearchVisibility();
+            updateInventoryTable();
+        });
+
+        manufacturerFilterEl.addEventListener("change", (e) => {
+            currentManufacturerFilter = e.target.value;
+            updateInventoryTable();
+        });
+        partnerFilterEl.addEventListener("change", (e) => {
+            currentPartnerFilter = e.target.value;
+            updateInventoryTable();
+        });
+
+        function highlightTableRow(code, itemCode) {
+            const rows = document.querySelectorAll("#inventoryTable tbody tr");
+            rows.forEach(r => {
+                if (!code) {
+                    r.classList.remove("highlightRow");
+                    return;
+                }
+                const sameLoc = r.dataset.code === code;
+                const sameItem = !itemCode || r.dataset.itemCode === itemCode;
+                r.classList.toggle("highlightRow", sameLoc && sameItem);
+            });
+        }
+
+        function selectItemFromRow(row) {
+            const loc = row._LOCATION;
+            const itemCode = row._ITEM_CODE || "";
+            priorityLocation = loc;
+            updateInventoryTable();
+
+            focusItemIn3D(loc, itemCode);
+            highlightTableRow(loc, itemCode);
+
+            selTypeEl.textContent = "종류: 품목";
+            selLocEl.textContent = "로케이션: " + (loc || "-");
+            selItemEl.textContent = "품목명: " + (row._ITEM_NAME || "-") + " [" + (row._ITEM_CODE || "-") + "]";
+            selManuEl.textContent = "제조사명: " + (row._MANUFACTURER || "-");
+            selPartEl.textContent = "거래처명: " + (row._PARTNER || "-");
+            selQtyEl.textContent = "수량: " + (row._QTY ?? "-");
+            let abcText = "-";
+            if (window.shipmentData && row._ITEM_CODE) {
+                const yr = window.shipmentData[row._ITEM_CODE];
+                if (yr >= 2026) abcText = `A등급 (최종출고: ${yr}년)`;
+                else if (yr === 2025) abcText = `B등급 (최종출고: ${yr}년)`;
+                else abcText = `C등급 (최종출고: ${yr || '이력없음'})`;
+            }
+            if(selAbcEl) selAbcEl.textContent = "ABC 등급: " + abcText;
+        }
+
+        // ===== 6. 박스 생성 (다품목 박스 분할) =====
+        function rebuildBinsFromInventory() {
+            allBins.forEach(b => {
+                scene.remove(b);
+                if (b.geometry) b.geometry.dispose();
+                if (b.material) b.material.dispose();
+            });
+            allBins.length = 0;
+
+            clearSelectionOnly(); // 선택만 리셋, KS 색상은 유지
+
+            // RCV 아이템 풀 준비
+            let rcvItemPool = [];
+            Object.keys(inventoryByLoc).forEach(k => {
+                if (k.toUpperCase().includes("RCV")) {
+                    rcvItemPool.push(...inventoryByLoc[k]);
+                }
+            });
+
+            // 2. 슬롯 순회
+            Object.keys(locationSlots).forEach(loc => {
+                let rows;
+                if (loc.startsWith("RCV")) {
+                    // RCV 슬롯이면 풀에서 일부 가져옴 (예: 슬롯당 N개)
+                    // 여기서는 단순화: 풀에 남은게 있으면 이 슬롯에 할당
+                    // 균등 분배를 위해: poolSize / slotCount
+                    const rcvSlotKeys = Object.keys(locationSlots).filter(k => k.startsWith("RCV"));
+                    const slotCount = rcvSlotKeys.length;
+                    const itemsPerSlot = Math.ceil(rcvItemPool.length / slotCount) || 1;
+
+                    rows = rcvItemPool.splice(0, itemsPerSlot);
+                } else {
+                    rows = inventoryByLoc[loc];
+                }
+
+                if (!rows || rows.length === 0) return;
+                const slot = locationSlots[loc];
+
+
+                const valid = rows.filter(r => Number(r._QTY || 0) > 0);
+                if (valid.length === 0) return;
+
+                const n = valid.length;
+                const gridCols = Math.ceil(Math.sqrt(n));
+                const gridRows = Math.ceil(n / gridCols);
+
+                const subWidth = (slot.boxWidth / gridCols) * 0.9;
+                const subDepth = (slot.boxDepth / gridRows) * 0.9;
+                const subHeight = slot.boxHeight;
+
+                for (let i = 0; i < n; i++) {
+                    const r = valid[i];
+                    const gc = i % gridCols;
+                    const gr = Math.floor(i / gridCols);
+
+                    const localX = (gc - (gridCols - 1) / 2) * (slot.boxWidth / gridCols);
+                    const localZ = (gr - (gridRows - 1) / 2) * (slot.boxDepth / gridRows);
+
+                    const key = (colorMode === "manufacturer") ? (r._MANUFACTURER || "") : (r._PARTNER || "");
+                    const color = getOwnerColor(key);
+
+                    const geo = new THREE.BoxGeometry(subWidth, subHeight, subDepth);
+                    const mat = new THREE.MeshStandardMaterial({
+                        color: color,
+                        metalness: 0.2,
+                        roughness: 0.6,
+                        emissive: new THREE.Color(0x000000),
+                        emissiveIntensity: 0.0,
+                        transparent: (boxOpacity < 1.0),
+                        opacity: boxOpacity
+                    });
+
+                    const box = new THREE.Mesh(geo, mat);
+                    box.position.set(slot.x + localX, slot.y, slot.z + localZ);
+                    scene.add(box);
+
+                    box.userData.rowRef = r;
+                    allBins.push(box);
+                }
+            });
+
+            applyFiltersToBins();
+            if (ksVisible) applyKSHighlight(true);
+        }
+
+        function applyFiltersToBins() {
+            allBins.forEach(box => {
+                const row = box.userData.rowRef;
+                if (!row) { box.visible = false; return; }
+                box.visible = rowMatchesFilter(row, currentTextFilter, currentManufacturerFilter, currentPartnerFilter);
+            });
+        }
+
+        document.getElementById("boxOpacity").addEventListener("input", (e) => {
+            boxOpacity = parseFloat(e.target.value) || 1.0;
+            allBins.forEach(b => {
+                if (!b.material) return;
+                b.material.transparent = (boxOpacity < 1.0);
+                b.material.opacity = boxOpacity;
+                b.material.needsUpdate = true;
+            });
+        });
+
+        document.getElementById("colorByManufacturer").addEventListener("change", (e) => {
+            if (!e.target.checked) return;
+            colorMode = "manufacturer";
+            ownerColorMap = {};
+            if (panelSubEl) panelSubEl.innerHTML = "WMS Excel 기반 3D 로케이션 · <b>제조사별</b> 색상 뷰어";
+            rebuildBinsFromInventory();
+        });
+        document.getElementById("colorByPartner").addEventListener("change", (e) => {
+            if (!e.target.checked) return;
+            colorMode = "partner";
+            ownerColorMap = {};
+            if (panelSubEl) panelSubEl.innerHTML = "WMS Excel 기반 3D 로케이션 · <b>거래처별</b> 색상 뷰어";
+            rebuildBinsFromInventory();
+        });
+
+        // ===== 7. 선택/하이라이트 & 우클릭 메뉴 =====
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        let selectedBin = null;
+        let selectedOutline = null;
+        let selectedShelf = null;
+
+        let selectionMode = "item";
+
+        const contextMenu = document.getElementById("contextMenu");
+        const menuSelectShelf = document.getElementById("menuSelectShelf");
+        const menuSelectItem = document.getElementById("menuSelectItem");
+
+        document.addEventListener("contextmenu", (e) => {
+            const panelRect = document.getElementById("rightPanel").getBoundingClientRect();
+            if (e.clientX >= panelRect.left) return;
+            e.preventDefault();
+            contextMenu.style.display = "block";
+            contextMenu.style.left = e.clientX + "px";
+            contextMenu.style.top = e.clientY + "px";
+        });
+        document.addEventListener("click", () => {
+            contextMenu.style.display = "none";
+        });
+        menuSelectShelf.addEventListener("click", (e) => {
+            e.stopPropagation();
+            selectionMode = "shelf";
+            contextMenu.style.display = "none";
+        });
+        menuSelectItem.addEventListener("click", (e) => {
+            e.stopPropagation();
+            selectionMode = "item";
+            contextMenu.style.display = "none";
+        });
+
+        function clearSelectionOnly() {
+            // 품목 선택 해제
+            if (selectedOutline) {
+                scene.remove(selectedOutline);
+                if (selectedOutline.geometry) selectedOutline.geometry.dispose();
+                if (selectedOutline.material) selectedOutline.material.dispose();
+                selectedOutline = null;
+            }
+            if (selectedBin && selectedBin.material) {
+                selectedBin.material.emissive.setHex(0x000000);
+                selectedBin.material.emissiveIntensity = 0.0;
+            }
+            selectedBin = null;
+
+            // 선반 선택 해제
+            if (selectedShelf) {
+                if (selectedShelf.userData.isKS) {
+                    selectedShelf.material.color.set("#f97316"); // KS 선반 색 유지
+                } else {
+                    selectedShelf.material.color.copy(selectedShelf.userData.baseColor);
+                }
+            }
+            selectedShelf = null;
+
+            highlightTableRow(null, null);
+            clearSelectionCard();
+        }
+
+        function clearAllSelection() {
+            clearSelectionOnly();
+            priorityLocation = null;
+            updateInventoryTable();
+        }
+
+        function focusItemIn3D(location, itemCode) {
+            const box = allBins.find(b => {
+                const r = b.userData.rowRef;
+                if (!r) return false;
+                if (r._LOCATION !== location) return false;
+                if (itemCode && r._ITEM_CODE !== itemCode) return false;
+                return true;
+            });
+            if (!box) return;
+
+            if (selectedOutline) {
+                scene.remove(selectedOutline);
+                if (selectedOutline.geometry) selectedOutline.geometry.dispose();
+                if (selectedOutline.material) selectedOutline.material.dispose();
+                selectedOutline = null;
+            }
+            if (selectedBin && selectedBin.material) {
+                selectedBin.material.emissive.setHex(0x000000);
+                selectedBin.material.emissiveIntensity = 0.0;
+            }
+
+            selectedBin = box;
+            const edgeGeo = new THREE.EdgesGeometry(box.geometry);
+            const edgeMat = new THREE.LineBasicMaterial({ color: 0x22c55e });
+            const outline = new THREE.LineSegments(edgeGeo, edgeMat);
+            outline.scale.set(1.03, 1.03, 1.03);
+            outline.position.copy(box.position);
+            outline.quaternion.copy(box.quaternion);
+            scene.add(outline);
+            selectedOutline = outline;
+
+            if (selectedBin.material && selectedBin.material.emissive) {
+                selectedBin.material.emissive.setHex(0x22c55e);
+                selectedBin.material.emissiveIntensity = 0.5;
+            }
+        }
+
+        function focusShelfIn3D(shelf) {
+            // 이전 선반 선택 해제
+            if (selectedShelf) {
+                if (selectedShelf.userData.isKS) {
+                    selectedShelf.material.color.set("#f97316");
+                } else {
+                    selectedShelf.material.color.copy(selectedShelf.userData.baseColor);
+                }
+            }
+
+            selectedShelf = shelf;
+            // 선택된 선반만 노란색
+            shelf.material.color.set("#facc15");
+
+            const code = shelf.userData.code || "-";
+            priorityLocation = shelf.userData.code || null;
+            updateInventoryTable();
+
+            selTypeEl.textContent = "종류: 선반";
+            selLocEl.textContent = "로케이션: " + code;
+
+            const rows = inventoryByLoc[code] || [];
+            const valid = rows.filter(r => Number(r._QTY || 0) > 0);
+            const totalQty = valid.reduce((sum, r) => sum + (Number(r._QTY || 0)), 0);
+            const itemKinds = valid.length;
+
+            if (itemKinds === 0) {
+                selItemEl.textContent = "품목명: (재고 없음)";
+                selManuEl.textContent = "제조사명: -";
+                selPartEl.textContent = "거래처명: -";
+                selQtyEl.textContent = "수량: 0";
+            } else {
+                selItemEl.textContent = "품목명: " + itemKinds + "종 재고";
+                selManuEl.textContent = "제조사명: (다수)";
+                selPartEl.textContent = "거래처명: (다수)";
+                selQtyEl.textContent = "수량: " + totalQty;
+            }
+
+            highlightTableRow(code, "");
+        }
+
+        function onMouseDown(event) {
+            if (event.button !== 0) return; // 좌클릭만
+            const panelRect = document.getElementById("rightPanel").getBoundingClientRect();
+            if (event.clientX >= panelRect.left) return;
+
+            const rect = renderer.domElement.getBoundingClientRect();
+            mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+
+            if (selectionMode === "item") {
+                const intersects = raycaster.intersectObjects(allBins);
+                if (intersects.length === 0) return;
+                const box = intersects[0].object;
+                const row = box.userData.rowRef;
+                if (!row) return;
+                selectItemFromRow(row);
+            } else {
+                const intersects = raycaster.intersectObjects(allShelves);
+                if (intersects.length === 0) return;
+                const shelf = intersects[0].object;
+                focusShelfIn3D(shelf);
+            }
+        }
+        window.addEventListener("mousedown", onMouseDown, false);
+
+        // 빈 공간 더블클릭 시 선택 해제
+        window.addEventListener("dblclick", (event) => {
+            const panelRect = document.getElementById("rightPanel").getBoundingClientRect();
+            if (event.clientX >= panelRect.left) return; // 패널 위 더블클릭은 무시
+
+            const rect = renderer.domElement.getBoundingClientRect();
+            mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+
+            const hitsBins = raycaster.intersectObjects(allBins);
+            const hitsShelves = raycaster.intersectObjects(allShelves);
+            if (hitsBins.length === 0 && hitsShelves.length === 0) {
+                clearAllSelection();
+            }
+        });
+
+        // 라벨 / 랙 프레임 토글
+        document.getElementById("toggleLabels").addEventListener("change", (e) => {
+            const visible = e.target.checked;
+            labelSprites.forEach(s => s.visible = visible);
+        });
+        document.getElementById("toggleShelves").addEventListener("change", (e) => {
+            const visible = e.target.checked;
+            allShelves.forEach(s => s.visible = visible);
+        });
+        document.getElementById("togglePosts").addEventListener("change", (e) => {
+            const visible = e.target.checked;
+            allPosts.forEach(p => p.visible = visible);
+        });
+
+        // ===== 8. 영역 강조 (Highlight Areas: KS & GNN) =====
+        let highlightsVisible = false;
+        let highlightMeshes = [];
+
+        // 설정 정의
+        const highlightDefs = [
+            {
+                label: "경신",
+                colorHex: "#ea580c",     // Orange
+                postColorHex: "#ff4500", // Red-Orange
+                bgColor: "rgba(234, 88, 12, 0.9)",
+                zones: [
+                    { zone: "B01", rowMin: 15, rowMax: 22 },
+                    { zone: "A01", rowMin: 23, rowMax: 32 },
+                    { zone: "A02", rowMin: 23, rowMax: 28 }
+                ]
+            },
+            {
+                label: "GNN",
+                colorHex: "#2563eb",     // Blue
+                postColorHex: "#3b82f6", // Bright Blue
+                bgColor: "rgba(37, 99, 235, 0.9)",
+                zones: [
+                    { zone: "C02", rowMin: 1, rowMax: 999 } // C02 전체
+                ]
+            }
+        ];
+
+        function clearHighlights() {
+            highlightMeshes.forEach(m => {
+                scene.remove(m);
+                if (m.geometry) m.geometry.dispose();
+                if (m.material) m.material.dispose();
+            });
+            highlightMeshes = [];
+        }
+
+        document.getElementById("toggleKS").addEventListener("change", updateHighlights);
+        document.getElementById("toggleGNN").addEventListener("change", updateHighlights);
+
+        function updateHighlights() {
+            const ksOn = document.getElementById("toggleKS").checked;
+            const gnnOn = document.getElementById("toggleGNN").checked;
+            applyZoneHighlights(ksOn, gnnOn);
+        }
+
+        function applyZoneHighlights(ksOn, gnnOn) {
+            clearHighlights();
+
+            // 1. Reset color for ALL relevant zones first
+            allShelves.forEach(s => {
+                if (s.userData.isHighlight) {
+                    s.userData.isHighlight = false;
+                    if (s === selectedShelf) s.material.color.set("#facc15");
+                    else s.material.color.copy(s.userData.baseColor);
+                }
+            });
+            allPosts.forEach(p => {
+                if (p.userData.isHighlight) {
+                    p.userData.isHighlight = false;
+                    p.material.color.copy(p.userData.baseColor);
+                }
+            });
+
+            highlightDefs.forEach(conf => {
+                // Check visibility based on label
+                let isVisible = false;
+                if (conf.label === "경신" && ksOn) isVisible = true;
+                if (conf.label === "GNN" && gnnOn) isVisible = true;
+
+                if (!isVisible) return;
+
+                processHighlightConf(conf);
+            });
+        }
+
+        function processHighlightConf(conf) {
+            conf.zones.forEach(zDef => {
+                const shelvesInZone = allShelves.filter(s =>
+                    s.userData.zone === zDef.zone &&
+                    s.userData.rowIdx >= zDef.rowMin &&
+                    s.userData.rowIdx <= zDef.rowMax
+                );
+
+                if (shelvesInZone.length === 0) return;
+
+                let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
+                let maxY = 0;
+
+                shelvesInZone.forEach(s => {
+                    const b = new THREE.Box3().setFromObject(s);
+                    minX = Math.min(minX, b.min.x);
+                    maxX = Math.max(maxX, b.max.x);
+                    minZ = Math.min(minZ, b.min.z);
+                    maxZ = Math.max(maxZ, b.max.z);
+                    maxY = Math.max(maxY, b.max.y);
+
+                    s.userData.isHighlight = true;
+                    if (s !== selectedShelf) {
+                        s.material.color.set(0x999999);
+                    }
+                });
+
+                allPosts.forEach(p => {
+                    const pos = p.position;
+                    if (pos.x >= minX && pos.x <= maxX && pos.z >= minZ && pos.z <= maxZ) {
+                        p.userData.isHighlight = true;
+                        p.material.color.set(0x999999);
+                    }
+                });
+
+                // --- 시각 효과 생성 ---
+                const centerX = (minX + maxX) / 2;
+                const centerZ = (minZ + maxZ) / 2;
+                const width = (maxX - minX) * 1.05;
+                const depth = (maxZ - minZ) * 1.05;
+                const height = maxY + 2.0;
+
+                // 1. 바닥 (Floor)
+                const floorGeo = new THREE.PlaneGeometry(width, depth);
+                const floorMat = new THREE.MeshBasicMaterial({
+                    color: conf.colorHex,
+                    transparent: true,
+                    opacity: 0.25,
+                    side: THREE.DoubleSide
+                });
+                const floorMesh = new THREE.Mesh(floorGeo, floorMat);
+                floorMesh.rotation.x = -Math.PI / 2;
+                floorMesh.position.set(centerX, 0.015, centerZ);
+                scene.add(floorMesh);
+                highlightMeshes.push(floorMesh);
+
+                // 2. 기둥 (Pillars)
+                const postThick = 0.2;
+                const postGeo = new THREE.BoxGeometry(postThick, height, postThick);
+                const postMat = new THREE.MeshBasicMaterial({ color: conf.postColorHex });
+
+                const corners = [
+                    { x: minX, z: minZ }, { x: maxX, z: minZ },
+                    { x: maxX, z: maxZ }, { x: minX, z: maxZ }
+                ];
+                corners.forEach(c => {
+                    const p = new THREE.Mesh(postGeo, postMat);
+                    p.position.set(c.x, height / 2, c.z);
+                    scene.add(p);
+                    highlightMeshes.push(p);
+                });
+
+                // 3. 와이어프레임
+                const boxGeo = new THREE.BoxGeometry(width, height, depth);
+                const edges = new THREE.EdgesGeometry(boxGeo);
+                const lineMat = new THREE.LineBasicMaterial({ color: conf.postColorHex, linewidth: 2 });
+                const wireMesh = new THREE.LineSegments(edges, lineMat);
+                wireMesh.position.set(centerX, height / 2, centerZ);
+                scene.add(wireMesh);
+                highlightMeshes.push(wireMesh);
+
+                // 4. 상단 커버
+                const lidGeo = new THREE.PlaneGeometry(width, depth);
+                const lidMat = new THREE.MeshBasicMaterial({
+                    color: conf.colorHex,
+                    transparent: true,
+                    opacity: 0.15,
+                    side: THREE.DoubleSide
+                });
+                const lidMesh = new THREE.Mesh(lidGeo, lidMat);
+                lidMesh.rotation.x = -Math.PI / 2;
+                lidMesh.position.set(centerX, height, centerZ);
+                scene.add(lidMesh);
+                highlightMeshes.push(lidMesh);
+
+                // 5. 텍스트 라벨
+                const label = createTextSprite(conf.label, {
+                    fontSize: 100,
+                    textColor: "#ffffff",
+                    bgColor: conf.bgColor
+                });
+                label.position.set(centerX, height + 2.0, centerZ);
+                label.scale.set(4.0, 2.0, 1.0);
+                scene.add(label);
+                highlightMeshes.push(label);
+            });
+        }
+        // ===== 9. 엑셀 내보내기 =====
+        document.getElementById("exportBtn").addEventListener("click", () => {
+            if (!lastFilteredRows || lastFilteredRows.length === 0) {
+                alert("내보낼 데이터가 없습니다. (필터 결과 0건)");
+                return;
+            }
+            const exportData = lastFilteredRows.map(r => ({
+                로케이션: r._LOCATION || "",
+                품목코드: r._ITEM_CODE || "",
+                품목명: r._ITEM_NAME || "",
+                제조사명: r._MANUFACTURER || "",
+                거래처명: r._PARTNER || "",
+                고객명: r._CUSTOMER || "",
+                수량: r._QTY ?? 0
+            }));
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Inventory");
+            XLSX.writeFile(wb, "WMS3D_Export.xlsx");
+        });
+
+        // ===== 10. 패널 폭 드래그 조절 =====
+        (function setupPanelResize() {
+            const rightPanel = document.getElementById("rightPanel");
+            const resizer = document.getElementById("panelResizer");
+            let isResizing = false;
+
+            resizer.addEventListener("mousedown", (e) => {
+                isResizing = true;
+                document.body.style.cursor = "ew-resize";
+                e.preventDefault();
+            });
+
+            window.addEventListener("mousemove", (e) => {
+                if (!isResizing) return;
+                const min = 260;
+                const max = 700;
+                const newWidth = window.innerWidth - e.clientX;
+                const clamped = Math.max(min, Math.min(max, newWidth));
+                rightPanel.style.width = clamped + "px";
+            });
+
+            window.addEventListener("mouseup", () => {
+                if (isResizing) {
+                    isResizing = false;
+                    document.body.style.cursor = "default";
+                }
+            });
+        })();
+
+        // ===== 11. 렌더 루프 =====
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+
+            if (selectedBin && selectedBin.material) {
+                const t = performance.now() / 1000;
+                const phase = (Math.sin(t * 4.0) + 1) / 2;
+                const intensity = 0.3 + 0.4 * phase;
+                selectedBin.material.emissiveIntensity = intensity;
+                if (selectedOutline) {
+                    const base = 1.03;
+                    const extra = 0.02 * phase;
+                    selectedOutline.scale.set(base + extra, base + extra, base + extra);
+                }
+            }
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener("resize", () => {
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+            renderer.setSize(w, h);
+        });
+
+        clearSelectionCard();
+        updateInventoryTable();
+        updateClearSearchVisibility();
+    </script>
+</body>
+
+</html>
