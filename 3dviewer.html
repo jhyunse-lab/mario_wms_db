@@ -476,15 +476,6 @@
 
     <!-- THREE & XLSX -->
     <script src="https://unpkg.com/three@0.142.0/build/three.min.js">
-        window.shipmentData = {};
-        fetch('./shipmentData.json')
-            .then(res => res.json())
-            .then(data => {
-                window.shipmentData = data;
-                console.log('Loaded shipment data for ABC Pareto:', Object.keys(data).length, 'items');
-            })
-            .catch(err => console.warn('shipmentData.json fetch error', err));
-
     </script>
     <script src="https://unpkg.com/three@0.142.0/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -1281,7 +1272,7 @@
             selQtyEl.textContent = "수량: " + (row._QTY ?? "-");
             let abcText = "-";
             if (window.shipmentData && row._ITEM_CODE) {
-                const yr = window.shipmentData[row._ITEM_CODE];
+                const yr = window.shipmentData[(row._ITEM_CODE || "").toString().trim()];
                 if (yr >= 2026) abcText = `A등급 (최종출고: ${yr}년)`;
                 else if (yr === 2025) abcText = `B등급 (최종출고: ${yr}년)`;
                 else abcText = `C등급 (최종출고: ${yr || '이력없음'})`;
@@ -1877,6 +1868,17 @@
         updateInventoryTable();
         updateClearSearchVisibility();
     </script>
+
+<script>
+        window.shipmentData = {};
+        fetch('./shipmentData.json')
+            .then(res => res.json())
+            .then(data => {
+                window.shipmentData = data;
+                console.log('Loaded shipment data for ABC Pareto:', Object.keys(data).length, 'items');
+            })
+            .catch(err => console.warn('shipmentData.json fetch error', err));
+</script>
 </body>
 
 </html>
