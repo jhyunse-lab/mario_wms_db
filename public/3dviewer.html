@@ -1338,8 +1338,17 @@
                     const localX = (gc - (gridCols - 1) / 2) * (slot.boxWidth / gridCols);
                     const localZ = (gr - (gridRows - 1) / 2) * (slot.boxDepth / gridRows);
 
-                    const key = (colorMode === "manufacturer") ? (r._MANUFACTURER || "") : (r._PARTNER || "");
-                    const color = getOwnerColor(key);
+                    let color;
+                    if (colorMode === "abc") {
+                        const itemCode = (r._ITEM_CODE || "").toString().trim();
+                        const lastYear = window.shipmentData ? window.shipmentData[itemCode] : null;
+                        if (lastYear >= 2026) color = new THREE.Color(0x22c55e); // Green
+                        else if (lastYear === 2025) color = new THREE.Color(0xfacc15); // Yellow
+                        else color = new THREE.Color(0xef4444); // Red
+                    } else {
+                        const key = (colorMode === "manufacturer") ? (r._MANUFACTURER || "") : (r._PARTNER || "");
+                        color = getOwnerColor(key);
+                    }
 
                     const geo = new THREE.BoxGeometry(subWidth, subHeight, subDepth);
                     const mat = new THREE.MeshStandardMaterial({
