@@ -1055,101 +1055,7 @@
                 applyPartnerMappingToInventory();
                 rebuildFilters();
                 
-        // ===== 9. Memo and Issue Management Logic =====
-        const memoModal = document.getElementById("memoModal");
-        const closeMemoBtn = document.getElementById("closeMemoBtn");
-        const openMemoBtn = document.getElementById("openMemoBtn");
-        const saveMemoBtn = document.getElementById("saveMemoBtn");
-        const memoDate = document.getElementById("memoDate");
-        const memoText = document.getElementById("memoText");
-        const memoImage = document.getElementById("memoImage");
-        const memoHistoryList = document.getElementById("memoHistoryList");
         
-        let currentItemCodeForMemo = null;
-
-        // Add to selectItemFromRow function to show button
-        const oldSelectFunction = window.selectItemFromRow; // not possible like this, we'll replace text directly
-
-        closeMemoBtn.addEventListener("click", () => {
-            memoModal.style.display = "none";
-        });
-
-        openMemoBtn.addEventListener("click", async () => {
-            if (!currentItemCodeForMemo) return;
-            // Set today's date
-            memoDate.value = new Date().toISOString().split('T')[0];
-            memoText.value = "";
-            memoImage.value = "";
-            memoModal.style.display = "flex";
-            
-            // Fetch history
-            memoHistoryList.innerHTML = '<div style="color:#9ca3af; font-size:12px; text-align:center;">불러오는 중...</div>';
-            if (window.fetchIssueMemos) {
-                const memos = await window.fetchIssueMemos(currentItemCodeForMemo);
-                memoHistoryList.innerHTML = "";
-                if (memos.length === 0) {
-                    memoHistoryList.innerHTML = '<div style="color:#9ca3af; font-size:12px; text-align:center;">등록된 이력이 없습니다.</div>';
-                } else {
-                    memos.forEach(memo => {
-                        const div = document.createElement("div");
-                        div.style.background = "#0d1117";
-                        div.style.padding = "10px";
-                        div.style.borderRadius = "4px";
-                        div.style.borderLeft = "3px solid #ef4444";
-                        
-                        let imgHtml = "";
-                        if (memo.imageUrl) {
-                            imgHtml = `<img src="${memo.imageUrl}" style="max-width:100%; max-height:150px; margin-top:8px; border-radius:4px; border:1px solid #374151;" />`;
-                        }
-                        
-                        div.innerHTML = `
-                            <div style="font-size:11px; color:#9ca3af; margin-bottom:4px;">${memo.date}</div>
-                            <div style="font-size:13px; color:#fff; white-space:pre-wrap;">${memo.text}</div>
-                            ${imgHtml}
-                        `;
-                        memoHistoryList.appendChild(div);
-                    });
-                }
-            }
-        });
-
-        saveMemoBtn.addEventListener("click", async () => {
-            if (!currentItemCodeForMemo) return;
-            const dateVal = memoDate.value;
-            const textVal = memoText.value.trim();
-            const file = memoImage.files[0];
-            
-            if (!textVal) {
-                alert("내용을 입력해주세요.");
-                return;
-            }
-            
-            saveMemoBtn.textContent = "저장 중...";
-            saveMemoBtn.disabled = true;
-            
-            let imageUrl = null;
-            if (file && window.uploadIssueImage) {
-                imageUrl = await window.uploadIssueImage(file);
-            }
-            
-            if (window.saveIssueMemo) {
-                await window.saveIssueMemo(currentItemCodeForMemo, dateVal, textVal, imageUrl);
-                alert("저장되었습니다.");
-                // Refresh list
-                openMemoBtn.click();
-            }
-            
-            saveMemoBtn.textContent = "등록하기";
-            saveMemoBtn.disabled = false;
-        });
-
-        // Add visual indicators inside rebuildBinsFromInventory
-        let issueIndicators = [];
-        window.addEventListener('firebaseReady', () => {
-            if (typeof rebuildBinsFromInventory === 'function') {
-                rebuildBinsFromInventory();
-            }
-        });
 
         updateInventoryTable();
                 rebuildBinsFromInventory();
@@ -2075,6 +1981,103 @@
             camera.updateProjectionMatrix();
             renderer.setSize(w, h);
         });
+
+// ===== 9. Memo and Issue Management Logic =====
+        const memoModal = document.getElementById("memoModal");
+        const closeMemoBtn = document.getElementById("closeMemoBtn");
+        const openMemoBtn = document.getElementById("openMemoBtn");
+        const saveMemoBtn = document.getElementById("saveMemoBtn");
+        const memoDate = document.getElementById("memoDate");
+        const memoText = document.getElementById("memoText");
+        const memoImage = document.getElementById("memoImage");
+        const memoHistoryList = document.getElementById("memoHistoryList");
+        
+        let currentItemCodeForMemo = null;
+
+        // Add to selectItemFromRow function to show button
+        const oldSelectFunction = window.selectItemFromRow; // not possible like this, we'll replace text directly
+
+        closeMemoBtn.addEventListener("click", () => {
+            memoModal.style.display = "none";
+        });
+
+        openMemoBtn.addEventListener("click", async () => {
+            if (!currentItemCodeForMemo) return;
+            // Set today's date
+            memoDate.value = new Date().toISOString().split('T')[0];
+            memoText.value = "";
+            memoImage.value = "";
+            memoModal.style.display = "flex";
+            
+            // Fetch history
+            memoHistoryList.innerHTML = '<div style="color:#9ca3af; font-size:12px; text-align:center;">불러오는 중...</div>';
+            if (window.fetchIssueMemos) {
+                const memos = await window.fetchIssueMemos(currentItemCodeForMemo);
+                memoHistoryList.innerHTML = "";
+                if (memos.length === 0) {
+                    memoHistoryList.innerHTML = '<div style="color:#9ca3af; font-size:12px; text-align:center;">등록된 이력이 없습니다.</div>';
+                } else {
+                    memos.forEach(memo => {
+                        const div = document.createElement("div");
+                        div.style.background = "#0d1117";
+                        div.style.padding = "10px";
+                        div.style.borderRadius = "4px";
+                        div.style.borderLeft = "3px solid #ef4444";
+                        
+                        let imgHtml = "";
+                        if (memo.imageUrl) {
+                            imgHtml = `<img src="${memo.imageUrl}" style="max-width:100%; max-height:150px; margin-top:8px; border-radius:4px; border:1px solid #374151;" />`;
+                        }
+                        
+                        div.innerHTML = `
+                            <div style="font-size:11px; color:#9ca3af; margin-bottom:4px;">${memo.date}</div>
+                            <div style="font-size:13px; color:#fff; white-space:pre-wrap;">${memo.text}</div>
+                            ${imgHtml}
+                        `;
+                        memoHistoryList.appendChild(div);
+                    });
+                }
+            }
+        });
+
+        saveMemoBtn.addEventListener("click", async () => {
+            if (!currentItemCodeForMemo) return;
+            const dateVal = memoDate.value;
+            const textVal = memoText.value.trim();
+            const file = memoImage.files[0];
+            
+            if (!textVal) {
+                alert("내용을 입력해주세요.");
+                return;
+            }
+            
+            saveMemoBtn.textContent = "저장 중...";
+            saveMemoBtn.disabled = true;
+            
+            let imageUrl = null;
+            if (file && window.uploadIssueImage) {
+                imageUrl = await window.uploadIssueImage(file);
+            }
+            
+            if (window.saveIssueMemo) {
+                await window.saveIssueMemo(currentItemCodeForMemo, dateVal, textVal, imageUrl);
+                alert("저장되었습니다.");
+                // Refresh list
+                openMemoBtn.click();
+            }
+            
+            saveMemoBtn.textContent = "등록하기";
+            saveMemoBtn.disabled = false;
+        });
+
+        // Add visual indicators inside rebuildBinsFromInventory
+        let issueIndicators = [];
+        window.addEventListener('firebaseReady', () => {
+            if (typeof rebuildBinsFromInventory === 'function') {
+                rebuildBinsFromInventory();
+            }
+        });
+
 
         clearSelectionCard();
         updateInventoryTable();
