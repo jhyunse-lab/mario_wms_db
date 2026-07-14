@@ -368,11 +368,12 @@
             
 
             <div id="colorModeRow">
-                <span>분석 모드</span>
+                <span style="font-weight:bold; font-size:13px;">분석 모드</span>
                 <select id="colorModeSelect" style="padding:4px; font-size:11px; background:#1f2933; color:#fff; border:1px solid #374151; border-radius:4px; width:160px; outline:none; cursor:pointer;">
                     <option value="manufacturer">제조사별</option>
                     <option value="partner">거래처별</option>
                     <option value="abc">장기재고 분석</option>
+                    <option value="issue">특이사항</option>
                 </select>
             </div>
 
@@ -1184,6 +1185,9 @@
             const partn = (row._PARTNER || "").toString();
             const cust = (row._CUSTOMER || "").toString();
 
+            if (typeof colorMode !== 'undefined' && colorMode === "issue") {
+                if (!window.itemsWithIssues || !window.itemsWithIssues.has(code)) return false;
+            }
             if (manuFilter && manuFilter !== "__ALL__" && manu !== manuFilter) return false;
             if (partnerFilter && partnerFilter !== "__ALL__" && partn !== partnerFilter) return false;
             
@@ -1427,6 +1431,10 @@
                         color = getOwnerColor(key);
                     }
 
+                    if (colorMode === "issue") {
+                        color = new THREE.Color(0xef4444); // Red for issue mode
+                    }
+                    
                     const geo = new THREE.BoxGeometry(subWidth, subHeight, subDepth);
                     const mat = new THREE.MeshStandardMaterial({
                         color: color,
@@ -2134,6 +2142,9 @@
 
         window.addEventListener('firebaseReady', () => {
             if(typeof updateMemoBtnUI === 'function') updateMemoBtnUI();
+            if(typeof colorMode !== 'undefined' && colorMode === 'issue' && typeof rebuildBinsFromInventory === 'function') {
+                rebuildBinsFromInventory();
+            }
         });
 
         clearSelectionCard();
