@@ -2045,7 +2045,7 @@
             memoDate.value = new Date().toISOString().split('T')[0];
             memoText.value = "";
             memoAuthor.value = "";
-            delete saveMemoBtn.dataset.editingId;
+            saveMemoBtn.removeAttribute('data-editing-id');
             saveMemoBtn.textContent = "등록하기";
             memoModal.style.display = "flex";
             
@@ -2131,7 +2131,7 @@
             if (saveMemoBtn.dataset.editingId) {
                 if (window.updateIssueMemo) {
                     await window.updateIssueMemo(saveMemoBtn.dataset.editingId, dateVal, textVal, authorVal);
-                    delete saveMemoBtn.dataset.editingId;
+                    saveMemoBtn.removeAttribute('data-editing-id');
                 }
             } else {
                 if (window.saveIssueMemo) {
