@@ -1017,10 +1017,17 @@
         function applyPartnerMappingToInventory() {
             if (!inventoryData || inventoryData.length === 0) return;
             inventoryData.forEach(row => {
+                // 1. Map from file name
                 const key = (row._FILE_NAME || "").toString().trim();
-                if (!key) return;
-                const mapped = partnerByFileName[key];
-                if (mapped) row._PARTNER = mapped;
+                if (key && partnerByFileName[key]) {
+                    row._PARTNER = partnerByFileName[key];
+                }
+                
+                // 2. Map from partnerData.json
+                const itemCode = (row._ITEM_CODE || "").toString().trim();
+                if (window.partnerData && window.partnerData[itemCode]) {
+                    row._PARTNER = window.partnerData[itemCode];
+                }
             });
         }
 
