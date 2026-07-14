@@ -364,21 +364,16 @@
 
         <div id="panelHeader">
             <div id="panelTitle">WMS 3D Viewer <span>by Jhs</span></div>
-            <div id="panelSub" data-mode-text>WMS Excel 기반 3D 로케이션 · <b>제조사별</b> 색상 뷰어</div>
-
-            <div id="legend">
-                <span><span class="legend-dot" style="background:#9ca3af;"></span>기본(값 미지정)</span>
-                <span>색상 기준: <b>제조사별 / 거래처별</b></span>
-            </div>
+            
 
             <div id="colorModeRow">
-                <span>색상 기준(Color by)</span>
-                <div>
-                    <label><input type="radio" name="colorMode" id="colorByManufacturer" value="manufacturer" checked />
-                        제조사별</label>
-                    <label><input type="radio" name="colorMode" id="colorByPartner" value="partner" /> 거래처별</label>
-                    <label><input type="radio" name="colorMode" id="colorByABC" value="abc" /> ABC등급별(장기재고)</label>
-                </div>
+                <span>3D 시각화 분석 모드</span>
+                <select id="colorModeSelect" style="padding:4px; font-size:11px; background:#1f2933; color:#fff; border:1px solid #374151; border-radius:4px; width:160px; outline:none; cursor:pointer;">
+                    <option value="manufacturer">제조사별 색상</option>
+                    <option value="partner">거래처별 색상</option>
+                    <option value="abc">ABC 장기재고 분석</option>
+                </select>
+            </div>
             </div>
 
             
@@ -960,7 +955,7 @@
         const rowCountSpan = document.getElementById("rowCount");
         const manufacturerFilterEl = document.getElementById("manufacturerFilter");
         const partnerFilterEl = document.getElementById("partnerFilter");
-        const panelSubEl = document.querySelector("#panelSub[data-mode-text]");
+        
 
         const selTypeEl = document.getElementById("sel_type");
         const selLocEl = document.getElementById("sel_location");
@@ -1396,29 +1391,11 @@
             });
         });
 
-        document.getElementById("colorByManufacturer").addEventListener("change", (e) => {
-            if (!e.target.checked) return;
-            colorMode = "manufacturer";
-            ownerColorMap = {};
-            if (panelSubEl) panelSubEl.innerHTML = "WMS Excel 기반 3D 로케이션 · <b>제조사별</b> 색상 뷰어";
-            rebuildBinsFromInventory();
-        });
-        document.getElementById("colorByPartner").addEventListener("change", (e) => {
-            if (!e.target.checked) return;
-            colorMode = "partner";
-            ownerColorMap = {};
-            if (panelSubEl) panelSubEl.innerHTML = "WMS Excel 기반 3D 로케이션 · <b>거래처별</b> 색상 뷰어";
-            rebuildBinsFromInventory();
-        });
-
-        const elByABC = document.getElementById("colorByABC");
-        if(elByABC) {
-            elByABC.addEventListener("change", (e) => {
-                if (!e.target.checked) return;
-                colorMode = "abc";
+        const colorModeSelect = document.getElementById("colorModeSelect");
+        if (colorModeSelect) {
+            colorModeSelect.addEventListener("change", (e) => {
+                colorMode = e.target.value;
                 ownerColorMap = {};
-                const panelSubEl = document.querySelector("#panelSub[data-mode-text]");
-                if (panelSubEl) panelSubEl.innerHTML = "WMS Excel 기반 3D 로케이션 · <b>ABC 등급별</b> 색상 뷰어";
                 rebuildBinsFromInventory();
             });
         }
