@@ -1439,6 +1439,17 @@
                     box.position.set(slot.x + localX, slot.y, slot.z + localZ);
                     scene.add(box);
 
+                    if (window.itemsWithIssues && window.itemsWithIssues.has(r._ITEM_CODE)) {
+                        const sphereGeo = new THREE.SphereGeometry(Math.min(subWidth, subDepth) * 0.4, 16, 16);
+                        const sphereMat = new THREE.MeshBasicMaterial({ color: 0xef4444 });
+                        const ind = new THREE.Mesh(sphereGeo, sphereMat);
+                        ind.position.copy(box.position);
+                        ind.position.y += subHeight / 2 + 0.3;
+                        scene.add(ind);
+                        if (typeof issueIndicators !== 'undefined') issueIndicators.push(ind);
+                        box.userData.indicator = ind;
+                    }
+
                     box.userData.rowRef = r;
                     allBins.push(box);
                 }
