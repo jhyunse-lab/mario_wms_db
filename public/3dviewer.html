@@ -1153,6 +1153,13 @@
                 if (row._MANUFACTURER) manuSet.add(row._MANUFACTURER);
                 if (row._PARTNER) partnerSet.add(row._PARTNER);
             });
+            
+            // Add all partners from partnerData mapping to show in dropdown
+            if (window.partnerData) {
+                Object.values(window.partnerData).forEach(p => {
+                    if (p) partnerSet.add(p);
+                });
+            };
 
             const manuArr = Array.from(manuSet).sort();
             const partnerArr = Array.from(partnerSet).sort();
