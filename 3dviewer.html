@@ -1446,7 +1446,8 @@
                     }
 
                     if (colorMode === "issue") {
-                        color = new THREE.Color(0xef4444); // Red for issue mode
+                        const key = (r._ITEM_CODE || r._ITEM_NAME || "").toString();
+                        color = getOwnerColor(key);
                     }
                     
                     const geo = new THREE.BoxGeometry(subWidth, subHeight, subDepth);
