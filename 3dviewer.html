@@ -381,8 +381,8 @@
                     <div class="abc-legend-item" data-grade="__ALL__" style="cursor:pointer; display:flex; align-items:center; gap:4px; font-weight:bold; color:#fff; opacity:1.0;">전체보기</div>
                     <div class="abc-legend-item" data-grade="A" style="cursor:pointer; display:flex; align-items:center; gap:4px; color:#9ca3af; opacity:0.5;"><span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#22c55e;"></span> A등급 (26년)</div>
                     <div class="abc-legend-item" data-grade="B" style="cursor:pointer; display:flex; align-items:center; gap:4px; color:#9ca3af; opacity:0.5;"><span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#facc15;"></span> B등급 (25년)</div>
-                    <div class="abc-legend-item" data-grade="C" style="cursor:pointer; display:flex; align-items:center; gap:4px; color:#9ca3af; opacity:0.5;"><span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#ef4444;"></span> C등급 (24년 이하)</div>
-                    <div class="abc-legend-item" data-grade="D" style="cursor:pointer; display:flex; align-items:center; gap:4px; color:#9ca3af; opacity:0.5;"><span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#3b82f6;"></span> D등급 (이력없음)</div>
+                    <div class="abc-legend-item" data-grade="C" style="cursor:pointer; display:flex; align-items:center; gap:4px; color:#9ca3af; opacity:0.5;"><span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#3b82f6;"></span> C등급 (24년 이하)</div>
+                    <div class="abc-legend-item" data-grade="D" style="cursor:pointer; display:flex; align-items:center; gap:4px; color:#9ca3af; opacity:0.5;"><span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#ef4444;"></span> D등급 (이력없음)</div>
                 </div>
             </div>
 
@@ -1349,8 +1349,8 @@
                         const lastYear = window.shipmentData ? window.shipmentData[itemCode] : null;
                         if (lastYear >= 2026) color = new THREE.Color(0x22c55e);
                         else if (lastYear === 2025) color = new THREE.Color(0xfacc15);
-                        else if (lastYear <= 2024 && lastYear > 0) color = new THREE.Color(0xef4444);
-                        else color = new THREE.Color(0x3b82f6); // Blue for D (No history)
+                        else if (lastYear <= 2024 && lastYear > 0) color = new THREE.Color(0x3b82f6); // Blue for C
+                        else color = new THREE.Color(0xef4444); // Red for D (No history)
                     } else {
                         const itemCode = (r._ITEM_CODE || "").toString().trim();
                         const pKey = (window.partnerData && window.partnerData[itemCode]) ? window.partnerData[itemCode] : (r._PARTNER || "");
