@@ -1423,7 +1423,9 @@
                     el.style.color = "#9ca3af";
                 }
             });
-            updateInventoryTable();
+            setTimeout(() => {
+                updateInventoryTable();
+            }, 10);
         }
 
         document.querySelectorAll('.abc-legend-item').forEach(item => {
