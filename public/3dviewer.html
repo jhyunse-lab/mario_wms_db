@@ -1331,6 +1331,7 @@
             currentItemCodeForMemo = itemCode;
             if (itemCode && itemCode !== "") {
                 openMemoBtn.style.display = "block";
+                if(typeof updateMemoBtnUI === 'function') updateMemoBtnUI();
             } else {
                 openMemoBtn.style.display = "none";
             }
@@ -2000,13 +2001,24 @@
         const saveMemoBtn = document.getElementById("saveMemoBtn");
         const memoDate = document.getElementById("memoDate");
         const memoText = document.getElementById("memoText");
-        const memoImage = document.getElementById("memoImage");
         const memoHistoryList = document.getElementById("memoHistoryList");
         
         let currentItemCodeForMemo = null;
 
-        // Add to selectItemFromRow function to show button
-        const oldSelectFunction = window.selectItemFromRow; // not possible like this, we'll replace text directly
+        function updateMemoBtnUI() {
+            if (!currentItemCodeForMemo || !openMemoBtn) return;
+            if (window.itemsWithIssues && window.itemsWithIssues.has(currentItemCodeForMemo)) {
+                openMemoBtn.textContent = "🚨 특이사항 있음";
+                openMemoBtn.style.background = "#ef4444";
+                openMemoBtn.style.color = "#fff";
+                openMemoBtn.style.border = "none";
+            } else {
+                openMemoBtn.textContent = "📝 메모 작성";
+                openMemoBtn.style.background = "#374151";
+                openMemoBtn.style.color = "#e5e7eb";
+                openMemoBtn.style.border = "1px solid #4b5563";
+            }
+        }
 
         closeMemoBtn.addEventListener("click", () => {
             memoModal.style.display = "none";
@@ -2014,13 +2026,12 @@
 
         openMemoBtn.addEventListener("click", async () => {
             if (!currentItemCodeForMemo) return;
-            // Set today's date
             memoDate.value = new Date().toISOString().split('T')[0];
             memoText.value = "";
-            memoImage.value = "";
+            delete saveMemoBtn.dataset.editingId;
+            saveMemoBtn.textContent = "등록하기";
             memoModal.style.display = "flex";
             
-            // Fetch history
             memoHistoryList.innerHTML = '<div style="color:#9ca3af; font-size:12px; text-align:center;">불러오는 중...</div>';
             if (window.fetchIssueMemos) {
                 const memos = await window.fetchIssueMemos(currentItemCodeForMemo);
@@ -2034,17 +2045,51 @@
                         div.style.padding = "10px";
                         div.style.borderRadius = "4px";
                         div.style.borderLeft = "3px solid #ef4444";
+                        div.style.marginBottom = "8px";
                         
-                        let imgHtml = "";
-                        if (memo.imageUrl) {
-                            imgHtml = `<img src="${memo.imageUrl}" style="max-width:100%; max-height:150px; margin-top:8px; border-radius:4px; border:1px solid #374151;" />`;
-                        }
+                        const header = document.createElement("div");
+                        header.style.display = "flex";
+                        header.style.justifyContent = "space-between";
+                        header.style.alignItems = "flex-start";
+                        header.style.marginBottom = "4px";
+                        header.innerHTML = `<div style="font-size:11px; color:#9ca3af;">${memo.date}</div>`;
                         
-                        div.innerHTML = `
-                            <div style="font-size:11px; color:#9ca3af; margin-bottom:4px;">${memo.date}</div>
-                            <div style="font-size:13px; color:#fff; white-space:pre-wrap;">${memo.text}</div>
-                            ${imgHtml}
-                        `;
+                        const actions = document.createElement("div");
+                        const editBtn = document.createElement("button");
+                        editBtn.textContent = "수정";
+                        editBtn.style = "background:none; border:none; color:#3b82f6; cursor:pointer; font-size:11px; padding:0 4px;";
+                        
+                        const delBtn = document.createElement("button");
+                        delBtn.textContent = "삭제";
+                        delBtn.style = "background:none; border:none; color:#ef4444; cursor:pointer; font-size:11px; padding:0 4px;";
+                        
+                        delBtn.onclick = async () => {
+                            if(confirm("정말 삭제하시겠습니까?")) {
+                                delBtn.textContent = "...";
+                                await window.deleteIssueMemo(memo.id, currentItemCodeForMemo);
+                                openMemoBtn.click(); // reload
+                            }
+                        };
+                        
+                        editBtn.onclick = () => {
+                            memoDate.value = memo.date;
+                            memoText.value = memo.text;
+                            saveMemoBtn.textContent = "수정하기";
+                            saveMemoBtn.dataset.editingId = memo.id;
+                        };
+                        
+                        actions.appendChild(editBtn);
+                        actions.appendChild(delBtn);
+                        header.appendChild(actions);
+                        
+                        const content = document.createElement("div");
+                        content.style.fontSize = "13px";
+                        content.style.color = "#fff";
+                        content.style.whiteSpace = "pre-wrap";
+                        content.textContent = memo.text;
+                        
+                        div.appendChild(header);
+                        div.appendChild(content);
                         memoHistoryList.appendChild(div);
                     });
                 }
@@ -2055,40 +2100,35 @@
             if (!currentItemCodeForMemo) return;
             const dateVal = memoDate.value;
             const textVal = memoText.value.trim();
-            const file = memoImage.files[0];
             
             if (!textVal) {
                 alert("내용을 입력해주세요.");
                 return;
             }
             
-            saveMemoBtn.textContent = "저장 중...";
             saveMemoBtn.disabled = true;
+            saveMemoBtn.textContent = "저장 중...";
             
-            let imageUrl = null;
-            if (file && window.uploadIssueImage) {
-                imageUrl = await window.uploadIssueImage(file);
-            }
-            
-            if (window.saveIssueMemo) {
-                await window.saveIssueMemo(currentItemCodeForMemo, dateVal, textVal, imageUrl);
-                alert("저장되었습니다.");
-                // Refresh list
-                openMemoBtn.click();
+            if (saveMemoBtn.dataset.editingId) {
+                if (window.updateIssueMemo) {
+                    await window.updateIssueMemo(saveMemoBtn.dataset.editingId, dateVal, textVal);
+                    delete saveMemoBtn.dataset.editingId;
+                }
+            } else {
+                if (window.saveIssueMemo) {
+                    await window.saveIssueMemo(currentItemCodeForMemo, dateVal, textVal);
+                }
             }
             
             saveMemoBtn.textContent = "등록하기";
             saveMemoBtn.disabled = false;
+            openMemoBtn.click(); // refresh list
+            if(typeof updateMemoBtnUI === 'function') updateMemoBtnUI();
         });
 
-        // Add visual indicators inside rebuildBinsFromInventory
-        let issueIndicators = [];
         window.addEventListener('firebaseReady', () => {
-            if (typeof rebuildBinsFromInventory === 'function') {
-                rebuildBinsFromInventory();
-            }
+            if(typeof updateMemoBtnUI === 'function') updateMemoBtnUI();
         });
-
 
         clearSelectionCard();
         updateInventoryTable();
