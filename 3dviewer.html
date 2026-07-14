@@ -1619,14 +1619,14 @@
             raycaster.setFromCamera(mouse, camera);
 
             if (selectionMode === "item") {
-                const intersects = raycaster.intersectObjects(allBins);
+                const intersects = raycaster.intersectObjects(allBins).filter(hit => hit.object.visible);
                 if (intersects.length === 0) return;
                 const box = intersects[0].object;
                 const row = box.userData.rowRef;
                 if (!row) return;
                 selectItemFromRow(row);
             } else {
-                const intersects = raycaster.intersectObjects(allShelves);
+                const intersects = raycaster.intersectObjects(allShelves).filter(hit => hit.object.visible);
                 if (intersects.length === 0) return;
                 const shelf = intersects[0].object;
                 focusShelfIn3D(shelf);
@@ -1644,8 +1644,8 @@
             mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
             raycaster.setFromCamera(mouse, camera);
 
-            const hitsBins = raycaster.intersectObjects(allBins);
-            const hitsShelves = raycaster.intersectObjects(allShelves);
+            const hitsBins = raycaster.intersectObjects(allBins).filter(hit => hit.object.visible);
+            const hitsShelves = raycaster.intersectObjects(allShelves).filter(hit => hit.object.visible);
             if (hitsBins.length === 0 && hitsShelves.length === 0) {
                 clearAllSelection();
             }
