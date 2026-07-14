@@ -1946,10 +1946,15 @@
                 고객명: r._CUSTOMER || "",
                 수량: r._QTY ?? 0
             }));
+            let fileName = prompt("저장할 파일명을 입력하세요 (확장자 제외):", "WMS3D_Export");
+            if (fileName === null) return; // User cancelled
+            fileName = fileName.trim() || "WMS3D_Export";
+            if (!fileName.endsWith('.xlsx')) fileName += '.xlsx';
+
             const ws = XLSX.utils.json_to_sheet(exportData);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Inventory");
-            XLSX.writeFile(wb, "WMS3D_Export.xlsx");
+            XLSX.writeFile(wb, fileName);
         });
 
         // ===== 10. 패널 폭 드래그 조절 =====
