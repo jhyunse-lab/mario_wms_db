@@ -375,8 +375,8 @@
                 </select>
             </div>
 
-            <div id="abcLegendRow" style="display:none; flex-direction:column; gap:6px; margin-top:8px; margin-bottom:8px; font-size:11px; padding: 8px; background: #1f2933; border-radius: 6px;">
-                <div style="color:#9ca3af; margin-bottom:2px;">※ 등급 클릭 시 해당 품목들만 필터링(선택)됩니다.</div>
+            <div id="abcLegendRow" style="display:none; flex-direction:column; gap:6px; margin-top:8px; margin-bottom:8px; font-size:13px; font-weight:bold; padding: 10px; background: #1f2933; border-radius: 6px;">
+                
                 <div style="display:flex; flex-wrap:wrap; gap:8px;">
                     <div class="abc-legend-item" data-grade="__ALL__" style="cursor:pointer; display:flex; align-items:center; gap:4px; font-weight:bold; color:#fff; opacity:1.0;">전체보기</div>
                     <div class="abc-legend-item" data-grade="A" style="cursor:pointer; display:flex; align-items:center; gap:4px; color:#9ca3af; opacity:0.5;"><span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#22c55e;"></span> A등급 (26년)</div>
@@ -1151,11 +1151,14 @@
             
             if (currentAbcFilter && currentAbcFilter !== "__ALL__") {
                 const itemCode = (row._ITEM_CODE || "").toString().trim();
-                const lastYear = window.shipmentData ? window.shipmentData[itemCode] : null;
+                const lastDate = window.shipmentData ? window.shipmentData[itemCode] : null;
                 let grade = "D";
-                if (lastYear >= 2026) grade = "A";
-                else if (lastYear === 2025) grade = "B";
-                else if (lastYear <= 2024 && lastYear > 0) grade = "C";
+                if (lastDate) {
+                    const yr = parseInt(lastDate.substring(0, 4));
+                    if (yr >= 2026) grade = "A";
+                    else if (yr === 2025) grade = "B";
+                    else if (yr <= 2024 && yr > 0) grade = "C";
+                }
                 if (grade !== currentAbcFilter) return false;
             }
 
@@ -1346,11 +1349,16 @@
                     let color;
                     if (colorMode === "abc") {
                         const itemCode = (r._ITEM_CODE || "").toString().trim();
-                        const lastYear = window.shipmentData ? window.shipmentData[itemCode] : null;
-                        if (lastYear >= 2026) color = new THREE.Color(0x22c55e);
-                        else if (lastYear === 2025) color = new THREE.Color(0xfacc15);
-                        else if (lastYear <= 2024 && lastYear > 0) color = new THREE.Color(0x3b82f6); // Blue for C
-                        else color = new THREE.Color(0xef4444); // Red for D (No history)
+                        const lastDate = window.shipmentData ? window.shipmentData[itemCode] : null;
+                        if (lastDate) {
+                            const yr = parseInt(lastDate.substring(0, 4));
+                            if (yr >= 2026) color = new THREE.Color(0x22c55e);
+                            else if (yr === 2025) color = new THREE.Color(0xfacc15);
+                            else if (yr <= 2024 && yr > 0) color = new THREE.Color(0x3b82f6); // Blue for C
+                            else color = new THREE.Color(0xef4444); // Red for D
+                        } else {
+                            color = new THREE.Color(0xef4444); // Red for D
+                        } // Red for D (No history)
                     } else {
                         const itemCode = (r._ITEM_CODE || "").toString().trim();
                         const pKey = (window.partnerData && window.partnerData[itemCode]) ? window.partnerData[itemCode] : (r._PARTNER || "");
