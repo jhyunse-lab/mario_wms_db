@@ -377,18 +377,7 @@
 
             
 
-            <div id="labelToggleRow">
-                <span>영역 라벨 표시</span>
-                <label><input type="checkbox" id="toggleLabels" checked /> 표시</label>
-            </div>
-
-            <div id="frameToggleRow">
-                <span>랙 프레임</span>
-                <div>
-                    <label><input type="checkbox" id="toggleShelves" checked /> 선반</label>
-                    <label><input type="checkbox" id="togglePosts" checked /> 기둥</label>
-                </div>
-            </div>
+            
 
             <div id="ksRow">
                 <span>주요 영역 표시</span>
@@ -1590,18 +1579,7 @@
         });
 
         // 라벨 / 랙 프레임 토글
-        document.getElementById("toggleLabels").addEventListener("change", (e) => {
-            const visible = e.target.checked;
-            labelSprites.forEach(s => s.visible = visible);
-        });
-        document.getElementById("toggleShelves").addEventListener("change", (e) => {
-            const visible = e.target.checked;
-            allShelves.forEach(s => s.visible = visible);
-        });
-        document.getElementById("togglePosts").addEventListener("change", (e) => {
-            const visible = e.target.checked;
-            allPosts.forEach(p => p.visible = visible);
-        });
+        
 
         // ===== 8. 영역 강조 (Highlight Areas: KS & GNN) =====
         let highlightsVisible = false;
@@ -1719,7 +1697,10 @@
                 const centerZ = (minZ + maxZ) / 2;
                 const width = (maxX - minX) * 1.05;
                 const depth = (maxZ - minZ) * 1.05;
-                const height = maxY + 2.0;
+                let height = maxY + 2.0;
+                if (zDef.zone === "A01" || zDef.zone === "A02" || zDef.zone === "AA") {
+                    height = 5.13;
+                }
 
                 // 1. 바닥 (Floor)
                 const floorGeo = new THREE.PlaneGeometry(width, depth);
