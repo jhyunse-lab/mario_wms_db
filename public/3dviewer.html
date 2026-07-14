@@ -1279,11 +1279,16 @@
             selQtyEl.textContent = "수량: " + (row._QTY ?? "-");
             let abcText = "-";
             if (window.shipmentData && row._ITEM_CODE) {
-                const yr = window.shipmentData[(row._ITEM_CODE || "").toString().trim()];
-                if (yr >= 2026) abcText = `A등급 (최종출고: ${yr}년)`;
-                else if (yr === 2025) abcText = `B등급 (최종출고: ${yr}년)`;
-                else if (yr <= 2024 && yr > 0) abcText = `C등급 (최종출고: ${yr}년)`;
-                else abcText = `D등급 (이력없음)`;
+                const lastDate = window.shipmentData[(row._ITEM_CODE || "").toString().trim()];
+                if (lastDate) {
+                    const yr = parseInt(lastDate.substring(0, 4));
+                    if (yr >= 2026) abcText = `A등급 (최종출고: ${lastDate})`;
+                    else if (yr === 2025) abcText = `B등급 (최종출고: ${lastDate})`;
+                    else if (yr <= 2024 && yr > 0) abcText = `C등급 (최종출고: ${lastDate})`;
+                    else abcText = `D등급 (이력없음)`;
+                } else {
+                    abcText = `D등급 (이력없음)`;
+                }
             }
             if(selAbcEl) selAbcEl.textContent = "ABC 등급: " + abcText;
         }
