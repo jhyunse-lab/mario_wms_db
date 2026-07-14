@@ -351,6 +351,7 @@
             background: #1f2937;
         }
     </style>
+    <script type="module" src="./firebase-service.js"></script>
 </head>
 
 <body>
@@ -1021,7 +1022,104 @@
 
                 applyPartnerMappingToInventory();
                 rebuildFilters();
-                updateInventoryTable();
+                
+        // ===== 9. Memo and Issue Management Logic =====
+        const memoModal = document.getElementById("memoModal");
+        const closeMemoBtn = document.getElementById("closeMemoBtn");
+        const openMemoBtn = document.getElementById("openMemoBtn");
+        const saveMemoBtn = document.getElementById("saveMemoBtn");
+        const memoDate = document.getElementById("memoDate");
+        const memoText = document.getElementById("memoText");
+        const memoImage = document.getElementById("memoImage");
+        const memoHistoryList = document.getElementById("memoHistoryList");
+        
+        let currentItemCodeForMemo = null;
+
+        // Add to selectItemFromRow function to show button
+        const oldSelectFunction = window.selectItemFromRow; // not possible like this, we'll replace text directly
+
+        closeMemoBtn.addEventListener("click", () => {
+            memoModal.style.display = "none";
+        });
+
+        openMemoBtn.addEventListener("click", async () => {
+            if (!currentItemCodeForMemo) return;
+            // Set today's date
+            memoDate.value = new Date().toISOString().split('T')[0];
+            memoText.value = "";
+            memoImage.value = "";
+            memoModal.style.display = "flex";
+            
+            // Fetch history
+            memoHistoryList.innerHTML = '<div style="color:#9ca3af; font-size:12px; text-align:center;">불러오는 중...</div>';
+            if (window.fetchIssueMemos) {
+                const memos = await window.fetchIssueMemos(currentItemCodeForMemo);
+                memoHistoryList.innerHTML = "";
+                if (memos.length === 0) {
+                    memoHistoryList.innerHTML = '<div style="color:#9ca3af; font-size:12px; text-align:center;">등록된 이력이 없습니다.</div>';
+                } else {
+                    memos.forEach(memo => {
+                        const div = document.createElement("div");
+                        div.style.background = "#0d1117";
+                        div.style.padding = "10px";
+                        div.style.borderRadius = "4px";
+                        div.style.borderLeft = "3px solid #ef4444";
+                        
+                        let imgHtml = "";
+                        if (memo.imageUrl) {
+                            imgHtml = `<img src="${memo.imageUrl}" style="max-width:100%; max-height:150px; margin-top:8px; border-radius:4px; border:1px solid #374151;" />`;
+                        }
+                        
+                        div.innerHTML = `
+                            <div style="font-size:11px; color:#9ca3af; margin-bottom:4px;">${memo.date}</div>
+                            <div style="font-size:13px; color:#fff; white-space:pre-wrap;">${memo.text}</div>
+                            ${imgHtml}
+                        `;
+                        memoHistoryList.appendChild(div);
+                    });
+                }
+            }
+        });
+
+        saveMemoBtn.addEventListener("click", async () => {
+            if (!currentItemCodeForMemo) return;
+            const dateVal = memoDate.value;
+            const textVal = memoText.value.trim();
+            const file = memoImage.files[0];
+            
+            if (!textVal) {
+                alert("내용을 입력해주세요.");
+                return;
+            }
+            
+            saveMemoBtn.textContent = "저장 중...";
+            saveMemoBtn.disabled = true;
+            
+            let imageUrl = null;
+            if (file && window.uploadIssueImage) {
+                imageUrl = await window.uploadIssueImage(file);
+            }
+            
+            if (window.saveIssueMemo) {
+                await window.saveIssueMemo(currentItemCodeForMemo, dateVal, textVal, imageUrl);
+                alert("저장되었습니다.");
+                // Refresh list
+                openMemoBtn.click();
+            }
+            
+            saveMemoBtn.textContent = "등록하기";
+            saveMemoBtn.disabled = false;
+        });
+
+        // Add visual indicators inside rebuildBinsFromInventory
+        let issueIndicators = [];
+        window.addEventListener('firebaseReady', () => {
+            if (typeof rebuildBinsFromInventory === 'function') {
+                rebuildBinsFromInventory();
+            }
+        });
+
+        updateInventoryTable();
                 rebuildBinsFromInventory();
             };
             reader.readAsArrayBuffer(file);
@@ -1291,6 +1389,14 @@
                 }
             }
             if(selAbcEl) selAbcEl.textContent = "ABC 등급: " + abcText;
+            
+            currentItemCodeForMemo = itemCode;
+            if (itemCode && itemCode !== "") {
+                openMemoBtn.style.display = "block";
+            } else {
+                openMemoBtn.style.display = "none";
+            }
+
         }
 
         // ===== 6. 박스 생성 (다품목 박스 분할) =====
@@ -1301,6 +1407,15 @@
                 if (b.material) b.material.dispose();
             });
             allBins.length = 0;
+            if (typeof issueIndicators !== 'undefined') {
+                issueIndicators.forEach(ind => {
+                    scene.remove(ind);
+                    if(ind.geometry) ind.geometry.dispose();
+                    if(ind.material) ind.material.dispose();
+                });
+                issueIndicators.length = 0;
+            }
+
 
             clearSelectionOnly(); // 선택만 리셋, KS 색상은 유지
 
@@ -1400,6 +1515,10 @@
                 const row = box.userData.rowRef;
                 if (!row) { box.visible = false; return; }
                 box.visible = rowMatchesFilter(row, currentTextFilter, currentManufacturerFilter, currentPartnerFilter);
+                if (box.userData.indicator) {
+                    box.userData.indicator.visible = box.visible;
+                }
+
             });
         }
 
@@ -1410,6 +1529,12 @@
                 if (!b.material) return;
                 b.material.transparent = (boxOpacity < 1.0);
                 b.material.opacity = boxOpacity;
+                if (b.userData.indicator && b.userData.indicator.material) {
+                    b.userData.indicator.material.transparent = (boxOpacity < 1.0);
+                    b.userData.indicator.material.opacity = boxOpacity;
+                    b.userData.indicator.material.needsUpdate = true;
+                }
+
                 b.material.needsUpdate = true;
             });
         });
@@ -1937,6 +2062,39 @@
             .then(data => { window.partnerData = data; })
             .catch(err => console.warn('partnerData fetch error', err));
 </script>
+
+    <!-- Memo Modal -->
+    <div id="memoModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center;">
+        <div style="background:#1f2933; width:450px; max-height:80vh; border-radius:8px; display:flex; flex-direction:column; box-shadow:0 10px 25px rgba(0,0,0,0.5); overflow:hidden;">
+            <div style="padding:16px; border-bottom:1px solid #374151; display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="margin:0; color:#fff; font-size:16px;" id="memoModalTitle">이슈/메모 관리</h3>
+                <button id="closeMemoBtn" style="background:none; border:none; color:#9ca3af; font-size:20px; cursor:pointer;">&times;</button>
+            </div>
+            <div style="padding:16px; overflow-y:auto; flex:1;">
+                <div style="margin-bottom:16px;">
+                    <label style="display:block; color:#9ca3af; font-size:12px; margin-bottom:4px;">날짜</label>
+                    <input type="date" id="memoDate" style="width:100%; padding:8px; background:#0d1117; border:1px solid #374151; color:#fff; border-radius:4px;" />
+                </div>
+                <div style="margin-bottom:16px;">
+                    <label style="display:block; color:#9ca3af; font-size:12px; margin-bottom:4px;">이슈 내용</label>
+                    <textarea id="memoText" rows="4" style="width:100%; padding:8px; background:#0d1117; border:1px solid #374151; color:#fff; border-radius:4px; resize:vertical;"></textarea>
+                </div>
+                <div style="margin-bottom:16px;">
+                    <label style="display:block; color:#9ca3af; font-size:12px; margin-bottom:4px;">이미지 첨부 (선택)</label>
+                    <input type="file" id="memoImage" accept="image/*" style="color:#fff; font-size:12px;" />
+                </div>
+                <button id="saveMemoBtn" style="width:100%; background:#2563eb; color:#fff; padding:10px; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">등록하기</button>
+                
+                <hr style="border:none; border-top:1px solid #374151; margin:20px 0;" />
+                
+                <h4 style="margin:0 0 10px 0; color:#fff; font-size:14px;">이전 이력</h4>
+                <div id="memoHistoryList" style="display:flex; flex-direction:column; gap:10px;">
+                    <div style="color:#9ca3af; font-size:12px; text-align:center;">불러오는 중...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </body>
 
 </html>
