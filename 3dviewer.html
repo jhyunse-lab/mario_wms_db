@@ -367,11 +367,11 @@
             
 
             <div id="colorModeRow">
-                <span>3D 시각화 분석 모드</span>
+                <span>분석 모드</span>
                 <select id="colorModeSelect" style="padding:4px; font-size:11px; background:#1f2933; color:#fff; border:1px solid #374151; border-radius:4px; width:160px; outline:none; cursor:pointer;">
-                    <option value="manufacturer">제조사별 색상</option>
-                    <option value="partner">거래처별 색상</option>
-                    <option value="abc">ABC 장기재고 분석</option>
+                    <option value="manufacturer">제조사별</option>
+                    <option value="partner">거래처별</option>
+                    <option value="abc">장기재고 분석</option>
                 </select>
             </div>
 
@@ -380,7 +380,7 @@
             
 
             <div id="ksRow">
-                <span>주요 영역 표시</span>
+                <span></span>
                 <div style="display:flex; gap:8px;">
                     <label><input type="checkbox" id="toggleKS" /> 경신</label>
                     <label><input type="checkbox" id="toggleGNN" /> GNN</label>
@@ -937,6 +937,7 @@
         let currentTextFilter = "";
         let currentManufacturerFilter = "__ALL__";
         let currentPartnerFilter = "__ALL__";
+        let currentAbcFilter = "__ALL__";
         let lastFilteredRows = [];
         let priorityLocation = null;   // 선택한 선반/품목의 로케이션을 테이블 상단으로 정렬하기 위함
 
@@ -1136,6 +1137,16 @@
 
             if (manuFilter && manuFilter !== "__ALL__" && manu !== manuFilter) return false;
             if (partnerFilter && partnerFilter !== "__ALL__" && partn !== partnerFilter) return false;
+            
+            if (currentAbcFilter && currentAbcFilter !== "__ALL__") {
+                const itemCode = (row._ITEM_CODE || "").toString().trim();
+                const lastYear = window.shipmentData ? window.shipmentData[itemCode] : null;
+                let grade = "D";
+                if (lastYear >= 2026) grade = "A";
+                else if (lastYear === 2025) grade = "B";
+                else if (lastYear <= 2024 && lastYear > 0) grade = "C";
+                if (grade !== currentAbcFilter) return false;
+            }
 
             if (textFilter) {
                 const hay = (loc + " " + item + " " + code + " " + manu + " " + partn + " " + cust).toLowerCase();
@@ -1379,14 +1390,50 @@
             });
         });
 
+        
+        function setAbcFilter(grade) {
+            currentAbcFilter = grade;
+            document.querySelectorAll('.abc-legend-item').forEach(el => {
+                if (el.getAttribute('data-grade') === grade) {
+                    el.style.opacity = "1.0";
+                    el.style.fontWeight = "bold";
+                    el.style.color = "#fff";
+                } else {
+                    el.style.opacity = "0.5";
+                    el.style.fontWeight = "normal";
+                    el.style.color = "#9ca3af";
+                }
+            });
+            updateInventoryTable();
+        }
+
+        document.querySelectorAll('.abc-legend-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                const grade = e.currentTarget.getAttribute('data-grade');
+                setAbcFilter(grade);
+            });
+        });
+
         const colorModeSelect = document.getElementById("colorModeSelect");
         if (colorModeSelect) {
             colorModeSelect.addEventListener("change", (e) => {
                 colorMode = e.target.value;
                 ownerColorMap = {};
+                
+                const abcLegend = document.getElementById('abcLegendRow');
+                if (abcLegend) {
+                    if (colorMode === 'abc') {
+                        abcLegend.style.display = 'flex';
+                    } else {
+                        abcLegend.style.display = 'none';
+                        setAbcFilter("__ALL__");
+                    }
+                }
+                
                 rebuildBinsFromInventory();
             });
         }
+
 
         // ===== 7. 선택/하이라이트 & 우클릭 메뉴 =====
         const raycaster = new THREE.Raycaster();
