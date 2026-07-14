@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, serverTimestamp, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 const firebaseConfig = {
@@ -36,24 +36,13 @@ window.initFirebaseIssues = async function() {
     }
 };
 
-// Function to upload an image to Firebase Storage
-window.uploadIssueImage = async function(file) {
-    if (!file) return null;
-    const fileName = `issues/\${Date.now()}_\${file.name}`;
-    const storageRef = ref(storage, fileName);
-    const snapshot = await uploadBytes(storageRef, file);
-    const downloadURL = await getDownloadURL(snapshot.ref);
-    return downloadURL;
-};
-
 // Function to save a new memo
-window.saveIssueMemo = async function(itemCode, date, text, imageUrl) {
+window.saveIssueMemo = async function(itemCode, date, text) {
     try {
         await addDoc(collection(db, "memos"), {
             itemCode: itemCode,
             date: date,
             text: text,
-            imageUrl: imageUrl,
             createdAt: serverTimestamp()
         });
         
@@ -86,6 +75,40 @@ window.fetchIssueMemos = async function(itemCode) {
     } catch (e) {
         console.error("Error fetching memos", e);
         return [];
+    }
+};
+
+
+// Function to delete a memo
+window.deleteIssueMemo = async function(memoId, itemCode) {
+    try {
+        await deleteDoc(doc(db, "memos", memoId));
+        
+        // Check if there are any memos left for this item
+        const q = query(collection(db, "memos"), where("itemCode", "==", itemCode));
+        const querySnapshot = await getDocs(q);
+        if (querySnapshot.empty) {
+            window.itemsWithIssues.delete(itemCode);
+            window.dispatchEvent(new Event('firebaseReady'));
+        }
+        return true;
+    } catch (e) {
+        console.error("Error deleting memo", e);
+        return false;
+    }
+};
+
+// Function to update a memo
+window.updateIssueMemo = async function(memoId, date, text) {
+    try {
+        await updateDoc(doc(db, "memos", memoId), {
+            date: date,
+            text: text
+        });
+        return true;
+    } catch (e) {
+        console.error("Error updating memo", e);
+        return false;
     }
 };
 
