@@ -37,12 +37,13 @@ window.initFirebaseIssues = async function() {
 };
 
 // Function to save a new memo
-window.saveIssueMemo = async function(itemCode, date, text) {
+window.saveIssueMemo = async function(itemCode, date, text, author) {
     try {
         await addDoc(collection(db, "memos"), {
             itemCode: itemCode,
             date: date,
             text: text,
+            author: author || "",
             createdAt: serverTimestamp()
         });
         
@@ -99,11 +100,12 @@ window.deleteIssueMemo = async function(memoId, itemCode) {
 };
 
 // Function to update a memo
-window.updateIssueMemo = async function(memoId, date, text) {
+window.updateIssueMemo = async function(memoId, date, text, author) {
     try {
         await updateDoc(doc(db, "memos", memoId), {
             date: date,
-            text: text
+            text: text,
+            author: author || ""
         });
         return true;
     } catch (e) {
