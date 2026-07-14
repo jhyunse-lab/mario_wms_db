@@ -1474,6 +1474,9 @@
 
             applyFiltersToBins();
             if (ksVisible) applyKSHighlight(true);
+            if (typeof priorityLocation !== 'undefined' && priorityLocation) {
+                focusItemIn3D(priorityLocation, typeof currentItemCodeForMemo !== 'undefined' ? currentItemCodeForMemo : "");
+            }
         }
 
         function applyFiltersToBins() {
