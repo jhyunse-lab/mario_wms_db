@@ -476,21 +476,23 @@
     <div id="memoModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center;">
         <div style="background:#1f2933; width:450px; max-height:80vh; border-radius:8px; display:flex; flex-direction:column; box-shadow:0 10px 25px rgba(0,0,0,0.5); overflow:hidden;">
             <div style="padding:16px; border-bottom:1px solid #374151; display:flex; justify-content:space-between; align-items:center;">
-                <h3 style="margin:0; color:#fff; font-size:16px;" id="memoModalTitle">이슈/메모 관리</h3>
+                <h3 style="margin:0; color:#fff; font-size:16px;" id="memoModalTitle">메모 작성</h3>
                 <button id="closeMemoBtn" style="background:none; border:none; color:#9ca3af; font-size:20px; cursor:pointer;">&times;</button>
             </div>
             <div style="padding:16px; overflow-y:auto; flex:1;">
-                <div style="margin-bottom:16px;">
-                    <label style="display:block; color:#9ca3af; font-size:12px; margin-bottom:4px;">날짜</label>
-                    <input type="date" id="memoDate" style="width:100%; padding:8px; background:#0d1117; border:1px solid #374151; color:#fff; border-radius:4px;" />
+                <div style="margin-bottom:16px; display:flex; gap:10px;">
+                    <div style="flex:1;">
+                        <label style="display:block; color:#9ca3af; font-size:12px; margin-bottom:4px;">날짜</label>
+                        <input type="date" id="memoDate" style="width:100%; padding:8px; background:#0d1117; border:1px solid #374151; color:#fff; border-radius:4px;" />
+                    </div>
+                    <div style="flex:1;">
+                        <label style="display:block; color:#9ca3af; font-size:12px; margin-bottom:4px;">작성자</label>
+                        <input type="text" id="memoAuthor" placeholder="이름 입력" style="width:100%; padding:8px; background:#0d1117; border:1px solid #374151; color:#fff; border-radius:4px;" />
+                    </div>
                 </div>
                 <div style="margin-bottom:16px;">
-                    <label style="display:block; color:#9ca3af; font-size:12px; margin-bottom:4px;">이슈 내용</label>
+                    <label style="display:block; color:#9ca3af; font-size:12px; margin-bottom:4px;">특이사항</label>
                     <textarea id="memoText" rows="4" style="width:100%; padding:8px; background:#0d1117; border:1px solid #374151; color:#fff; border-radius:4px; resize:vertical;"></textarea>
-                </div>
-                <div style="margin-bottom:16px;">
-                    <label style="display:block; color:#9ca3af; font-size:12px; margin-bottom:4px;">이미지 첨부 (선택)</label>
-                    <input type="file" id="memoImage" accept="image/*" style="color:#fff; font-size:12px;" />
                 </div>
                 <button id="saveMemoBtn" style="width:100%; background:#2563eb; color:#fff; padding:10px; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">등록하기</button>
                 
@@ -2001,6 +2003,7 @@
         const saveMemoBtn = document.getElementById("saveMemoBtn");
         const memoDate = document.getElementById("memoDate");
         const memoText = document.getElementById("memoText");
+        const memoAuthor = document.getElementById("memoAuthor");
         const memoHistoryList = document.getElementById("memoHistoryList");
         
         let currentItemCodeForMemo = null;
@@ -2028,6 +2031,7 @@
             if (!currentItemCodeForMemo) return;
             memoDate.value = new Date().toISOString().split('T')[0];
             memoText.value = "";
+            memoAuthor.value = "";
             delete saveMemoBtn.dataset.editingId;
             saveMemoBtn.textContent = "등록하기";
             memoModal.style.display = "flex";
@@ -2052,7 +2056,7 @@
                         header.style.justifyContent = "space-between";
                         header.style.alignItems = "flex-start";
                         header.style.marginBottom = "4px";
-                        header.innerHTML = `<div style="font-size:11px; color:#9ca3af;">${memo.date}</div>`;
+                        header.innerHTML = `<div style="font-size:11px; color:#9ca3af;">${memo.date} ${memo.author ? " | " + memo.author : ""}</div>`;
                         
                         const actions = document.createElement("div");
                         const editBtn = document.createElement("button");
@@ -2074,6 +2078,7 @@
                         editBtn.onclick = () => {
                             memoDate.value = memo.date;
                             memoText.value = memo.text;
+                            memoAuthor.value = memo.author || "";
                             saveMemoBtn.textContent = "수정하기";
                             saveMemoBtn.dataset.editingId = memo.id;
                         };
@@ -2100,6 +2105,7 @@
             if (!currentItemCodeForMemo) return;
             const dateVal = memoDate.value;
             const textVal = memoText.value.trim();
+            const authorVal = memoAuthor.value.trim();
             
             if (!textVal) {
                 alert("내용을 입력해주세요.");
@@ -2111,19 +2117,19 @@
             
             if (saveMemoBtn.dataset.editingId) {
                 if (window.updateIssueMemo) {
-                    await window.updateIssueMemo(saveMemoBtn.dataset.editingId, dateVal, textVal);
+                    await window.updateIssueMemo(saveMemoBtn.dataset.editingId, dateVal, textVal, authorVal);
                     delete saveMemoBtn.dataset.editingId;
                 }
             } else {
                 if (window.saveIssueMemo) {
-                    await window.saveIssueMemo(currentItemCodeForMemo, dateVal, textVal);
+                    await window.saveIssueMemo(currentItemCodeForMemo, dateVal, textVal, authorVal);
                 }
             }
             
             saveMemoBtn.textContent = "등록하기";
             saveMemoBtn.disabled = false;
-            openMemoBtn.click(); // refresh list
             if(typeof updateMemoBtnUI === 'function') updateMemoBtnUI();
+            memoModal.style.display = "none"; // Close modal upon save
         });
 
         window.addEventListener('firebaseReady', () => {
