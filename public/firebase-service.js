@@ -70,11 +70,17 @@ window.saveIssueMemo = async function(itemCode, date, text, imageUrl) {
 // Function to fetch memos for a specific item
 window.fetchIssueMemos = async function(itemCode) {
     try {
-        const q = query(collection(db, "memos"), where("itemCode", "==", itemCode), orderBy("createdAt", "desc"));
+        const q = query(collection(db, "memos"), where("itemCode", "==", itemCode));
         const querySnapshot = await getDocs(q);
         const memos = [];
         querySnapshot.forEach((doc) => {
             memos.push({ id: doc.id, ...doc.data() });
+        });
+        // Sort in memory by createdAt descending
+        memos.sort((a, b) => {
+            const timeA = a.createdAt ? a.createdAt.toMillis() : 0;
+            const timeB = b.createdAt ? b.createdAt.toMillis() : 0;
+            return timeB - timeA;
         });
         return memos;
     } catch (e) {
