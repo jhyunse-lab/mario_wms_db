@@ -474,34 +474,57 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
     <!-- Memo Modal -->
-    <div id="memoModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center;">
-        <div style="background:#1f2933; width:450px; max-height:80vh; border-radius:8px; display:flex; flex-direction:column; box-shadow:0 10px 25px rgba(0,0,0,0.5); overflow:hidden;">
-            <div style="padding:16px; border-bottom:1px solid #374151; display:flex; justify-content:space-between; align-items:center;">
-                <h3 style="margin:0; color:#fff; font-size:16px;" id="memoModalTitle">메모 작성</h3>
-                <button id="closeMemoBtn" style="background:none; border:none; color:#9ca3af; font-size:20px; cursor:pointer;">&times;</button>
+    <style>
+      #memoModal * { box-sizing: border-box; font-family: 'Segoe UI', -apple-system, sans-serif; }
+      .memo-input {
+        width: 100%; padding: 10px 12px;
+        background: #fff; border: 1.5px solid #e2e8f0; color: #1e293b;
+        border-radius: 10px; font-size: 14px; outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+      }
+      .memo-input:focus { border-color: #818cf8; box-shadow: 0 0 0 3px rgba(129,140,248,0.15); }
+      .memo-input::placeholder { color: #94a3b8; }
+      .memo-history-card {
+        background: #fff; padding: 14px 16px;
+        border-radius: 12px; border: 1.5px solid #f1f5f9;
+        border-left: 4px solid #f472b6;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      }
+    </style>
+    <div id="memoModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(100,116,139,0.3); z-index:2000; align-items:center; justify-content:center; backdrop-filter:blur(4px); pointer-events:auto;">
+        <div style="background:linear-gradient(135deg,#f8faff 0%,#fff 100%); width:460px; max-height:82vh; border-radius:20px; display:flex; flex-direction:column; box-shadow:0 20px 60px rgba(99,102,241,0.15), 0 4px 20px rgba(0,0,0,0.08); overflow:hidden; border:1.5px solid rgba(255,255,255,0.8);">
+            <!-- Header -->
+            <div style="padding:18px 22px 16px; background:linear-gradient(135deg,#818cf8,#a78bfa); display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:20px;">📋</span>
+                    <h3 style="margin:0; color:#fff; font-size:17px; font-weight:700; letter-spacing:-0.3px;" id="memoModalTitle">메모 작성</h3>
+                </div>
+                <button id="closeMemoBtn" style="background:rgba(255,255,255,0.2); border:none; color:#fff; font-size:18px; width:32px; height:32px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; line-height:1; transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.35)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">&times;</button>
             </div>
-            <div style="padding:16px; overflow-y:auto; flex:1;">
-                <div style="margin-bottom:16px; display:flex; gap:10px;">
+            <!-- Body -->
+            <div style="padding:20px 22px; overflow-y:auto; flex:1;">
+                <div style="margin-bottom:14px; display:flex; gap:12px;">
                     <div style="flex:1;">
-                        <label style="display:block; color:#9ca3af; font-size:12px; margin-bottom:4px;">날짜</label>
-                        <input type="date" id="memoDate" style="width:100%; padding:8px; background:#0d1117; border:1px solid #374151; color:#fff; border-radius:4px;" />
+                        <label style="display:block; color:#64748b; font-size:12px; font-weight:600; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">날짜</label>
+                        <input type="date" id="memoDate" class="memo-input" />
                     </div>
                     <div style="flex:1;">
-                        <label style="display:block; color:#9ca3af; font-size:12px; margin-bottom:4px;">작성자</label>
-                        <input type="text" id="memoAuthor" placeholder="이름 입력" style="width:100%; padding:8px; background:#0d1117; border:1px solid #374151; color:#fff; border-radius:4px;" />
+                        <label style="display:block; color:#64748b; font-size:12px; font-weight:600; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">작성자</label>
+                        <input type="text" id="memoAuthor" placeholder="이름 입력" class="memo-input" />
                     </div>
                 </div>
-                <div style="margin-bottom:16px;">
-                    <label style="display:block; color:#9ca3af; font-size:12px; margin-bottom:4px;">특이사항</label>
-                    <textarea id="memoText" rows="4" style="width:100%; padding:8px; background:#0d1117; border:1px solid #374151; color:#fff; border-radius:4px; resize:vertical;"></textarea>
+                <div style="margin-bottom:18px;">
+                    <label style="display:block; color:#64748b; font-size:12px; font-weight:600; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">특이사항</label>
+                    <textarea id="memoText" rows="4" placeholder="내용을 입력하세요..." class="memo-input" style="resize:vertical;"></textarea>
                 </div>
-                <button id="saveMemoBtn" style="width:100%; background:#2563eb; color:#fff; padding:10px; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">등록하기</button>
-                
-                <hr style="border:none; border-top:1px solid #374151; margin:20px 0;" />
-                
-                <h4 style="margin:0 0 10px 0; color:#fff; font-size:14px;">이전 이력</h4>
+                <button id="saveMemoBtn" style="width:100%; background:linear-gradient(135deg,#818cf8,#a78bfa); color:#fff; padding:13px; border:none; border-radius:12px; cursor:pointer; font-weight:700; font-size:15px; letter-spacing:-0.2px; transition:opacity 0.2s, transform 0.1s; box-shadow:0 4px 15px rgba(129,140,248,0.4);" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='scale(1)'">✅ 작성 완료</button>
+                <div style="display:flex; align-items:center; gap:10px; margin:22px 0 18px;">
+                    <div style="flex:1; height:1px; background:#f1f5f9;"></div>
+                    <span style="color:#94a3b8; font-size:12px; font-weight:600;">이전 이력</span>
+                    <div style="flex:1; height:1px; background:#f1f5f9;"></div>
+                </div>
                 <div id="memoHistoryList" style="display:flex; flex-direction:column; gap:10px;">
-                    <div style="color:#9ca3af; font-size:12px; text-align:center;">불러오는 중...</div>
+                    <div style="color:#94a3b8; font-size:13px; text-align:center; padding:16px;">불러오는 중...</div>
                 </div>
             </div>
         </div>
@@ -1703,6 +1726,7 @@
         }
 
         function onMouseDown(event) {
+            if (event.target !== renderer.domElement) return; // UI 위 클릭 무시
             if (event.button !== 0) return; // 좌클릭만
             const panelRect = document.getElementById("rightPanel").getBoundingClientRect();
             if (event.clientX >= panelRect.left) return;
