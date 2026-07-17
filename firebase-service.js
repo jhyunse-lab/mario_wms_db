@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, serverTimestamp, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAYzUtguSZ37m2PSyihERhbQ9RjBdNoEtw",
@@ -36,20 +36,45 @@ window.initFirebaseIssues = async function() {
     }
 };
 
-// Function to save a new memo
-window.saveIssueMemo = async function(itemCode, date, text, author) {
+// Upload image to Firebase Storage, return { url, path }
+window.uploadMemoImage = async function(file) {
+    try {
+        const timestamp = Date.now();
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+        const storageRef = ref(storage, `memo_images/${timestamp}_${safeName}`);
+        const snapshot = await uploadBytes(storageRef, file);
+        const url = await getDownloadURL(snapshot.ref);
+        return { url, path: snapshot.ref.fullPath };
+    } catch (e) {
+        console.error("Error uploading image", e);
+        return null;
+    }
+};
+
+// Delete image from Firebase Storage
+window.deleteMemoImage = async function(imagePath) {
+    try {
+        if (!imagePath) return;
+        await deleteObject(ref(storage, imagePath));
+    } catch (e) {
+        console.warn("Could not delete image", e);
+    }
+};
+
+// Function to save a new memo (with optional image)
+window.saveIssueMemo = async function(itemCode, date, text, author, imageUrl, imagePath) {
     try {
         await addDoc(collection(db, "memos"), {
-            itemCode: itemCode,
-            date: date,
-            text: text,
+            itemCode,
+            date,
+            text,
             author: author || "",
+            imageUrl: imageUrl || "",
+            imagePath: imagePath || "",
             createdAt: serverTimestamp()
         });
-        
-        // Add to our local set and update 3D
         window.itemsWithIssues.add(itemCode);
-        window.dispatchEvent(new Event('firebaseReady')); // Re-trigger visual update
+        window.dispatchEvent(new Event('firebaseReady'));
         return true;
     } catch (e) {
         console.error("Error saving memo", e);
@@ -80,12 +105,11 @@ window.fetchIssueMemos = async function(itemCode) {
 };
 
 
-// Function to delete a memo
-window.deleteIssueMemo = async function(memoId, itemCode) {
+// Function to delete a memo (and its image)
+window.deleteIssueMemo = async function(memoId, itemCode, imagePath) {
     try {
+        if (imagePath) await window.deleteMemoImage(imagePath);
         await deleteDoc(doc(db, "memos", memoId));
-        
-        // Check if there are any memos left for this item
         const q = query(collection(db, "memos"), where("itemCode", "==", itemCode));
         const querySnapshot = await getDocs(q);
         if (querySnapshot.empty) {
@@ -100,13 +124,12 @@ window.deleteIssueMemo = async function(memoId, itemCode) {
 };
 
 // Function to update a memo
-window.updateIssueMemo = async function(memoId, date, text, author) {
+window.updateIssueMemo = async function(memoId, date, text, author, imageUrl, imagePath) {
     try {
-        await updateDoc(doc(db, "memos", memoId), {
-            date: date,
-            text: text,
-            author: author || ""
-        });
+        const updateData = { date, text, author: author || "" };
+        if (imageUrl !== undefined) updateData.imageUrl = imageUrl;
+        if (imagePath !== undefined) updateData.imagePath = imagePath;
+        await updateDoc(doc(db, "memos", memoId), updateData);
         return true;
     } catch (e) {
         console.error("Error updating memo", e);

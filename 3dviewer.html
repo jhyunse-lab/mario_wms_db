@@ -517,6 +517,18 @@
                     <label style="display:block; color:#64748b; font-size:12px; font-weight:600; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">특이사항</label>
                     <textarea id="memoText" rows="4" placeholder="내용을 입력하세요..." class="memo-input" style="resize:vertical;"></textarea>
                 </div>
+                <!-- Image Upload Area -->
+                <div style="margin-bottom:18px;">
+                    <label style="display:block; color:#64748b; font-size:12px; font-weight:600; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">이미지 첨부 <span style="color:#94a3b8; font-weight:400; font-size:11px;">(선택사항)</span></label>
+                    <label id="memoImageLabel" for="memoImageInput" style="display:flex; align-items:center; justify-content:center; gap:8px; width:100%; padding:12px; background:#f8faff; border:2px dashed #c7d2fe; border-radius:10px; cursor:pointer; color:#818cf8; font-size:13px; font-weight:600; transition:background 0.2s, border-color 0.2s;" onmouseover="this.style.background='#ede9fe'; this.style.borderColor='#a78bfa';" onmouseout="this.style.background='#f8faff'; this.style.borderColor='#c7d2fe';">
+                        <span style="font-size:18px;">📎</span> 이미지 선택
+                    </label>
+                    <input type="file" id="memoImageInput" accept="image/*" style="display:none;" />
+                    <div id="memoImagePreview" style="display:none; margin-top:10px; position:relative; border-radius:10px; overflow:hidden; border:1.5px solid #e2e8f0;">
+                        <img id="memoImagePreviewImg" src="" alt="미리보기" style="width:100%; display:block; max-height:200px; object-fit:cover;" />
+                        <button id="memoImageRemoveBtn" style="position:absolute; top:8px; right:8px; background:rgba(0,0,0,0.6); border:none; color:#fff; border-radius:50%; width:26px; height:26px; cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center;" title="이미지 제거">×</button>
+                    </div>
+                </div>
                 <button id="saveMemoBtn" style="width:100%; background:linear-gradient(135deg,#818cf8,#a78bfa); color:#fff; padding:13px; border:none; border-radius:12px; cursor:pointer; font-weight:700; font-size:15px; letter-spacing:-0.2px; transition:opacity 0.2s, transform 0.1s; box-shadow:0 4px 15px rgba(129,140,248,0.4);" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='scale(1)'">✅ 작성 완료</button>
                 <div style="display:flex; align-items:center; gap:10px; margin:22px 0 18px;">
                     <div style="flex:1; height:1px; background:#f1f5f9;"></div>
@@ -2085,7 +2097,7 @@
                     div.style.padding = "14px";
                     div.style.borderRadius = "8px";
                     div.style.border = "1px solid #e5e7eb";
-                    div.style.borderLeft = "4px solid #ef4444";
+                    div.style.borderLeft = "4px solid #f472b6";
                     
                     const header = document.createElement("div");
                     header.style.display = "flex";
@@ -2106,7 +2118,7 @@
                     delBtn.onclick = async () => {
                         if(confirm("이 이력을 삭제하시겠습니까?")) {
                             delBtn.textContent = "...";
-                            await window.deleteIssueMemo(memo.id, currentItemCodeForMemo);
+                            await window.deleteIssueMemo(memo.id, currentItemCodeForMemo, memo.imagePath || "");
                             if (window.fetchIssueMemos) {
                                 const updatedMemos = await window.fetchIssueMemos(currentItemCodeForMemo);
                                 renderMemoList(updatedMemos);
@@ -2120,6 +2132,15 @@
                         memoAuthor.value = memo.author || "";
                         saveMemoBtn.textContent = "수정하기";
                         saveMemoBtn.dataset.editingId = memo.id;
+                        // Show existing image if any
+                        if (memo.imageUrl) {
+                            memoImagePreviewImg.src = memo.imageUrl;
+                            memoImagePreview.style.display = "block";
+                            saveMemoBtn.dataset.existingImageUrl = memo.imageUrl;
+                            saveMemoBtn.dataset.existingImagePath = memo.imagePath || "";
+                        } else {
+                            clearImagePreview();
+                        }
                     };
                     
                     actions.appendChild(editBtn);
@@ -2135,10 +2156,59 @@
                     
                     div.appendChild(header);
                     div.appendChild(content);
+                    
+                    // Show image if attached
+                    if (memo.imageUrl) {
+                        const imgWrap = document.createElement("div");
+                        imgWrap.style.marginTop = "10px";
+                        const img = document.createElement("img");
+                        img.src = memo.imageUrl;
+                        img.alt = "첨부 이미지";
+                        img.style = "width:100%; border-radius:8px; cursor:pointer; transition: opacity 0.2s;";
+                        img.onmouseover = () => img.style.opacity = '0.85';
+                        img.onmouseout = () => img.style.opacity = '1';
+                        img.onclick = () => window.open(memo.imageUrl, '_blank');
+                        imgWrap.appendChild(img);
+                        div.appendChild(imgWrap);
+                    }
+                    
                     memoHistoryList.appendChild(div);
                 });
             }
         }
+
+        // Image preview helpers
+        const memoImageInput = document.getElementById("memoImageInput");
+        const memoImagePreview = document.getElementById("memoImagePreview");
+        const memoImagePreviewImg = document.getElementById("memoImagePreviewImg");
+        const memoImageRemoveBtn = document.getElementById("memoImageRemoveBtn");
+        let pendingImageFile = null;
+
+        function clearImagePreview() {
+            pendingImageFile = null;
+            memoImageInput.value = "";
+            memoImagePreviewImg.src = "";
+            memoImagePreview.style.display = "none";
+            delete saveMemoBtn.dataset.existingImageUrl;
+            delete saveMemoBtn.dataset.existingImagePath;
+        }
+
+        memoImageInput.addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            pendingImageFile = file;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                memoImagePreviewImg.src = ev.target.result;
+                memoImagePreview.style.display = "block";
+            };
+            reader.readAsDataURL(file);
+        });
+
+        memoImageRemoveBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            clearImagePreview();
+        });
 
         openMemoBtn.addEventListener("click", async () => {
             if (!currentItemCodeForMemo) return;
@@ -2146,7 +2216,8 @@
             memoText.value = "";
             memoAuthor.value = "";
             saveMemoBtn.removeAttribute('data-editing-id');
-            saveMemoBtn.textContent = "작성 완료";
+            saveMemoBtn.textContent = "✅ 작성 완료";
+            clearImagePreview();
             memoModal.style.display = "flex";
             
             memoHistoryList.innerHTML = '<div style="color:#6b7280; font-size:13px; text-align:center;">불러오는 중...</div>';
@@ -2168,20 +2239,33 @@
             }
             
             saveMemoBtn.disabled = true;
+            
+            // Upload image if a new one was selected
+            let imageUrl = "";
+            let imagePath = "";
+            if (pendingImageFile) {
+                saveMemoBtn.textContent = "이미지 업로드 중...";
+                const result = await window.uploadMemoImage(pendingImageFile);
+                if (result) { imageUrl = result.url; imagePath = result.path; }
+            } else if (saveMemoBtn.dataset.existingImageUrl) {
+                imageUrl = saveMemoBtn.dataset.existingImageUrl;
+                imagePath = saveMemoBtn.dataset.existingImagePath || "";
+            }
+            
             saveMemoBtn.textContent = "저장 중...";
             
             if (saveMemoBtn.dataset.editingId) {
                 if (window.updateIssueMemo) {
-                    await window.updateIssueMemo(saveMemoBtn.dataset.editingId, dateVal, textVal, authorVal);
+                    await window.updateIssueMemo(saveMemoBtn.dataset.editingId, dateVal, textVal, authorVal, imageUrl, imagePath);
                     saveMemoBtn.removeAttribute('data-editing-id');
                 }
             } else {
                 if (window.saveIssueMemo) {
-                    await window.saveIssueMemo(currentItemCodeForMemo, dateVal, textVal, authorVal);
+                    await window.saveIssueMemo(currentItemCodeForMemo, dateVal, textVal, authorVal, imageUrl, imagePath);
                 }
             }
             
-            saveMemoBtn.textContent = "작성 완료";
+            saveMemoBtn.textContent = "✅ 작성 완료";
             saveMemoBtn.disabled = false;
             
             if(typeof updateMemoBtnUI === 'function') updateMemoBtnUI();
@@ -2189,6 +2273,7 @@
             // Clear inputs for next memo
             memoText.value = "";
             memoDate.value = new Date().toISOString().split('T')[0];
+            clearImagePreview();
             
             // Refresh list instead of closing modal
             if (window.fetchIssueMemos) {
