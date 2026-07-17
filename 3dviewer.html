@@ -521,7 +521,9 @@
                 <div style="margin-bottom:18px;">
                     <label style="display:block; color:#64748b; font-size:12px; font-weight:600; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">이미지 첨부 <span style="color:#94a3b8; font-weight:400; font-size:11px;">(선택사항)</span></label>
                     <label id="memoImageLabel" for="memoImageInput" style="display:flex; align-items:center; justify-content:center; gap:8px; width:100%; padding:12px; background:#f8faff; border:2px dashed #c7d2fe; border-radius:10px; cursor:pointer; color:#818cf8; font-size:13px; font-weight:600; transition:background 0.2s, border-color 0.2s;" onmouseover="this.style.background='#ede9fe'; this.style.borderColor='#a78bfa';" onmouseout="this.style.background='#f8faff'; this.style.borderColor='#c7d2fe';">
-                        <span style="font-size:18px;">📎</span> 이미지 선택
+                        <span style="font-size:18px;">📎</span>
+                        <span>이미지 선택</span>
+                        <span style="color:#c4b5fd; font-weight:400; font-size:11px;">또는 Ctrl+V 붙여넣기</span>
                     </label>
                     <input type="file" id="memoImageInput" accept="image/*" style="display:none;" />
                     <div id="memoImagePreview" style="display:none; margin-top:10px; position:relative; border-radius:10px; overflow:hidden; border:1.5px solid #e2e8f0;">
@@ -2208,6 +2210,31 @@
         memoImageRemoveBtn.addEventListener("click", (e) => {
             e.stopPropagation();
             clearImagePreview();
+        });
+
+        // Ctrl+V paste support: paste image directly into memo modal
+        document.addEventListener('paste', (e) => {
+            if (memoModal.style.display === 'none') return; // only when modal is open
+            const items = e.clipboardData?.items;
+            if (!items) return;
+            for (const item of items) {
+                if (item.type.startsWith('image/')) {
+                    e.preventDefault();
+                    const file = item.getAsFile();
+                    if (!file) continue;
+                    pendingImageFile = file;
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        memoImagePreviewImg.src = ev.target.result;
+                        memoImagePreview.style.display = 'block';
+                        // Flash the preview area to indicate success
+                        memoImagePreview.style.outline = '3px solid #818cf8';
+                        setTimeout(() => memoImagePreview.style.outline = 'none', 600);
+                    };
+                    reader.readAsDataURL(file);
+                    break;
+                }
+            }
         });
 
         openMemoBtn.addEventListener("click", async () => {
