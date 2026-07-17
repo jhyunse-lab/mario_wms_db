@@ -2049,77 +2049,86 @@
             memoModal.style.display = "none";
         });
 
+        
+        function renderMemoList(memos) {
+            memoHistoryList.innerHTML = "";
+            if (memos.length === 0) {
+                memoHistoryList.innerHTML = '<div style="color:#6b7280; font-size:13px; text-align:center; padding: 20px 0;">등록된 이력이 없습니다.</div>';
+            } else {
+                memos.forEach(memo => {
+                    const div = document.createElement("div");
+                    div.style.background = "#f9fafb";
+                    div.style.padding = "14px";
+                    div.style.borderRadius = "8px";
+                    div.style.border = "1px solid #e5e7eb";
+                    div.style.borderLeft = "4px solid #ef4444";
+                    
+                    const header = document.createElement("div");
+                    header.style.display = "flex";
+                    header.style.justifyContent = "space-between";
+                    header.style.alignItems = "flex-start";
+                    header.style.marginBottom = "8px";
+                    header.innerHTML = `<div style="font-size:12px; color:#4b5563; font-weight:500;">${memo.date} ${memo.author ? " | " + memo.author : ""}</div>`;
+                    
+                    const actions = document.createElement("div");
+                    const editBtn = document.createElement("button");
+                    editBtn.textContent = "수정";
+                    editBtn.style = "background:none; border:none; color:#2563eb; cursor:pointer; font-size:12px; padding:0 4px; font-weight:500;";
+                    
+                    const delBtn = document.createElement("button");
+                    delBtn.textContent = "삭제";
+                    delBtn.style = "background:none; border:none; color:#ef4444; cursor:pointer; font-size:12px; padding:0 4px; font-weight:500;";
+                    
+                    delBtn.onclick = async () => {
+                        if(confirm("이 이력을 삭제하시겠습니까?")) {
+                            delBtn.textContent = "...";
+                            await window.deleteIssueMemo(memo.id, currentItemCodeForMemo);
+                            if (window.fetchIssueMemos) {
+                                const updatedMemos = await window.fetchIssueMemos(currentItemCodeForMemo);
+                                renderMemoList(updatedMemos);
+                            }
+                        }
+                    };
+                    
+                    editBtn.onclick = () => {
+                        memoDate.value = memo.date;
+                        memoText.value = memo.text;
+                        memoAuthor.value = memo.author || "";
+                        saveMemoBtn.textContent = "수정하기";
+                        saveMemoBtn.dataset.editingId = memo.id;
+                    };
+                    
+                    actions.appendChild(editBtn);
+                    actions.appendChild(delBtn);
+                    header.appendChild(actions);
+                    
+                    const content = document.createElement("div");
+                    content.style.fontSize = "14px";
+                    content.style.color = "#1f2937";
+                    content.style.lineHeight = "1.5";
+                    content.style.whiteSpace = "pre-wrap";
+                    content.textContent = memo.text;
+                    
+                    div.appendChild(header);
+                    div.appendChild(content);
+                    memoHistoryList.appendChild(div);
+                });
+            }
+        }
+
         openMemoBtn.addEventListener("click", async () => {
             if (!currentItemCodeForMemo) return;
             memoDate.value = new Date().toISOString().split('T')[0];
             memoText.value = "";
             memoAuthor.value = "";
             saveMemoBtn.removeAttribute('data-editing-id');
-            saveMemoBtn.textContent = "등록하기";
+            saveMemoBtn.textContent = "작성 완료";
             memoModal.style.display = "flex";
             
-            memoHistoryList.innerHTML = '<div style="color:#9ca3af; font-size:12px; text-align:center;">불러오는 중...</div>';
+            memoHistoryList.innerHTML = '<div style="color:#6b7280; font-size:13px; text-align:center;">불러오는 중...</div>';
             if (window.fetchIssueMemos) {
                 const memos = await window.fetchIssueMemos(currentItemCodeForMemo);
-                memoHistoryList.innerHTML = "";
-                if (memos.length === 0) {
-                    memoHistoryList.innerHTML = '<div style="color:#9ca3af; font-size:12px; text-align:center;">등록된 이력이 없습니다.</div>';
-                } else {
-                    memos.forEach(memo => {
-                        const div = document.createElement("div");
-                        div.style.background = "#0d1117";
-                        div.style.padding = "10px";
-                        div.style.borderRadius = "4px";
-                        div.style.borderLeft = "3px solid #ef4444";
-                        div.style.marginBottom = "8px";
-                        
-                        const header = document.createElement("div");
-                        header.style.display = "flex";
-                        header.style.justifyContent = "space-between";
-                        header.style.alignItems = "flex-start";
-                        header.style.marginBottom = "4px";
-                        header.innerHTML = `<div style="font-size:11px; color:#9ca3af;">${memo.date} ${memo.author ? " | " + memo.author : ""}</div>`;
-                        
-                        const actions = document.createElement("div");
-                        const editBtn = document.createElement("button");
-                        editBtn.textContent = "수정";
-                        editBtn.style = "background:none; border:none; color:#3b82f6; cursor:pointer; font-size:11px; padding:0 4px;";
-                        
-                        const delBtn = document.createElement("button");
-                        delBtn.textContent = "삭제";
-                        delBtn.style = "background:none; border:none; color:#ef4444; cursor:pointer; font-size:11px; padding:0 4px;";
-                        
-                        delBtn.onclick = async () => {
-                            if(confirm("정말 삭제하시겠습니까?")) {
-                                delBtn.textContent = "...";
-                                await window.deleteIssueMemo(memo.id, currentItemCodeForMemo);
-                                openMemoBtn.click(); // reload
-                            }
-                        };
-                        
-                        editBtn.onclick = () => {
-                            memoDate.value = memo.date;
-                            memoText.value = memo.text;
-                            memoAuthor.value = memo.author || "";
-                            saveMemoBtn.textContent = "수정하기";
-                            saveMemoBtn.dataset.editingId = memo.id;
-                        };
-                        
-                        actions.appendChild(editBtn);
-                        actions.appendChild(delBtn);
-                        header.appendChild(actions);
-                        
-                        const content = document.createElement("div");
-                        content.style.fontSize = "13px";
-                        content.style.color = "#fff";
-                        content.style.whiteSpace = "pre-wrap";
-                        content.textContent = memo.text;
-                        
-                        div.appendChild(header);
-                        div.appendChild(content);
-                        memoHistoryList.appendChild(div);
-                    });
-                }
+                renderMemoList(memos);
             }
         });
 
@@ -2130,7 +2139,7 @@
             const authorVal = memoAuthor.value.trim();
             
             if (!textVal) {
-                alert("내용을 입력해주세요.");
+                alert("특이사항을 입력해주세요.");
                 return;
             }
             
@@ -2148,10 +2157,20 @@
                 }
             }
             
-            saveMemoBtn.textContent = "등록하기";
+            saveMemoBtn.textContent = "작성 완료";
             saveMemoBtn.disabled = false;
+            
             if(typeof updateMemoBtnUI === 'function') updateMemoBtnUI();
-            memoModal.style.display = "none"; // Close modal upon save
+            
+            // Clear inputs for next memo
+            memoText.value = "";
+            memoDate.value = new Date().toISOString().split('T')[0];
+            
+            // Refresh list instead of closing modal
+            if (window.fetchIssueMemos) {
+                const memos = await window.fetchIssueMemos(currentItemCodeForMemo);
+                renderMemoList(memos);
+            }
         });
 
         window.addEventListener('firebaseReady', () => {
