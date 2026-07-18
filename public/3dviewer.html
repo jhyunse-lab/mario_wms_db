@@ -577,12 +577,11 @@
                 <table id="inventoryTable">
                     <thead>
                         <tr>
-                            <th>로케이션</th>
-                            <th>품목명</th>
-                            <th>제조사명</th>
-                            <th>거래처명</th>
-                            <th>고객명</th>
-                            <th>수량</th>
+                            <th id="thLoc" style="cursor:pointer; user-select:none;">로케이션</th>
+                            <th id="thItem" style="cursor:pointer; user-select:none;">품목명</th>
+                            <th id="thManu" style="cursor:pointer; user-select:none;">제조사명</th>
+                            <th id="thPart" style="cursor:pointer; user-select:none;">거래처명</th>
+                            <th id="thQty" style="cursor:pointer; user-select:none;">수량</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -1410,6 +1409,43 @@
 
         const rowCountSpanEl = document.getElementById("rowCount");
 
+        let currentSortCol = null; // '_LOCATION', '_ITEM_NAME', '_MANUFACTURER', '_PARTNER', '_QTY'
+        let currentSortDir = 'asc';
+
+        function updateSortHeaders() {
+            const headers = {
+                'thLoc': { text: '로케이션', col: '_LOCATION' },
+                'thItem': { text: '품목명', col: '_ITEM_NAME' },
+                'thManu': { text: '제조사명', col: '_MANUFACTURER' },
+                'thPart': { text: '거래처명', col: '_PARTNER' },
+                'thQty': { text: '수량', col: '_QTY' }
+            };
+
+            Object.keys(headers).forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                const h = headers[id];
+                if (currentSortCol === h.col) {
+                    el.textContent = h.text + (currentSortDir === 'asc' ? ' ▲' : ' ▼');
+                    el.style.color = '#c4b5fd';
+                } else {
+                    el.textContent = h.text;
+                    el.style.color = '';
+                }
+            });
+        }
+
+        function handleHeaderSort(col) {
+            if (currentSortCol === col) {
+                currentSortDir = (currentSortDir === 'asc') ? 'desc' : 'asc';
+            } else {
+                currentSortCol = col;
+                currentSortDir = 'asc';
+            }
+            updateSortHeaders();
+            updateInventoryTable();
+        }
+
         function updateInventoryTable() {
             const tbody = document.querySelector("#inventoryTable tbody");
             tbody.innerHTML = "";
@@ -1418,8 +1454,26 @@
                 rowMatchesFilter(row, currentTextFilter, currentManufacturerFilter, currentPartnerFilter)
             );
 
-            // 선택된 선반/품목의 로케이션을 테이블 상단으로 정렬
-            if (priorityLocation) {
+            // Apply column sorting if active, otherwise fallback to priority location sorting
+            if (currentSortCol) {
+                filtered = filtered.slice().sort((a, b) => {
+                    let valA = a[currentSortCol];
+                    let valB = b[currentSortCol];
+                    if (valA === undefined || valA === null) valA = '';
+                    if (valB === undefined || valB === null) valB = '';
+
+                    if (currentSortCol === '_QTY') {
+                        const numA = Number(valA) || 0;
+                        const numB = Number(valB) || 0;
+                        return currentSortDir === 'asc' ? numA - numB : numB - numA;
+                    }
+
+                    const strA = valA.toString().trim();
+                    const strB = valB.toString().trim();
+                    const cmp = strA.localeCompare(strB, 'ko', { sensitivity: 'base', numeric: true });
+                    return currentSortDir === 'asc' ? cmp : -cmp;
+                });
+            } else if (priorityLocation) {
                 filtered = filtered.slice().sort((a, b) => {
                     const aPri = (a._LOCATION === priorityLocation) ? 0 : 1;
                     const bPri = (b._LOCATION === priorityLocation) ? 0 : 1;
@@ -1436,7 +1490,6 @@
                 const item = row._ITEM_NAME || "";
                 const manu = row._MANUFACTURER || "";
                 const partn = row._PARTNER || "";
-                const cust = row._CUSTOMER || "";
                 const qty = row._QTY ?? "";
 
                 const tr = document.createElement("tr");
@@ -1450,7 +1503,6 @@
         <td>${item}</td>
         <td>${manu}</td>
         <td>${partn}</td>
-        <td>${cust}</td>
         <td>${qty}</td>
       `;
                 tbody.appendChild(tr);
@@ -2198,7 +2250,6 @@
                 품목명: r._ITEM_NAME || "",
                 제조사명: r._MANUFACTURER || "",
                 거래처명: r._PARTNER || "",
-                고객명: r._CUSTOMER || "",
                 수량: r._QTY ?? 0
             }));
             let fileName = prompt("저장할 파일명을 입력하세요 (확장자 제외):", "WMS3D_Export");
@@ -2707,6 +2758,17 @@
                 allPosts.forEach(p => { p.visible = visible; });
             });
         }
+
+        // Header double-click sort event listeners
+        const bindHeaderSort = (id, col) => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('dblclick', () => handleHeaderSort(col));
+        };
+        bindHeaderSort('thLoc', '_LOCATION');
+        bindHeaderSort('thItem', '_ITEM_NAME');
+        bindHeaderSort('thManu', '_MANUFACTURER');
+        bindHeaderSort('thPart', '_PARTNER');
+        bindHeaderSort('thQty', '_QTY');
 
         clearSelectionCard();
         updateInventoryTable();
