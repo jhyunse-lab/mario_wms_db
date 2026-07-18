@@ -418,6 +418,14 @@
                 </div>
             </div>
 
+            <div id="issueLegendRow" style="display:none; flex-direction:column; gap:6px; margin-top:8px; margin-bottom:8px; font-size:13px; font-weight:bold; padding: 10px; background: #1f2933; border-radius: 6px;">
+                <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                    <div style="display:flex; align-items:center; gap:4px; color:#fff;"><span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#ef4444;"></span> 품목 특이사항</div>
+                    <div style="display:flex; align-items:center; gap:4px; color:#fff;"><span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#3b82f6;"></span> 제조사 특이사항</div>
+                    <div style="display:flex; align-items:center; gap:4px; color:#fff;"><span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#22c55e;"></span> 거래처 특이사항</div>
+                </div>
+            </div>
+
             
 
             
@@ -531,8 +539,18 @@
                 </div>
                 <button id="closeMemoBtn" style="background:rgba(255,255,255,0.2); border:none; color:#fff; font-size:18px; width:32px; height:32px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; line-height:1; transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.35)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">&times;</button>
             </div>
+            <!-- Scope Tabs -->
+            <div style="display:flex; background:#f1f5f9; padding:4px; gap:4px; border-bottom:1px solid #e2e8f0; border-top:1px solid #e2e8f0;">
+                <button id="memoScopeItemBtn" style="flex:1; padding:8px; border:none; border-radius:10px; background:#fff; color:#4f46e5; font-size:13px; font-weight:700; cursor:pointer; transition:all 0.2s; box-shadow:0 1px 3px rgba(0,0,0,0.1);">품목별</button>
+                <button id="memoScopeManuBtn" style="flex:1; padding:8px; border:none; border-radius:10px; background:transparent; color:#64748b; font-size:13px; font-weight:600; cursor:pointer; transition:all 0.2s;">제조사별</button>
+                <button id="memoScopePartnerBtn" style="flex:1; padding:8px; border:none; border-radius:10px; background:transparent; color:#64748b; font-size:13px; font-weight:600; cursor:pointer; transition:all 0.2s;">거래처별</button>
+            </div>
             <!-- Body -->
             <div style="padding:20px 22px; overflow-y:auto; flex:1;">
+                <!-- Target Scope Info -->
+                <div id="memoTargetScopeContainer" style="margin-bottom:14px; padding:10px 12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; font-size:13px; color:#334155; font-weight:600;">
+                    적용 대상: <span id="memoTargetScopeText" style="color:#4f46e5;">-</span>
+                </div>
                 <div style="margin-bottom:14px; display:flex; gap:12px;">
                     <div style="flex:1;">
                         <label style="display:block; color:#64748b; font-size:12px; font-weight:600; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">날짜</label>
@@ -1079,6 +1097,11 @@
             selPartEl.textContent = "거래처명: -";
             selQtyEl.textContent = "수량: -";
             if (selAbcEl) selAbcEl.textContent = "출고등급: -";
+            
+            currentItemCodeForMemo = null;
+            currentManufacturerForMemo = null;
+            currentPartnerForMemo = null;
+            if (openMemoBtn) openMemoBtn.style.display = "none";
         }
 
         function applyPartnerMappingToInventory() {
@@ -1267,7 +1290,10 @@
             const cust = (row._CUSTOMER || "").toString();
 
             if (typeof colorMode !== 'undefined' && colorMode === "issue") {
-                if (!window.itemsWithIssues || !window.itemsWithIssues.has(code)) return false;
+                const hasItemIssue = window.itemsWithIssues && window.itemsWithIssues.has(code);
+                const hasManuIssue = window.manufacturersWithIssues && window.manufacturersWithIssues.has(manu);
+                const hasPartnerIssue = window.partnersWithIssues && window.partnersWithIssues.has(partn);
+                if (!hasItemIssue && !hasManuIssue && !hasPartnerIssue) return false;
             }
             if (manuFilter && manuFilter !== "__ALL__" && manu !== manuFilter) return false;
             if (partnerFilter && partnerFilter !== "__ALL__" && partn !== partnerFilter) return false;
@@ -1416,6 +1442,10 @@
             if(selAbcEl) selAbcEl.textContent = "출고등급: " + abcText;
             
             currentItemCodeForMemo = itemCode;
+            currentItemCodeForMemo = itemCode;
+            currentManufacturerForMemo = (row._MANUFACTURER || "").toString().trim();
+            currentPartnerForMemo = partnerName !== "-" ? partnerName : "";
+
             if (itemCode && itemCode !== "") {
                 openMemoBtn.style.display = "block";
                 if(typeof updateMemoBtnUI === 'function') updateMemoBtnUI();
@@ -1513,8 +1543,23 @@
                     }
 
                     if (colorMode === "issue") {
-                        const key = (r._ITEM_CODE || r._ITEM_NAME || "").toString();
-                        color = getOwnerColor(key);
+                        const itemCode = (r._ITEM_CODE || "").toString().trim();
+                        const manu = (r._MANUFACTURER || "").toString().trim();
+                        const partn = (window.partnerData && window.partnerData[itemCode]) ? window.partnerData[itemCode] : (r._PARTNER || "");
+
+                        const hasItemIssue = window.itemsWithIssues && window.itemsWithIssues.has(itemCode);
+                        const hasManuIssue = window.manufacturersWithIssues && window.manufacturersWithIssues.has(manu);
+                        const hasPartnerIssue = window.partnersWithIssues && window.partnersWithIssues.has(partn);
+
+                        if (hasItemIssue) {
+                            color = new THREE.Color(0xef4444); // Red
+                        } else if (hasManuIssue) {
+                            color = new THREE.Color(0x3b82f6); // Blue
+                        } else if (hasPartnerIssue) {
+                            color = new THREE.Color(0x22c55e); // Green
+                        } else {
+                            color = defaultOwnerColor;
+                        }
                     }
                     
                     const geo = new THREE.BoxGeometry(subWidth, subHeight, subDepth);
@@ -1601,7 +1646,7 @@
             });
         });
 
-        // ===== Custom colorMode dropdown =====
+                // ===== Custom colorMode dropdown =====
         const colorModeBtn = document.getElementById('colorModeBtn');
         const colorModeMenu = document.getElementById('colorModeMenu');
         const colorModeBtnLabel = document.getElementById('colorModeBtnLabel');
@@ -1619,23 +1664,28 @@
             colorMode = value;
             colorModeBtnLabel.textContent = label;
             ownerColorMap = {};
-        colorModeOptions.forEach(opt => {
-            opt.addEventListener('mouseenter', () => { if (opt.dataset.value !== colorMode) opt.style.background = '#312e81'; });
-            opt.addEventListener('mouseleave', () => { if (opt.dataset.value !== colorMode) opt.style.background = ''; });
-            opt.addEventListener('click', (e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                const val = opt.dataset.value;
-                const lbl = opt.textContent.trim();
-                closeColorMenu();
-                setTimeout(() => setColorModeValue(val, lbl), 0);
+
+            colorModeOptions.forEach(opt => {
+                if (opt.dataset.value === value) {
+                    opt.style.background = '#4c1d95';
+                    opt.style.color = '#fff';
+                } else {
+                    opt.style.background = '';
+                    opt.style.color = '#e0e7ff';
+                }
             });
-        });
+
             const abcLegend = document.getElementById('abcLegendRow');
             if (abcLegend) {
                 if (value === 'abc') { abcLegend.style.display = 'flex'; }
                 else { abcLegend.style.display = 'none'; setAbcFilter('__ALL__'); }
             }
+
+            const issueLegend = document.getElementById('issueLegendRow');
+            if (issueLegend) {
+                issueLegend.style.display = (value === 'issue') ? 'flex' : 'none';
+            }
+
             rebuildBinsFromInventory();
         }
 
@@ -2148,10 +2198,17 @@
         const memoHistoryList = document.getElementById("memoHistoryList");
         
         let currentItemCodeForMemo = null;
+        let currentManufacturerForMemo = null;
+        let currentPartnerForMemo = null;
+        let currentMemoScope = 'item'; // 'item', 'manufacturer', 'partner'
 
         function updateMemoBtnUI() {
             if (!currentItemCodeForMemo || !openMemoBtn) return;
-            if (window.itemsWithIssues && window.itemsWithIssues.has(currentItemCodeForMemo)) {
+            const hasItem = window.itemsWithIssues && window.itemsWithIssues.has(currentItemCodeForMemo);
+            const hasManu = window.manufacturersWithIssues && window.manufacturersWithIssues.has(currentManufacturerForMemo);
+            const hasPartner = window.partnersWithIssues && window.partnersWithIssues.has(currentPartnerForMemo);
+
+            if (hasItem || hasManu || hasPartner) {
                 openMemoBtn.textContent = "🚨 특이사항 있음";
                 openMemoBtn.style.background = "#ef4444";
                 openMemoBtn.style.color = "#fff";
@@ -2163,6 +2220,94 @@
                 openMemoBtn.style.border = "1px solid #4b5563";
             }
         }
+
+        // Scope tab selection
+        function setMemoScope(scope) {
+            currentMemoScope = scope;
+            const itemBtn = document.getElementById('memoScopeItemBtn');
+            const manuBtn = document.getElementById('memoScopeManuBtn');
+            const partnerBtn = document.getElementById('memoScopePartnerBtn');
+            
+            if (scope === 'item') {
+                itemBtn.style.background = '#fff';
+                itemBtn.style.color = '#4f46e5';
+                itemBtn.style.fontWeight = '700';
+                itemBtn.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+                
+                manuBtn.style.background = 'transparent';
+                manuBtn.style.color = '#64748b';
+                manuBtn.style.fontWeight = '600';
+                manuBtn.style.boxShadow = 'none';
+                
+                partnerBtn.style.background = 'transparent';
+                partnerBtn.style.color = '#64748b';
+                partnerBtn.style.fontWeight = '600';
+                partnerBtn.style.boxShadow = 'none';
+                
+                document.getElementById('memoTargetScopeText').textContent = `품목: ${currentItemCodeForMemo || '-'}`;
+            } else if (scope === 'manufacturer') {
+                itemBtn.style.background = 'transparent';
+                itemBtn.style.color = '#64748b';
+                itemBtn.style.fontWeight = '600';
+                itemBtn.style.boxShadow = 'none';
+                
+                manuBtn.style.background = '#fff';
+                manuBtn.style.color = '#4f46e5';
+                manuBtn.style.fontWeight = '700';
+                manuBtn.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+                
+                partnerBtn.style.background = 'transparent';
+                partnerBtn.style.color = '#64748b';
+                partnerBtn.style.fontWeight = '600';
+                partnerBtn.style.boxShadow = 'none';
+                
+                document.getElementById('memoTargetScopeText').textContent = `제조사: ${currentManufacturerForMemo || '-'}`;
+            } else if (scope === 'partner') {
+                itemBtn.style.background = 'transparent';
+                itemBtn.style.color = '#64748b';
+                itemBtn.style.fontWeight = '600';
+                itemBtn.style.boxShadow = 'none';
+                
+                manuBtn.style.background = 'transparent';
+                manuBtn.style.color = '#64748b';
+                manuBtn.style.fontWeight = '600';
+                manuBtn.style.boxShadow = 'none';
+                
+                partnerBtn.style.background = '#fff';
+                partnerBtn.style.color = '#4f46e5';
+                partnerBtn.style.fontWeight = '700';
+                partnerBtn.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+                
+                document.getElementById('memoTargetScopeText').textContent = `거래처: ${currentPartnerForMemo || '-'}`;
+            }
+
+            refreshMemoHistory();
+        }
+
+        function getCurrentMemoScopeKey() {
+            if (currentMemoScope === 'item') return currentItemCodeForMemo;
+            if (currentMemoScope === 'manufacturer') return currentManufacturerForMemo;
+            if (currentMemoScope === 'partner') return currentPartnerForMemo;
+            return '';
+        }
+
+        async function refreshMemoHistory() {
+            const key = getCurrentMemoScopeKey();
+            memoHistoryList.innerHTML = '<div style="color:#6b7280; font-size:13px; text-align:center;">불러오는 중...</div>';
+            if (!key) {
+                memoHistoryList.innerHTML = '<div style="color:#6b7280; font-size:13px; text-align:center;">적용 대상이 없습니다.</div>';
+                return;
+            }
+            if (window.fetchIssueMemos) {
+                const memos = await window.fetchIssueMemos(currentMemoScope, key);
+                renderMemoList(memos);
+            }
+        }
+
+        // Add scope tab event listeners
+        document.getElementById('memoScopeItemBtn').addEventListener('click', () => setMemoScope('item'));
+        document.getElementById('memoScopeManuBtn').addEventListener('click', () => setMemoScope('manufacturer'));
+        document.getElementById('memoScopePartnerBtn').addEventListener('click', () => setMemoScope('partner'));
 
         closeMemoBtn.addEventListener("click", () => {
             memoModal.style.display = "none";
@@ -2230,9 +2375,11 @@
                     delBtn.onclick = async () => {
                         if(confirm("이 이력을 삭제하시겠습니까?")) {
                             delBtn.textContent = "...";
-                            await window.deleteIssueMemo(memo.id, currentItemCodeForMemo, memo.imagePath || "");
+                            const scopeType = memo.scopeType || 'item';
+                            const scopeKey = memo.scopeKey || memo.itemCode || currentItemCodeForMemo;
+                            await window.deleteIssueMemo(memo.id, scopeType, scopeKey, memo.imagePath || "");
                             if (window.fetchIssueMemos) {
-                                const updatedMemos = await window.fetchIssueMemos(currentItemCodeForMemo);
+                                const updatedMemos = await window.fetchIssueMemos(scopeType, scopeKey);
                                 renderMemoList(updatedMemos);
                             }
                         }
@@ -2364,11 +2511,7 @@
                 box.style.top = Math.round((window.innerHeight - box.offsetHeight) / 2) + 'px';
             }
             
-            memoHistoryList.innerHTML = '<div style="color:#6b7280; font-size:13px; text-align:center;">불러오는 중...</div>';
-            if (window.fetchIssueMemos) {
-                const memos = await window.fetchIssueMemos(currentItemCodeForMemo);
-                renderMemoList(memos);
-            }
+            setMemoScope('item');
         });
 
         saveMemoBtn.addEventListener("click", async () => {
@@ -2405,7 +2548,7 @@
                 }
             } else {
                 if (window.saveIssueMemo) {
-                    await window.saveIssueMemo(currentItemCodeForMemo, dateVal, textVal, authorVal, imageUrl, imagePath);
+                    await window.saveIssueMemo(currentMemoScope, getCurrentMemoScopeKey(), dateVal, textVal, authorVal, imageUrl, imagePath);
                 }
             }
             
@@ -2420,10 +2563,7 @@
             clearImagePreview();
             
             // Refresh list instead of closing modal
-            if (window.fetchIssueMemos) {
-                const memos = await window.fetchIssueMemos(currentItemCodeForMemo);
-                renderMemoList(memos);
-            }
+            refreshMemoHistory();
         });
 
         window.addEventListener('firebaseReady', () => {
