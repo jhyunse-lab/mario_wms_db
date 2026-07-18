@@ -419,10 +419,8 @@
             </div>
 
             <div id="issueLegendRow" style="display:none; flex-direction:column; gap:6px; margin-top:8px; margin-bottom:8px; font-size:13px; font-weight:bold; padding: 10px; background: #1f2933; border-radius: 6px;">
-                <div style="display:flex; flex-wrap:wrap; gap:8px;">
-                    <div style="display:flex; align-items:center; gap:4px; color:#fff;"><span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#ef4444;"></span> 품목 특이사항</div>
-                    <div style="display:flex; align-items:center; gap:4px; color:#fff;"><span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#3b82f6;"></span> 제조사 특이사항</div>
-                    <div style="display:flex; align-items:center; gap:4px; color:#fff;"><span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#22c55e;"></span> 거래처 특이사항</div>
+                <div style="color:#e2e8f0; font-size:12px; font-weight:600; display:flex; align-items:center; gap:6px;">
+                    <span>🎨 특이사항 품목별 색상 구분 (동일 품목은 같은 색상)</span>
                 </div>
             </div>
 
@@ -1291,9 +1289,7 @@
 
             if (typeof colorMode !== 'undefined' && colorMode === "issue") {
                 const hasItemIssue = window.itemsWithIssues && window.itemsWithIssues.has(code);
-                const hasManuIssue = window.manufacturersWithIssues && window.manufacturersWithIssues.has(manu);
-                const hasPartnerIssue = window.partnersWithIssues && window.partnersWithIssues.has(partn);
-                if (!hasItemIssue && !hasManuIssue && !hasPartnerIssue) return false;
+                if (!hasItemIssue) return false;
             }
             if (manuFilter && manuFilter !== "__ALL__" && manu !== manuFilter) return false;
             if (partnerFilter && partnerFilter !== "__ALL__" && partn !== partnerFilter) return false;
@@ -1421,10 +1417,13 @@
             selTypeEl.textContent = "종류: 품목";
             selLocEl.textContent = "로케이션: " + (loc || "-");
             selItemEl.textContent = "품목명: " + (row._ITEM_NAME || "-") + " [" + (row._ITEM_CODE || "-") + "]";
-            selManuEl.textContent = "제조사명: " + (row._MANUFACTURER || "-");
+            const hasManuMemo = window.manufacturersWithIssues && window.manufacturersWithIssues.has(row._MANUFACTURER || "");
+            selManuEl.innerHTML = "제조사명: " + (row._MANUFACTURER || "-") + (hasManuMemo ? ' <span style="background:#4f46e5; color:#fff; font-size:11px; padding:2px 6px; border-radius:4px; margin-left:6px; font-weight:700; display:inline-block;">💬 메모있음</span>' : '');
+            
             const itemCodeForPartner = (row._ITEM_CODE || "").toString().trim();
             const partnerName = (window.partnerData && window.partnerData[itemCodeForPartner]) ? window.partnerData[itemCodeForPartner] : (row._PARTNER || "-");
-            selPartEl.textContent = "거래처명: " + partnerName;
+            const hasPartnerMemo = window.partnersWithIssues && window.partnersWithIssues.has(partnerName || "");
+            selPartEl.innerHTML = "거래처명: " + partnerName + (hasPartnerMemo ? ' <span style="background:#10b981; color:#fff; font-size:11px; padding:2px 6px; border-radius:4px; margin-left:6px; font-weight:700; display:inline-block;">💬 메모있음</span>' : '');
             selQtyEl.textContent = "수량: " + (row._QTY ?? "-");
             let abcText = "-";
             if (window.shipmentData && row._ITEM_CODE) {
@@ -1544,19 +1543,9 @@
 
                     if (colorMode === "issue") {
                         const itemCode = (r._ITEM_CODE || "").toString().trim();
-                        const manu = (r._MANUFACTURER || "").toString().trim();
-                        const partn = (window.partnerData && window.partnerData[itemCode]) ? window.partnerData[itemCode] : (r._PARTNER || "");
-
                         const hasItemIssue = window.itemsWithIssues && window.itemsWithIssues.has(itemCode);
-                        const hasManuIssue = window.manufacturersWithIssues && window.manufacturersWithIssues.has(manu);
-                        const hasPartnerIssue = window.partnersWithIssues && window.partnersWithIssues.has(partn);
-
                         if (hasItemIssue) {
-                            color = new THREE.Color(0xef4444); // Red
-                        } else if (hasManuIssue) {
-                            color = new THREE.Color(0x3b82f6); // Blue
-                        } else if (hasPartnerIssue) {
-                            color = new THREE.Color(0x22c55e); // Green
+                            color = getOwnerColor(itemCode);
                         } else {
                             color = defaultOwnerColor;
                         }
@@ -2208,9 +2197,14 @@
             const hasManu = window.manufacturersWithIssues && window.manufacturersWithIssues.has(currentManufacturerForMemo);
             const hasPartner = window.partnersWithIssues && window.partnersWithIssues.has(currentPartnerForMemo);
 
-            if (hasItem || hasManu || hasPartner) {
+            if (hasItem) {
                 openMemoBtn.textContent = "🚨 특이사항 있음";
                 openMemoBtn.style.background = "#ef4444";
+                openMemoBtn.style.color = "#fff";
+                openMemoBtn.style.border = "none";
+            } else if (hasManu || hasPartner) {
+                openMemoBtn.textContent = "📝 메모 작성 (제조사/거래처 메모 있음)";
+                openMemoBtn.style.background = "#4f46e5";
                 openMemoBtn.style.color = "#fff";
                 openMemoBtn.style.border = "none";
             } else {
@@ -2304,6 +2298,34 @@
             }
         }
 
+        async function updateTabCounts() {
+            const itemBtn = document.getElementById('memoScopeItemBtn');
+            const manuBtn = document.getElementById('memoScopeManuBtn');
+            const partnerBtn = document.getElementById('memoScopePartnerBtn');
+            
+            if (!itemBtn || !manuBtn || !partnerBtn) return;
+            
+            // Set temporary loading status
+            const itemText = itemBtn.textContent.split(' ')[0] || "품목별";
+            const manuText = manuBtn.textContent.split(' ')[0] || "제조사별";
+            const partnerText = partnerBtn.textContent.split(' ')[0] || "거래처별";
+            
+            itemBtn.textContent = `${itemText} (...)`;
+            manuBtn.textContent = `${manuText} (...)`;
+            partnerBtn.textContent = `${partnerText} (...)`;
+
+            if (window.fetchIssueMemos) {
+                const items = await window.fetchIssueMemos('item', currentItemCodeForMemo || '');
+                itemBtn.textContent = `${itemText} (${items.length})`;
+
+                const manus = await window.fetchIssueMemos('manufacturer', currentManufacturerForMemo || '');
+                manuBtn.textContent = `${manuText} (${manus.length})`;
+
+                const partners = await window.fetchIssueMemos('partner', currentPartnerForMemo || '');
+                partnerBtn.textContent = `${partnerText} (${partners.length})`;
+            }
+        }
+
         // Add scope tab event listeners
         document.getElementById('memoScopeItemBtn').addEventListener('click', () => setMemoScope('item'));
         document.getElementById('memoScopeManuBtn').addEventListener('click', () => setMemoScope('manufacturer'));
@@ -2381,6 +2403,9 @@
                             if (window.fetchIssueMemos) {
                                 const updatedMemos = await window.fetchIssueMemos(scopeType, scopeKey);
                                 renderMemoList(updatedMemos);
+                            }
+                            if (typeof updateTabCounts === 'function') {
+                                updateTabCounts();
                             }
                         }
                     };
@@ -2512,6 +2537,9 @@
             }
             
             setMemoScope('item');
+            if (typeof updateTabCounts === 'function') {
+                updateTabCounts();
+            }
         });
 
         saveMemoBtn.addEventListener("click", async () => {
@@ -2564,6 +2592,9 @@
             
             // Refresh list instead of closing modal
             refreshMemoHistory();
+            if (typeof updateTabCounts === 'function') {
+                updateTabCounts();
+            }
         });
 
         window.addEventListener('firebaseReady', () => {
