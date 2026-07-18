@@ -100,7 +100,16 @@
             margin-right: 4px;
         }
 
-        #colorModeRow,
+        #colorModeRow {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 11px;
+            color: #9ca3af;
+            margin-top: 10px;
+            justify-content: flex-start;
+        }
+
         #opacityRow,
         #labelToggleRow,
         #frameToggleRow,
@@ -368,13 +377,29 @@
             
 
             <div id="colorModeRow">
-                <span style="font-weight:bold; font-size:13px;">분석 모드</span>
-                <select id="colorModeSelect" style="padding:4px; font-size:11px; background:#1f2933; color:#fff; border:1px solid #374151; border-radius:4px; width:160px; outline:none; cursor:pointer;">
-                    <option value="manufacturer">제조사별</option>
-                    <option value="partner">거래처별</option>
-                    <option value="abc">장기재고 분석</option>
-                    <option value="issue">특이사항</option>
-                </select>
+                <span style="font-size:13px; font-weight:700; color:#c4b5fd; letter-spacing:-0.3px; white-space:nowrap;">분석 모드</span>
+                <div style="position:relative; flex:1;">
+                    <select id="colorModeSelect" style="
+                        appearance:none; -webkit-appearance:none;
+                        width:100%; padding:8px 36px 8px 14px;
+                        font-size:13px; font-weight:600;
+                        background:linear-gradient(135deg,#312e81,#1e1b4b);
+                        color:#e0e7ff;
+                        border:1.5px solid #4c1d95;
+                        border-radius:999px;
+                        outline:none; cursor:pointer;
+                        box-shadow:0 2px 8px rgba(99,102,241,0.25);
+                        transition: border-color 0.2s, box-shadow 0.2s;
+                    "
+                    onmouseover="this.style.borderColor='#818cf8'; this.style.boxShadow='0 2px 12px rgba(129,140,248,0.4)';"
+                    onmouseout="this.style.borderColor='#4c1d95'; this.style.boxShadow='0 2px 8px rgba(99,102,241,0.25)';">
+                        <option value="manufacturer">제조사별</option>
+                        <option value="partner">거래처별</option>
+                        <option value="abc">장기재고</option>
+                        <option value="issue">특이사항</option>
+                    </select>
+                    <span style="position:absolute; right:12px; top:50%; transform:translateY(-50%); color:#a5b4fc; pointer-events:none; font-size:11px;">▼</span>
+                </div>
             </div>
 
             <div id="abcLegendRow" style="display:none; flex-direction:column; gap:6px; margin-top:8px; margin-bottom:8px; font-size:13px; font-weight:bold; padding: 10px; background: #1f2933; border-radius: 6px;">
