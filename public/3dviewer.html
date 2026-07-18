@@ -521,10 +521,10 @@
         box-shadow: 0 2px 8px rgba(0,0,0,0.05);
       }
     </style>
-    <div id="memoModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:2000; align-items:center; justify-content:center; pointer-events:auto;">
-        <div style="background:linear-gradient(135deg,#f8faff 0%,#fff 100%); width:460px; max-height:82vh; border-radius:20px; display:flex; flex-direction:column; box-shadow:0 20px 60px rgba(99,102,241,0.15), 0 4px 20px rgba(0,0,0,0.08); overflow:hidden; border:1.5px solid rgba(255,255,255,0.8);">
+    <div id="memoModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:2000; align-items:center; justify-content:center; pointer-events:none;">
+        <div id="memoModalBox" style="background:linear-gradient(135deg,#f8faff 0%,#fff 100%); width:460px; max-height:82vh; border-radius:20px; display:flex; flex-direction:column; box-shadow:0 20px 60px rgba(99,102,241,0.15), 0 4px 20px rgba(0,0,0,0.08); overflow:hidden; border:1.5px solid rgba(255,255,255,0.8); position:fixed; pointer-events:auto;">
             <!-- Header -->
-            <div style="padding:18px 22px 16px; background:linear-gradient(135deg,#818cf8,#a78bfa); display:flex; justify-content:space-between; align-items:center;">
+            <div id="memoDragHandle" style="padding:18px 22px 16px; background:linear-gradient(135deg,#818cf8,#a78bfa); display:flex; justify-content:space-between; align-items:center; cursor:move; user-select:none;">
                 <div style="display:flex; align-items:center; gap:8px;">
                     <span style="font-size:20px;">📋</span>
                     <h3 style="margin:0; color:#fff; font-size:17px; font-weight:700; letter-spacing:-0.3px;" id="memoModalTitle">메모 작성</h3>
@@ -2168,7 +2168,36 @@
             memoModal.style.display = "none";
         });
 
-        
+        // ===== Draggable memo modal =====
+        (function() {
+            const box = document.getElementById('memoModalBox');
+            const handle = document.getElementById('memoDragHandle');
+            let dragging = false, ox = 0, oy = 0;
+
+            handle.addEventListener('mousedown', (e) => {
+                if (e.target.closest('#closeMemoBtn')) return;
+                dragging = true;
+                const rect = box.getBoundingClientRect();
+                ox = e.clientX - rect.left;
+                oy = e.clientY - rect.top;
+                box.style.transition = 'none';
+                e.preventDefault();
+            });
+            document.addEventListener('mousemove', (e) => {
+                if (!dragging) return;
+                let nx = e.clientX - ox;
+                let ny = e.clientY - oy;
+                // Clamp to viewport
+                nx = Math.max(0, Math.min(nx, window.innerWidth - box.offsetWidth));
+                ny = Math.max(0, Math.min(ny, window.innerHeight - box.offsetHeight));
+                box.style.left = nx + 'px';
+                box.style.top = ny + 'px';
+                box.style.transform = 'none';
+            });
+            document.addEventListener('mouseup', () => { dragging = false; });
+        })();
+
+
         function renderMemoList(memos) {
             memoHistoryList.innerHTML = "";
             if (memos.length === 0) {
@@ -2327,6 +2356,13 @@
             saveMemoBtn.textContent = "✅ 작성 완료";
             clearImagePreview();
             memoModal.style.display = "flex";
+
+            // Center the box on first open (if not already dragged)
+            const box = document.getElementById('memoModalBox');
+            if (!box.style.left || box.style.left === '') {
+                box.style.left = Math.round((window.innerWidth - box.offsetWidth) / 2) + 'px';
+                box.style.top = Math.round((window.innerHeight - box.offsetHeight) / 2) + 'px';
+            }
             
             memoHistoryList.innerHTML = '<div style="color:#6b7280; font-size:13px; text-align:center;">불러오는 중...</div>';
             if (window.fetchIssueMemos) {
