@@ -17,18 +17,37 @@ const db = getFirestore(app);
 const storage = getStorage(app);
 
 window.itemsWithIssues = new Set();
+window.manufacturersWithIssues = new Set();
+window.partnersWithIssues = new Set();
 
 // Function to initialize and load the list of item codes that have issues
 window.initFirebaseIssues = async function() {
     try {
         const q = query(collection(db, "memos"));
         const querySnapshot = await getDocs(q);
-        const issues = new Set();
+        const items = new Set();
+        const manus = new Set();
+        const parts = new Set();
+
         querySnapshot.forEach((doc) => {
             const data = doc.data();
-            if (data.itemCode) issues.add(data.itemCode);
+            const scopeType = data.scopeType || 'item';
+            const scopeKey = data.scopeKey || data.itemCode;
+            if (scopeKey) {
+                if (scopeType === 'item') {
+                    items.add(scopeKey);
+                } else if (scopeType === 'manufacturer') {
+                    manus.add(scopeKey);
+                } else if (scopeType === 'partner') {
+                    parts.add(scopeKey);
+                }
+            }
         });
-        window.itemsWithIssues = issues;
+
+        window.itemsWithIssues = items;
+        window.manufacturersWithIssues = manus;
+        window.partnersWithIssues = parts;
+
         // Notify the main script to update visuals
         window.dispatchEvent(new Event('firebaseReady'));
     } catch (e) {
@@ -62,19 +81,21 @@ window.deleteMemoImage = async function(imagePath) {
 };
 
 // Function to save a new memo (with optional image)
-window.saveIssueMemo = async function(itemCode, date, text, author, imageUrl, imagePath) {
+window.saveIssueMemo = async function(scopeType, scopeKey, date, text, author, imageUrl, imagePath) {
     try {
-        await addDoc(collection(db, "memos"), {
-            itemCode,
+        const data = {
+            scopeType: scopeType || 'item',
+            scopeKey: scopeKey,
+            itemCode: scopeType === 'item' ? scopeKey : '', // legacy compat
             date,
             text,
             author: author || "",
             imageUrl: imageUrl || "",
             imagePath: imagePath || "",
             createdAt: serverTimestamp()
-        });
-        window.itemsWithIssues.add(itemCode);
-        window.dispatchEvent(new Event('firebaseReady'));
+        };
+        await addDoc(collection(db, "memos"), data);
+        await window.initFirebaseIssues();
         return true;
     } catch (e) {
         console.error("Error saving memo", e);
@@ -82,15 +103,33 @@ window.saveIssueMemo = async function(itemCode, date, text, author, imageUrl, im
     }
 };
 
-// Function to fetch memos for a specific item
-window.fetchIssueMemos = async function(itemCode) {
+// Function to fetch memos for a specific scope
+window.fetchIssueMemos = async function(scopeType, scopeKey) {
     try {
-        const q = query(collection(db, "memos"), where("itemCode", "==", itemCode));
-        const querySnapshot = await getDocs(q);
-        const memos = [];
-        querySnapshot.forEach((doc) => {
-            memos.push({ id: doc.id, ...doc.data() });
-        });
+        let memos = [];
+        if (!scopeType || scopeType === 'item') {
+            // Check both scopeKey and legacy itemCode field
+            const q1 = query(collection(db, "memos"), where("scopeKey", "==", scopeKey));
+            const snap1 = await getDocs(q1);
+            snap1.forEach((doc) => {
+                memos.push({ id: doc.id, ...doc.data() });
+            });
+
+            const q2 = query(collection(db, "memos"), where("itemCode", "==", scopeKey));
+            const snap2 = await getDocs(q2);
+            snap2.forEach((doc) => {
+                if (!memos.some(m => m.id === doc.id)) {
+                    memos.push({ id: doc.id, ...doc.data() });
+                }
+            });
+        } else {
+            const q = query(collection(db, "memos"), where("scopeType", "==", scopeType), where("scopeKey", "==", scopeKey));
+            const querySnapshot = await getDocs(q);
+            querySnapshot.forEach((doc) => {
+                memos.push({ id: doc.id, ...doc.data() });
+            });
+        }
+
         // Sort in memory by createdAt descending
         memos.sort((a, b) => {
             const timeA = a.createdAt ? a.createdAt.toMillis() : 0;
@@ -104,18 +143,12 @@ window.fetchIssueMemos = async function(itemCode) {
     }
 };
 
-
 // Function to delete a memo (and its image)
-window.deleteIssueMemo = async function(memoId, itemCode, imagePath) {
+window.deleteIssueMemo = async function(memoId, scopeType, scopeKey, imagePath) {
     try {
         if (imagePath) await window.deleteMemoImage(imagePath);
         await deleteDoc(doc(db, "memos", memoId));
-        const q = query(collection(db, "memos"), where("itemCode", "==", itemCode));
-        const querySnapshot = await getDocs(q);
-        if (querySnapshot.empty) {
-            window.itemsWithIssues.delete(itemCode);
-            window.dispatchEvent(new Event('firebaseReady'));
-        }
+        await window.initFirebaseIssues();
         return true;
     } catch (e) {
         console.error("Error deleting memo", e);
@@ -130,6 +163,7 @@ window.updateIssueMemo = async function(memoId, date, text, author, imageUrl, im
         if (imageUrl !== undefined) updateData.imageUrl = imageUrl;
         if (imagePath !== undefined) updateData.imagePath = imagePath;
         await updateDoc(doc(db, "memos", memoId), updateData);
+        await window.initFirebaseIssues();
         return true;
     } catch (e) {
         console.error("Error updating memo", e);
