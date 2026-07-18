@@ -378,27 +378,32 @@
 
             <div id="colorModeRow">
                 <span style="font-size:13px; font-weight:700; color:#c4b5fd; letter-spacing:-0.3px; white-space:nowrap;">분석 모드</span>
-                <div style="position:relative; flex:1;">
-                    <select id="colorModeSelect" style="
-                        appearance:none; -webkit-appearance:none;
-                        width:100%; padding:8px 36px 8px 14px;
-                        font-size:13px; font-weight:600;
+                <!-- Custom Dropdown -->
+                <div id="colorModeDropdown" style="position:relative; flex:1; user-select:none;">
+                    <div id="colorModeBtn" style="
+                        display:flex; align-items:center; justify-content:space-between;
+                        padding:8px 14px; cursor:pointer;
                         background:linear-gradient(135deg,#312e81,#1e1b4b);
-                        color:#e0e7ff;
-                        border:1.5px solid #4c1d95;
-                        border-radius:999px;
-                        outline:none; cursor:pointer;
+                        color:#e0e7ff; font-size:13px; font-weight:600;
+                        border:1.5px solid #4c1d95; border-radius:999px;
                         box-shadow:0 2px 8px rgba(99,102,241,0.25);
                         transition: border-color 0.2s, box-shadow 0.2s;
-                    "
-                    onmouseover="this.style.borderColor='#818cf8'; this.style.boxShadow='0 2px 12px rgba(129,140,248,0.4)';"
-                    onmouseout="this.style.borderColor='#4c1d95'; this.style.boxShadow='0 2px 8px rgba(99,102,241,0.25)';">
-                        <option value="manufacturer">제조사별</option>
-                        <option value="partner">거래처별</option>
-                        <option value="abc">장기재고</option>
-                        <option value="issue">특이사항</option>
-                    </select>
-                    <span style="position:absolute; right:12px; top:50%; transform:translateY(-50%); color:#a5b4fc; pointer-events:none; font-size:11px;">▼</span>
+                    ">
+                        <span id="colorModeBtnLabel">제조사별</span>
+                        <span id="colorModeBtnArrow" style="color:#a5b4fc; font-size:11px; transition:transform 0.2s;">▼</span>
+                    </div>
+                    <div id="colorModeMenu" style="
+                        display:none; position:absolute; top:calc(100% + 6px); left:0; right:0;
+                        background:#1e1b4b; border:1.5px solid #4c1d95;
+                        border-radius:14px; overflow:hidden;
+                        box-shadow:0 8px 24px rgba(0,0,0,0.5);
+                        z-index:9999;
+                    ">
+                        <div class="cm-option" data-value="manufacturer" style="padding:10px 16px; color:#e0e7ff; font-size:13px; font-weight:600; cursor:pointer; transition:background 0.15s;">제조사별</div>
+                        <div class="cm-option" data-value="partner" style="padding:10px 16px; color:#e0e7ff; font-size:13px; font-weight:600; cursor:pointer; transition:background 0.15s;">거래처별</div>
+                        <div class="cm-option" data-value="abc" style="padding:10px 16px; color:#e0e7ff; font-size:13px; font-weight:600; cursor:pointer; transition:background 0.15s;">장기재고</div>
+                        <div class="cm-option" data-value="issue" style="padding:10px 16px; color:#e0e7ff; font-size:13px; font-weight:600; cursor:pointer; transition:background 0.15s;">특이사항</div>
+                    </div>
                 </div>
             </div>
 
@@ -1596,25 +1601,75 @@
             });
         });
 
-        const colorModeSelect = document.getElementById("colorModeSelect");
-        if (colorModeSelect) {
-            colorModeSelect.addEventListener("change", (e) => {
-                colorMode = e.target.value;
-                ownerColorMap = {};
-                
-                const abcLegend = document.getElementById('abcLegendRow');
-                if (abcLegend) {
-                    if (colorMode === 'abc') {
-                        abcLegend.style.display = 'flex';
-                    } else {
-                        abcLegend.style.display = 'none';
-                        setAbcFilter("__ALL__");
-                    }
+        // ===== Custom colorMode dropdown =====
+        const colorModeBtn = document.getElementById('colorModeBtn');
+        const colorModeMenu = document.getElementById('colorModeMenu');
+        const colorModeBtnLabel = document.getElementById('colorModeBtnLabel');
+        const colorModeBtnArrow = document.getElementById('colorModeBtnArrow');
+        const colorModeOptions = document.querySelectorAll('.cm-option');
+
+        function setColorModeValue(value, label) {
+            colorMode = value;
+            colorModeBtnLabel.textContent = label;
+            ownerColorMap = {};
+
+            // Highlight selected option
+            colorModeOptions.forEach(opt => {
+                if (opt.dataset.value === value) {
+                    opt.style.background = '#4c1d95';
+                    opt.style.color = '#fff';
+                } else {
+                    opt.style.background = '';
+                    opt.style.color = '#e0e7ff';
                 }
-                
-                rebuildBinsFromInventory();
             });
+
+            const abcLegend = document.getElementById('abcLegendRow');
+            if (abcLegend) {
+                if (value === 'abc') {
+                    abcLegend.style.display = 'flex';
+                } else {
+                    abcLegend.style.display = 'none';
+                    setAbcFilter("__ALL__");
+                }
+            }
+            rebuildBinsFromInventory();
         }
+
+        // Toggle menu open/close
+        colorModeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = colorModeMenu.style.display !== 'none';
+            colorModeMenu.style.display = isOpen ? 'none' : 'block';
+            colorModeBtnArrow.style.transform = isOpen ? '' : 'rotate(180deg)';
+            colorModeBtn.style.borderColor = isOpen ? '#4c1d95' : '#818cf8';
+            colorModeBtn.style.boxShadow = isOpen ? '0 2px 8px rgba(99,102,241,0.25)' : '0 2px 12px rgba(129,140,248,0.4)';
+        });
+
+        // Option hover effect & click
+        colorModeOptions.forEach(opt => {
+            opt.addEventListener('mouseenter', () => { if (opt.dataset.value !== colorMode) opt.style.background = '#312e81'; });
+            opt.addEventListener('mouseleave', () => { if (opt.dataset.value !== colorMode) opt.style.background = ''; });
+            opt.addEventListener('click', (e) => {
+                e.stopPropagation();
+                setColorModeValue(opt.dataset.value, opt.textContent);
+                colorModeMenu.style.display = 'none';
+                colorModeBtnArrow.style.transform = '';
+                colorModeBtn.style.borderColor = '#4c1d95';
+                colorModeBtn.style.boxShadow = '0 2px 8px rgba(99,102,241,0.25)';
+            });
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', () => {
+            colorModeMenu.style.display = 'none';
+            colorModeBtnArrow.style.transform = '';
+            colorModeBtn.style.borderColor = '#4c1d95';
+        });
+
+        // Initialize first option as selected
+        setColorModeValue('manufacturer', '제조사별');
+
 
 
         // ===== 7. 선택/하이라이트 & 우클릭 메뉴 =====
