@@ -1608,19 +1608,29 @@
         const colorModeBtnArrow = document.getElementById('colorModeBtnArrow');
         const colorModeOptions = document.querySelectorAll('.cm-option');
 
+        function closeColorMenu() {
+            colorModeMenu.style.display = 'none';
+            colorModeBtnArrow.style.transform = '';
+            colorModeBtn.style.borderColor = '#4c1d95';
+            colorModeBtn.style.boxShadow = '0 2px 8px rgba(99,102,241,0.25)';
+        }
+
         function setColorModeValue(value, label) {
             colorMode = value;
             colorModeBtnLabel.textContent = label;
             ownerColorMap = {};
-            colorModeOptions.forEach(opt => {
-                if (opt.dataset.value === value) {
-                    opt.style.background = '#4c1d95';
-                    opt.style.color = '#fff';
-                } else {
-                    opt.style.background = '';
-                    opt.style.color = '#e0e7ff';
-                }
+        colorModeOptions.forEach(opt => {
+            opt.addEventListener('mouseenter', () => { if (opt.dataset.value !== colorMode) opt.style.background = '#312e81'; });
+            opt.addEventListener('mouseleave', () => { if (opt.dataset.value !== colorMode) opt.style.background = ''; });
+            opt.addEventListener('click', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                const val = opt.dataset.value;
+                const lbl = opt.textContent.trim();
+                closeColorMenu();
+                setTimeout(() => setColorModeValue(val, lbl), 0);
             });
+        });
             const abcLegend = document.getElementById('abcLegendRow');
             if (abcLegend) {
                 if (value === 'abc') { abcLegend.style.display = 'flex'; }
@@ -1643,11 +1653,11 @@
             opt.addEventListener('mouseleave', () => { if (opt.dataset.value !== colorMode) opt.style.background = ''; });
             opt.addEventListener('click', (e) => {
                 e.stopPropagation();
-                setColorModeValue(opt.dataset.value, opt.textContent.trim());
-                colorModeMenu.style.display = 'none';
-                colorModeBtnArrow.style.transform = '';
-                colorModeBtn.style.borderColor = '#4c1d95';
-                colorModeBtn.style.boxShadow = '0 2px 8px rgba(99,102,241,0.25)';
+                e.preventDefault();
+                const val = opt.dataset.value;
+                const lbl = opt.textContent.trim();
+                closeColorMenu();
+                setTimeout(() => setColorModeValue(val, lbl), 0);
             });
         });
 
