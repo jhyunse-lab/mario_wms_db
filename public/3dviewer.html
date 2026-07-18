@@ -57,6 +57,88 @@
             background: transparent;
         }
 
+        
+        /* Custom Toggle Switch (iOS style) */
+        .toggle-switch-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 12px;
+            margin-bottom: 8px;
+        }
+        .toggle-switch-wrapper span {
+            font-size: 13px;
+            font-weight: 700;
+            color: #c4b5fd;
+            letter-spacing: -0.3px;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #84cc16; /* ON: green */
+            transition: .3s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 26px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        input:checked + .slider {
+            background-color: #84cc16; /* green */
+        }
+        input:not(:checked) + .slider {
+            background-color: #9ca3af; /* grey */
+        }
+        input:not(:checked) + .slider:before {
+            transform: translateX(-22px);
+        }
+        /* Labels inside slider */
+        .slider-label {
+            color: white;
+            font-size: 9px;
+            font-weight: 800;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            transition: .3s;
+            pointer-events: none;
+        }
+        .slider-label.on {
+            left: 7px;
+            opacity: 1;
+        }
+        .slider-label.off {
+            right: 7px;
+            opacity: 0;
+        }
+        input:not(:checked) + .slider .slider-label.on {
+            opacity: 0;
+        }
+        input:not(:checked) + .slider .slider-label.off {
+            opacity: 1;
+        }
+
         #panelHeader {
             display: flex;
             flex-direction: column;
@@ -407,11 +489,15 @@
                 </div>
             </div>
 
-            <!-- Shelf and pillar visibility toggle -->
-            <div id="toggleShelvesRow" style="display:flex; align-items:center; justify-content:space-between; font-size:12px; color:#e2e8f0; margin-top:12px; margin-bottom:8px; font-weight:600;">
-                <span>선반/기둥 시각화</span>
-                <label style="cursor:pointer; display:flex; align-items:center; gap:6px; color:#c4b5fd; font-size:12px; user-select:none;">
-                    <input type="checkbox" id="toggleShelves" checked style="accent-color:#818cf8; width:14px; height:14px; cursor:pointer;" /> ON
+            <!-- Shelf and pillar visibility toggle (iOS style) -->
+            <div class="toggle-switch-wrapper">
+                <span>선반/기둥</span>
+                <label class="switch">
+                    <input type="checkbox" id="toggleShelves" checked />
+                    <span class="slider">
+                        <span class="slider-label on">ON</span>
+                        <span class="slider-label off">OFF</span>
+                    </span>
                 </label>
             </div>
 
