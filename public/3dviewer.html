@@ -401,7 +401,7 @@
                     ">
                         <div class="cm-option" data-value="manufacturer" style="padding:10px 16px; color:#e0e7ff; font-size:13px; font-weight:600; cursor:pointer; transition:background 0.15s;">제조사별</div>
                         <div class="cm-option" data-value="partner" style="padding:10px 16px; color:#e0e7ff; font-size:13px; font-weight:600; cursor:pointer; transition:background 0.15s;">거래처별</div>
-                        <div class="cm-option" data-value="abc" style="padding:10px 16px; color:#e0e7ff; font-size:13px; font-weight:600; cursor:pointer; transition:background 0.15s;">장기재고</div>
+                        <div class="cm-option" data-value="abc" style="padding:10px 16px; color:#e0e7ff; font-size:13px; font-weight:600; cursor:pointer; transition:background 0.15s;">출고등급</div>
                         <div class="cm-option" data-value="issue" style="padding:10px 16px; color:#e0e7ff; font-size:13px; font-weight:600; cursor:pointer; transition:background 0.15s;">특이사항</div>
                     </div>
                 </div>
@@ -437,7 +437,7 @@
             <div id="sel_type">종류: -</div>
             <div id="sel_location">로케이션: -</div>
             <div id="sel_item">품목명: -</div>
-            <div id="sel_abc" style="font-weight:bold; color:#fcd34d;">ABC 등급: -</div>
+            <div id="sel_abc" style="font-weight:bold; color:#fcd34d;">출고등급: -</div>
             <div id="sel_manu">제조사명: -</div>
             <div id="sel_partner">거래처명: -</div>
             <div id="sel_qty">수량: -</div>
@@ -1078,7 +1078,7 @@
             selManuEl.textContent = "제조사명: -";
             selPartEl.textContent = "거래처명: -";
             selQtyEl.textContent = "수량: -";
-            if (selAbcEl) selAbcEl.textContent = "ABC 등급: -";
+            if (selAbcEl) selAbcEl.textContent = "출고등급: -";
         }
 
         function applyPartnerMappingToInventory() {
@@ -1413,7 +1413,7 @@
                     abcText = `D등급 (이력없음)`;
                 }
             }
-            if(selAbcEl) selAbcEl.textContent = "ABC 등급: " + abcText;
+            if(selAbcEl) selAbcEl.textContent = "출고등급: " + abcText;
             
             currentItemCodeForMemo = itemCode;
             if (itemCode && itemCode !== "") {
