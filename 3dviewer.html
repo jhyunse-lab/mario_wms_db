@@ -1612,8 +1612,6 @@
             colorMode = value;
             colorModeBtnLabel.textContent = label;
             ownerColorMap = {};
-
-            // Highlight selected option
             colorModeOptions.forEach(opt => {
                 if (opt.dataset.value === value) {
                     opt.style.background = '#4c1d95';
@@ -1623,20 +1621,14 @@
                     opt.style.color = '#e0e7ff';
                 }
             });
-
             const abcLegend = document.getElementById('abcLegendRow');
             if (abcLegend) {
-                if (value === 'abc') {
-                    abcLegend.style.display = 'flex';
-                } else {
-                    abcLegend.style.display = 'none';
-                    setAbcFilter("__ALL__");
-                }
+                if (value === 'abc') { abcLegend.style.display = 'flex'; }
+                else { abcLegend.style.display = 'none'; setAbcFilter('__ALL__'); }
             }
             rebuildBinsFromInventory();
         }
 
-        // Toggle menu open/close
         colorModeBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             const isOpen = colorModeMenu.style.display !== 'none';
@@ -1646,13 +1638,12 @@
             colorModeBtn.style.boxShadow = isOpen ? '0 2px 8px rgba(99,102,241,0.25)' : '0 2px 12px rgba(129,140,248,0.4)';
         });
 
-        // Option hover effect & click
         colorModeOptions.forEach(opt => {
             opt.addEventListener('mouseenter', () => { if (opt.dataset.value !== colorMode) opt.style.background = '#312e81'; });
             opt.addEventListener('mouseleave', () => { if (opt.dataset.value !== colorMode) opt.style.background = ''; });
             opt.addEventListener('click', (e) => {
                 e.stopPropagation();
-                setColorModeValue(opt.dataset.value, opt.textContent);
+                setColorModeValue(opt.dataset.value, opt.textContent.trim());
                 colorModeMenu.style.display = 'none';
                 colorModeBtnArrow.style.transform = '';
                 colorModeBtn.style.borderColor = '#4c1d95';
@@ -1660,16 +1651,16 @@
             });
         });
 
-        // Close menu when clicking outside
         document.addEventListener('click', () => {
             colorModeMenu.style.display = 'none';
             colorModeBtnArrow.style.transform = '';
             colorModeBtn.style.borderColor = '#4c1d95';
         });
 
-        // Initialize first option as selected
-        setColorModeValue('manufacturer', '제조사별');
-
+        colorMode = 'manufacturer';
+        colorModeOptions.forEach(opt => {
+            if (opt.dataset.value === 'manufacturer') { opt.style.background = '#4c1d95'; opt.style.color = '#fff'; }
+        });
 
 
         // ===== 7. 선택/하이라이트 & 우클릭 메뉴 =====
