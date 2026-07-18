@@ -407,6 +407,14 @@
                 </div>
             </div>
 
+            <!-- Shelf and pillar visibility toggle -->
+            <div id="toggleShelvesRow" style="display:flex; align-items:center; justify-content:space-between; font-size:12px; color:#e2e8f0; margin-top:12px; margin-bottom:8px; font-weight:600;">
+                <span>선반/기둥 시각화</span>
+                <label style="cursor:pointer; display:flex; align-items:center; gap:6px; color:#c4b5fd; font-size:12px; user-select:none;">
+                    <input type="checkbox" id="toggleShelves" checked style="accent-color:#818cf8; width:14px; height:14px; cursor:pointer;" /> ON
+                </label>
+            </div>
+
             <div id="abcLegendRow" style="display:none; flex-direction:column; gap:6px; margin-top:8px; margin-bottom:8px; font-size:13px; font-weight:bold; padding: 10px; background: #1f2933; border-radius: 6px;">
                 
                 <div style="display:flex; flex-wrap:wrap; gap:8px;">
@@ -2603,6 +2611,16 @@
                 rebuildBinsFromInventory();
             }
         });
+
+        // Toggle shelves and pillars visibility
+        const toggleShelvesEl = document.getElementById("toggleShelves");
+        if (toggleShelvesEl) {
+            toggleShelvesEl.addEventListener("change", (e) => {
+                const visible = e.target.checked;
+                allShelves.forEach(s => { s.visible = visible; });
+                allPosts.forEach(p => { p.visible = visible; });
+            });
+        }
 
         clearSelectionCard();
         updateInventoryTable();
