@@ -58,27 +58,24 @@
         }
 
         
-        /* Custom Toggle Switch (iOS style) */
+        /* Custom Toggle Switch (iOS style - Compact Black) */
         .toggle-switch-wrapper {
             display: flex;
             align-items: center;
-            justify-content: flex-start; /* Align elements right next to each other */
-            gap: 12px;                  /* Close gap between text and button */
-            margin-top: 14px;
-            margin-bottom: 8px;
+            gap: 8px;                  /* Close gap between text and button */
+            user-select: none;
         }
         .toggle-switch-wrapper span {
-            font-size: 13px;
+            font-size: 11px;
             font-weight: 700;
-            color: #c4b5fd;
+            color: #9ca3af;            /* Grey text matching theme */
             letter-spacing: -0.3px;
-            user-select: none;
         }
         .switch {
             position: relative;
             display: inline-block;
-            width: 60px;
-            height: 28px;
+            width: 52px;
+            height: 22px;
         }
         .switch input {
             opacity: 0;
@@ -89,47 +86,48 @@
             position: absolute;
             cursor: pointer;
             top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #84cc16; /* green */
+            background-color: #111827; /* Pure black background */
+            border: 1px solid #374151; /* Dark border */
             transition: .3s;
             border-radius: 34px;
-            box-shadow: inset 0 1px 4px rgba(0,0,0,0.2);
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
         }
         .slider:before {
             position: absolute;
             content: "";
-            height: 20px;
-            width: 20px;
-            left: 36px; /* 60 - 20 - 4 */
-            bottom: 4px;
+            height: 14px;
+            width: 14px;
+            left: 32px;
+            bottom: 3px;
             background-color: white;
             transition: .3s;
             border-radius: 50%;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.5);
         }
         input:checked + .slider {
-            background-color: #84cc16; /* green */
+            background-color: #111827;
         }
         input:not(:checked) + .slider {
-            background-color: #707a8a; /* darker grey for better visibility */
+            background-color: #111827;
         }
         input:not(:checked) + .slider:before {
-            transform: translateX(-32px); /* Moves it to left: 4px */
+            transform: translateX(-26px); /* 32 - 26 = 6px left */
         }
         /* Labels inside slider */
         .slider-label {
             color: white;
-            font-size: 10px;
+            font-size: 8px;
             font-weight: 800;
             font-family: 'Segoe UI', -apple-system, sans-serif;
             position: absolute;
-            top: 52%;
+            top: 50%;
             transform: translateY(-50%);
             transition: .3s;
             pointer-events: none;
             letter-spacing: 0.5px;
         }
         .slider-label.on {
-            left: 10px;
+            left: 8px;
             opacity: 1;
         }
         .slider-label.off {
@@ -493,18 +491,6 @@
                 </div>
             </div>
 
-            <!-- Shelf and pillar visibility toggle (iOS style) -->
-            <div class="toggle-switch-wrapper">
-                <span>선반/기둥</span>
-                <label class="switch">
-                    <input type="checkbox" id="toggleShelves" checked />
-                    <span class="slider">
-                        <span class="slider-label on">ON</span>
-                        <span class="slider-label off">OFF</span>
-                    </span>
-                </label>
-            </div>
-
             <div id="abcLegendRow" style="display:none; flex-direction:column; gap:6px; margin-top:8px; margin-bottom:8px; font-size:13px; font-weight:bold; padding: 10px; background: #1f2933; border-radius: 6px;">
                 
                 <div style="display:flex; flex-wrap:wrap; gap:8px;">
@@ -522,15 +508,25 @@
                 </div>
             </div>
 
-            
-
-            
-
-            <div id="ksRow">
-                <span></span>
-                <div style="display:flex; gap:8px;">
-                    <label><input type="checkbox" id="toggleKS" /> 경신</label>
-                    <label><input type="checkbox" id="toggleGNN" /> GNN</label>
+            <!-- Shelf toggle & KS/GNN combined row -->
+            <div style="margin-top:12px; display:flex; flex-direction:column; gap:8px; align-items:flex-end;">
+                <!-- Compact Black Toggle Switch -->
+                <div class="toggle-switch-wrapper">
+                    <span>선반/기둥</span>
+                    <label class="switch">
+                        <input type="checkbox" id="toggleShelves" checked />
+                        <span class="slider">
+                            <span class="slider-label on">ON</span>
+                            <span class="slider-label off">OFF</span>
+                        </span>
+                    </label>
+                </div>
+                <!-- KS/GNN checkboxes -->
+                <div id="ksRow" style="margin-top:0; width:100%; display:flex; justify-content:flex-end;">
+                    <div style="display:flex; gap:8px;">
+                        <label style="cursor:pointer; display:flex; align-items:center; gap:4px; user-select:none; font-size:11px; color:#9ca3af;"><input type="checkbox" id="toggleKS" style="accent-color:#818cf8;" /> 경신</label>
+                        <label style="cursor:pointer; display:flex; align-items:center; gap:4px; user-select:none; font-size:11px; color:#9ca3af;"><input type="checkbox" id="toggleGNN" style="accent-color:#818cf8;" /> GNN</label>
+                    </div>
                 </div>
             </div>
         </div>
