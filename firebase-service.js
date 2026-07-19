@@ -55,11 +55,12 @@ window.initFirebaseIssues = async function() {
     }
 };
 
-// Upload image to Firebase Storage, return { url, path }
 window.uploadMemoImage = async function(file) {
     try {
+        if (!file) return null;
         const timestamp = Date.now();
-        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+        const originalName = file.name || 'pasted_image.png';
+        const safeName = originalName.replace(/[^a-zA-Z0-9._-]/g, '_');
         const storageRef = ref(storage, `memo_images/${timestamp}_${safeName}`);
         const snapshot = await uploadBytes(storageRef, file);
         const url = await getDownloadURL(snapshot.ref);
