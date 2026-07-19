@@ -2708,45 +2708,61 @@
             
             saveMemoBtn.disabled = true;
             
-            // Upload image if a new one was selected
-            let imageUrl = "";
-            let imagePath = "";
-            if (pendingImageFile) {
-                saveMemoBtn.textContent = "이미지 업로드 중...";
-                const result = await window.uploadMemoImage(pendingImageFile);
-                if (result) { imageUrl = result.url; imagePath = result.path; }
-            } else if (saveMemoBtn.dataset.existingImageUrl) {
-                imageUrl = saveMemoBtn.dataset.existingImageUrl;
-                imagePath = saveMemoBtn.dataset.existingImagePath || "";
-            }
-            
-            saveMemoBtn.textContent = "저장 중...";
-            
-            if (saveMemoBtn.dataset.editingId) {
-                if (window.updateIssueMemo) {
-                    await window.updateIssueMemo(saveMemoBtn.dataset.editingId, dateVal, textVal, authorVal, imageUrl, imagePath);
-                    saveMemoBtn.removeAttribute('data-editing-id');
+            try {
+                // Upload image if a new one was selected
+                let imageUrl = "";
+                let imagePath = "";
+                if (pendingImageFile) {
+                    saveMemoBtn.textContent = "이미지 업로드 중...";
+                    const result = await window.uploadMemoImage(pendingImageFile);
+                    if (result) { 
+                        imageUrl = result.url; 
+                        imagePath = result.path; 
+                    } else {
+                        throw new Error("이미지 업로드에 실패했습니다. 이미지 파일의 형식이나 네트워크 연결 상태를 확인해주세요.");
+                    }
+                } else if (saveMemoBtn.dataset.existingImageUrl) {
+                    imageUrl = saveMemoBtn.dataset.existingImageUrl;
+                    imagePath = saveMemoBtn.dataset.existingImagePath || "";
                 }
-            } else {
-                if (window.saveIssueMemo) {
-                    await window.saveIssueMemo(currentMemoScope, getCurrentMemoScopeKey(), dateVal, textVal, authorVal, imageUrl, imagePath);
+                
+                saveMemoBtn.textContent = "저장 중...";
+                
+                let success = false;
+                if (saveMemoBtn.dataset.editingId) {
+                    if (window.updateIssueMemo) {
+                        success = await window.updateIssueMemo(saveMemoBtn.dataset.editingId, dateVal, textVal, authorVal, imageUrl, imagePath);
+                        saveMemoBtn.removeAttribute('data-editing-id');
+                    }
+                } else {
+                    if (window.saveIssueMemo) {
+                        success = await window.saveIssueMemo(currentMemoScope, getCurrentMemoScopeKey(), dateVal, textVal, authorVal, imageUrl, imagePath);
+                    }
                 }
-            }
-            
-            saveMemoBtn.textContent = "✅ 작성 완료";
-            saveMemoBtn.disabled = false;
-            
-            if(typeof updateMemoBtnUI === 'function') updateMemoBtnUI();
-            
-            // Clear inputs for next memo
-            memoText.value = "";
-            memoDate.value = new Date().toISOString().split('T')[0];
-            clearImagePreview();
-            
-            // Refresh list instead of closing modal
-            refreshMemoHistory();
-            if (typeof updateTabCounts === 'function') {
-                updateTabCounts();
+                
+                if (!success) {
+                    throw new Error("서버 저장 실패: 네트워크 연결이나 데이터베이스 상태를 확인해 주세요.");
+                }
+
+                saveMemoBtn.textContent = "✅ 작성 완료";
+                saveMemoBtn.disabled = false;
+                
+                if(typeof updateMemoBtnUI === 'function') updateMemoBtnUI();
+                
+                // Clear inputs for next memo
+                memoText.value = "";
+                memoDate.value = new Date().toISOString().split('T')[0];
+                clearImagePreview();
+                
+                // Refresh list instead of closing modal
+                refreshMemoHistory();
+                if (typeof updateTabCounts === 'function') {
+                    updateTabCounts();
+                }
+            } catch (e) {
+                alert("오류 발생: " + e.message);
+                saveMemoBtn.textContent = saveMemoBtn.dataset.editingId ? "수정하기" : "✅ 작성 완료";
+                saveMemoBtn.disabled = false;
             }
         });
 
