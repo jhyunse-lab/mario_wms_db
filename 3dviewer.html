@@ -1618,7 +1618,15 @@
             }
 
 
-            clearSelectionOnly(); // 선택만 리셋, KS 색상은 유지
+            // Remove previous selection outline safely without resetting variables or card UI
+            if (selectedOutline) {
+                scene.remove(selectedOutline);
+                if (selectedOutline.geometry) selectedOutline.geometry.dispose();
+                if (selectedOutline.material) selectedOutline.material.dispose();
+                selectedOutline = null;
+            }
+            selectedBin = null;
+            selectedShelf = null;
 
             // RCV 아이템 풀 준비
             let rcvItemPool = [];
