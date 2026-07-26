@@ -797,7 +797,72 @@
             const s = raw.toString().trim();
 
             // AA 전용: AA03012 → AA-03-01-2
-            if (s.startsWith("AA") && s.length === 7 && /^\d{5}$/.test(s.slice(2))) {
+            if (s.startsWith("AA") && s.length === 7 && /^\d{5}
+
+        // DC Date & Year Parser
+        function parseYearFromDC(dcStr) {
+            if (!dcStr) return null;
+            const str = dcStr.toString().trim();
+            const match4 = str.match(/(202[0-9]|203[0-9])/);
+            if (match4) return parseInt(match4[0], 10);
+            const match2 = str.match(/\b(2[0-9])년?/);
+            if (match2) return 2000 + parseInt(match2[1], 10);
+            return null;
+        }
+
+        // Aggregate multiple detailed excel rows into 1 item per location for 3D & UI performance
+        function getAggregatedItemInfo(rows) {
+            if (!rows || rows.length === 0) return null;
+            const base = rows[0];
+            let totalQty = 0;
+            const dcMap = {};
+            let latestYear = 0;
+            let latestDCStr = "";
+
+            rows.forEach(r => {
+                const q = Number(r._QTY || 0);
+                totalQty += q;
+                const dc = (r._DC || "").toString().trim();
+                if (dc) {
+                    dcMap[dc] = (dcMap[dc] || 0) + q;
+                    const yr = parseYearFromDC(dc);
+                    if (yr && yr > latestYear) {
+                        latestYear = yr;
+                        latestDCStr = dc;
+                    } else if (!latestDCStr) {
+                        latestDCStr = dc;
+                    }
+                }
+            });
+
+            const dcEntries = Object.entries(dcMap);
+            let dcSummaryText = "";
+            if (dcEntries.length > 0) {
+                if (dcEntries.length === 1) {
+                    dcSummaryText = dcEntries[0][0];
+                } else {
+                    const details = dcEntries.map(([k, v]) => `${k}:${v}개`).join(', ');
+                    dcSummaryText = `${latestDCStr || dcEntries[0][0]} (${details})`;
+                }
+            } else {
+                dcSummaryText = "-";
+            }
+
+            return {
+                ...base,
+                _LOCATION: base._LOCATION,
+                _ITEM_CODE: base._ITEM_CODE,
+                _ITEM_NAME: base._ITEM_NAME,
+                _MANUFACTURER: base._MANUFACTURER,
+                _PARTNER: base._PARTNER,
+                _DC: latestDCStr || base._DC || "",
+                _LATEST_DC_YEAR: latestYear,
+                _DC_SUMMARY: dcSummaryText,
+                _QTY: totalQty,
+                _SUB_ROWS: rows
+            };
+        }
+$/.test(s.slice(2))) {
                 const zone = "AA";
                 const row = s.slice(2, 4);
                 const col = s.slice(4, 6);
@@ -1385,20 +1450,26 @@
                         row.Location ||
                         row["로케이션"] ||
                         row["LOCATION"] ||
+                        row["로케이션코드"] ||
+                        row["로케이션ID"] ||
+                        row.LOC ||
+                        row.loc ||
                         "";
                     const loc = normalizeLocationCode(rawLoc);
                     if (!loc) return;
 
                     row._LOCATION = loc;
-                    row._ITEM_CODE = row.ITEM_CODE || row["품목코드"] || "";
-                    row._ITEM_NAME = row.ITEM_NAME || row["품목명"] || "";
-                    row._DC = (row.DC !== undefined && row.DC !== null) ? row.DC.toString().trim() : (row["DC"] !== undefined && row["DC"] !== null ? row["DC"].toString().trim() : "");
+                    row._ITEM_CODE = row.ITEM_CODE || row["품목코드"] || row.ItemCode || row.ITEM || row["품번"] || row["자재코드"] || row["자재번호"] || "";
+                    row._ITEM_NAME = row.ITEM_NAME || row["품목명"] || row.ItemName || row.DESCR || row["품명"] || row["자재명"] || "";
+                    row._DC = (row.DC !== undefined && row.DC !== null) ? row.DC.toString().trim() : (row["DC"] !== undefined && row["DC"] !== null ? row["DC"].toString().trim() : (row["창고"] || row["센터"] || ""));
 
                     row._MANUFACTURER =
                         row.MANUFACTURER ||
                         row.MAKER ||
                         row["제조사"] ||
                         row["제조사명"] ||
+                        row.Maker ||
+                        row.Brand ||
                         "";
 
                     row._FILE_NAME =
@@ -1415,6 +1486,8 @@
                         row.OWNER ||
                         row["화주명"] ||
                         row["화주"] ||
+                        row.Partner ||
+                        row.Vendor ||
                         "";
 
                     row._CUSTOMER =
@@ -1429,6 +1502,9 @@
                         row["재고수량"] ??
                         row["가용수량"] ??
                         row["재고"] ??
+                        row.Quantity ??
+                        row["수량"] ??
+                        row.STOCK_QTY ??
                         0;
                     qty = Number(qty) || 0;
                     row._QTY = qty;
@@ -1438,6 +1514,7 @@
                 });
 
                 applyPartnerMappingToInventory();
+                buildAggregatedInventory();
                 rebuildFilters();
                 updateInventoryTable();
                 rebuildBinsFromInventory();
@@ -1559,11 +1636,43 @@
             updateInventoryTable();
         }
 
+        
+        let aggregatedInventoryData = [];
+        let aggregatedInventoryByLoc = {};
+
+        function buildAggregatedInventory() {
+            aggregatedInventoryData = [];
+            aggregatedInventoryByLoc = {};
+
+            Object.keys(inventoryByLoc).forEach(loc => {
+                const rows = inventoryByLoc[loc];
+                const itemsGrouped = {};
+                rows.forEach(r => {
+                    const code = (r._ITEM_CODE || r._ITEM_NAME || "UNKNOWN").toString().trim();
+                    if (!itemsGrouped[code]) itemsGrouped[code] = [];
+                    itemsGrouped[code].push(r);
+                });
+
+                const aggregatedList = [];
+                Object.values(itemsGrouped).forEach(group => {
+                    const agg = getAggregatedItemInfo(group);
+                    if (agg && agg._QTY > 0) {
+                        aggregatedList.push(agg);
+                        aggregatedInventoryData.push(agg);
+                    }
+                });
+
+                aggregatedInventoryByLoc[loc] = aggregatedList;
+            });
+        }
+
         function updateInventoryTable() {
             const tbody = document.querySelector("#inventoryTable tbody");
             tbody.innerHTML = "";
 
-            let filtered = inventoryData.filter(row =>
+            const dataSource = (aggregatedInventoryData && aggregatedInventoryData.length > 0) ? aggregatedInventoryData : inventoryData;
+
+            let filtered = dataSource.filter(row =>
                 rowMatchesFilter(row, currentTextFilter, currentManufacturerFilter, currentPartnerFilter)
             );
 
@@ -1617,7 +1726,7 @@
         <td>${item}</td>
         <td>${manu}</td>
         <td>${partn}</td>
-        <td>${dc}</td>
+        <td>${row._DC_SUMMARY || dc}</td>
         <td>${qty}</td>
       `;
                 tbody.appendChild(tr);
@@ -1678,7 +1787,7 @@
             selTypeEl.textContent = "종류: 품목";
             selLocEl.textContent = "로케이션: " + (loc || "-");
             selItemEl.textContent = "품목명: " + (row._ITEM_NAME || "-") + " [" + (row._ITEM_CODE || "-") + "]";
-            if (selDcEl) selDcEl.textContent = "DC: " + (row._DC || "-");
+            if (selDcEl) selDcEl.textContent = "DC: " + (row._DC_SUMMARY || row._DC || "-");
             const hasManuMemo = window.manufacturersWithIssues && window.manufacturersWithIssues.has(row._MANUFACTURER || "");
             selManuEl.innerHTML = "제조사명: " + (row._MANUFACTURER || "-") + (hasManuMemo ? ' <span style="background:#4f46e5; color:#fff; font-size:11px; padding:2px 6px; border-radius:4px; margin-left:6px; font-weight:700; display:inline-block;">💬 메모있음</span>' : '');
 
@@ -1688,17 +1797,21 @@
             selPartEl.innerHTML = "거래처명: " + partnerName + (hasPartnerMemo ? ' <span style="background:#10b981; color:#fff; font-size:11px; padding:2px 6px; border-radius:4px; margin-left:6px; font-weight:700; display:inline-block;">💬 메모있음</span>' : '');
             selQtyEl.textContent = "수량: " + (row._QTY ?? "-");
             let abcText = "-";
-            if (window.shipmentData && row._ITEM_CODE) {
-                const lastDate = window.shipmentData[(row._ITEM_CODE || "").toString().trim()];
-                if (lastDate) {
-                    const yr = parseInt(lastDate.substring(0, 4));
-                    if (yr >= 2026) abcText = `A등급 (최종출고: ${lastDate})`;
-                    else if (yr === 2025) abcText = `B등급 (최종출고: ${lastDate})`;
-                    else if (yr <= 2024 && yr > 0) abcText = `C등급 (최종출고: ${lastDate})`;
-                    else abcText = `D등급 (이력없음)`;
-                } else {
-                    abcText = `D등급 (이력없음)`;
-                }
+            let yr = row._LATEST_DC_YEAR;
+            const itemCodeForAbc = (row._ITEM_CODE || "").toString().trim();
+
+            if (!yr && window.shipmentData && itemCodeForAbc) {
+                const lastDate = window.shipmentData[itemCodeForAbc];
+                if (lastDate) yr = parseInt(lastDate.substring(0, 4), 10);
+            }
+
+            if (yr && yr > 0) {
+                if (yr >= 2026) abcText = `A등급 (최신DC: ${row._DC || yr+'년'})`;
+                else if (yr === 2025) abcText = `B등급 (최신DC: ${row._DC || yr+'년'})`;
+                else if (yr <= 2024) abcText = `C등급 (최신DC: ${row._DC || yr+'년'})`;
+                else abcText = `D등급 (이력없음)`;
+            } else {
+                abcText = `D등급 (이력없음)`;
             }
             if (selAbcEl) selAbcEl.textContent = "출고등급: " + abcText;
 
@@ -1765,7 +1878,7 @@
 
                     rows = rcvItemPool.splice(0, itemsPerSlot);
                 } else {
-                    rows = inventoryByLoc[loc];
+                    rows = (aggregatedInventoryByLoc && aggregatedInventoryByLoc[loc]) ? aggregatedInventoryByLoc[loc] : inventoryByLoc[loc];
                 }
 
                 if (!rows || rows.length === 0) return;
@@ -1794,16 +1907,20 @@
                     let color;
                     if (colorMode === "abc") {
                         const itemCode = (r._ITEM_CODE || "").toString().trim();
-                        const lastDate = window.shipmentData ? window.shipmentData[itemCode] : null;
-                        if (lastDate) {
-                            const yr = parseInt(lastDate.substring(0, 4));
-                            if (yr >= 2026) color = new THREE.Color(0x22c55e);
-                            else if (yr === 2025) color = new THREE.Color(0xfacc15);
-                            else if (yr <= 2024 && yr > 0) color = new THREE.Color(0x3b82f6); // Blue for C
-                            else color = new THREE.Color(0xef4444); // Red for D
+                        let yr = r._LATEST_DC_YEAR;
+                        if (!yr && window.shipmentData) {
+                            const lastDate = window.shipmentData[itemCode];
+                            if (lastDate) yr = parseInt(lastDate.substring(0, 4), 10);
+                        }
+
+                        if (yr && yr > 0) {
+                            if (yr >= 2026) color = new THREE.Color(0x22c55e);      // A등급 (녹색)
+                            else if (yr === 2025) color = new THREE.Color(0xfacc15); // B등급 (노란색)
+                            else if (yr <= 2024) color = new THREE.Color(0x3b82f6);  // C등급 (파란색)
+                            else color = new THREE.Color(0xef4444);                  // D등급 (빨간색)
                         } else {
-                            color = new THREE.Color(0xef4444); // Red for D
-                        } // Red for D (No history)
+                            color = new THREE.Color(0xef4444);                      // D등급 (이력없음)
+                        }
                     } else {
                         const itemCode = (r._ITEM_CODE || "").toString().trim();
                         const pKey = (window.partnerData && window.partnerData[itemCode]) ? window.partnerData[itemCode] : (r._PARTNER || "");
