@@ -534,22 +534,26 @@
                         style="cursor:pointer; display:flex; align-items:center; gap:4px; color:#9ca3af; opacity:0.5;">
                         <span
                             style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#22c55e;"></span>
-                        A등급 (26년)</div>
+                        A등급 (26년)
+                    </div>
                     <div class="abc-legend-item" data-grade="B"
                         style="cursor:pointer; display:flex; align-items:center; gap:4px; color:#9ca3af; opacity:0.5;">
                         <span
                             style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#facc15;"></span>
-                        B등급 (25년)</div>
+                        B등급 (25년)
+                    </div>
                     <div class="abc-legend-item" data-grade="C"
                         style="cursor:pointer; display:flex; align-items:center; gap:4px; color:#9ca3af; opacity:0.5;">
                         <span
                             style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#3b82f6;"></span>
-                        C등급 (24년 이하)</div>
+                        C등급 (24년 이하)
+                    </div>
                     <div class="abc-legend-item" data-grade="D"
                         style="cursor:pointer; display:flex; align-items:center; gap:4px; color:#9ca3af; opacity:0.5;">
                         <span
                             style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#ef4444;"></span>
-                        D등급 (이력없음)</div>
+                        D등급 (이력없음)
+                    </div>
                 </div>
             </div>
 
@@ -878,6 +882,8 @@
         const allShelves = [];
         const allPosts = [];
         const allBins = [];
+        const materialCache = {};
+        const binUnitGeometry = new THREE.BoxGeometry(1, 1, 1);
         const labelSprites = [];
 
         const locationSlots = {};
@@ -1720,10 +1726,14 @@
         function rebuildBinsFromInventory() {
             allBins.forEach(b => {
                 scene.remove(b);
-                if (b.geometry) b.geometry.dispose();
-                if (b.material) b.material.dispose();
+                // Do not dispose geometries/materials here since they are shared or cached
             });
             allBins.length = 0;
+
+            // Clear material cache to clean up memory
+            Object.values(materialCache).forEach(mat => mat.dispose());
+            for (const key in materialCache) delete materialCache[key];
+
             if (typeof issueIndicators !== 'undefined') {
                 issueIndicators.forEach(ind => {
                     scene.remove(ind);
@@ -1821,22 +1831,27 @@
                         }
                     }
 
-                    const geo = new THREE.BoxGeometry(subWidth, subHeight, subDepth);
-                    const mat = new THREE.MeshStandardMaterial({
-                        color: color,
-                        metalness: 0.2,
-                        roughness: 0.6,
-                        emissive: new THREE.Color(0x000000),
-                        emissiveIntensity: 0.0,
-                        transparent: (boxOpacity < 1.0),
-                        opacity: boxOpacity
-                    });
+                    // Material caching
+                    const hex = color.getHex();
+                    const matKey = `${hex}_${boxOpacity}`;
+                    let mat = materialCache[matKey];
+                    if (!mat) {
+                        mat = new THREE.MeshStandardMaterial({
+                            color: color,
+                            metalness: 0.2,
+                            roughness: 0.6,
+                            emissive: new THREE.Color(0x000000),
+                            emissiveIntensity: 0.0,
+                            transparent: (boxOpacity < 1.0),
+                            opacity: boxOpacity
+                        });
+                        materialCache[matKey] = mat;
+                    }
 
-                    const box = new THREE.Mesh(geo, mat);
+                    const box = new THREE.Mesh(binUnitGeometry, mat);
+                    box.scale.set(subWidth, subHeight, subDepth);
                     box.position.set(slot.x + localX, slot.y, slot.z + localZ);
                     scene.add(box);
-
-
 
                     box.userData.rowRef = r;
                     allBins.push(box);
@@ -1865,18 +1880,21 @@
         const elOpacity = document.getElementById("boxOpacity");
         if (elOpacity) elOpacity.addEventListener("input", (e) => {
             boxOpacity = parseFloat(e.target.value) || 1.0;
-            allBins.forEach(b => {
-                if (!b.material) return;
-                b.material.transparent = (boxOpacity < 1.0);
-                b.material.opacity = boxOpacity;
-                if (b.userData.indicator && b.userData.indicator.material) {
-                    b.userData.indicator.material.transparent = (boxOpacity < 1.0);
-                    b.userData.indicator.material.opacity = boxOpacity;
-                    b.userData.indicator.material.needsUpdate = true;
-                }
-
-                b.material.needsUpdate = true;
+            // Optimize: update cached materials instead of looping 20k meshes
+            Object.values(materialCache).forEach(mat => {
+                mat.transparent = (boxOpacity < 1.0);
+                mat.opacity = boxOpacity;
+                mat.needsUpdate = true;
             });
+            if (typeof issueIndicators !== 'undefined' && issueIndicators) {
+                issueIndicators.forEach(ind => {
+                    if (ind.material) {
+                        ind.material.transparent = (boxOpacity < 1.0);
+                        ind.material.opacity = boxOpacity;
+                        ind.material.needsUpdate = true;
+                    }
+                });
+            }
         });
 
 
