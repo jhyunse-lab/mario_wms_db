@@ -797,7 +797,25 @@
             const s = raw.toString().trim();
 
             // AA 전용: AA03012 → AA-03-01-2
-            if (s.startsWith("AA") && s.length === 7 && /^\d{5}
+            if (s.startsWith("AA") && s.length === 7 && /^\d{5}$/.test(s.slice(2))) {
+                const zone = "AA";
+                const row = s.slice(2, 4);
+                const col = s.slice(4, 6);
+                const lvl = s.slice(6);
+                return `${zone}-${row}-${col}-${lvl}`;
+            }
+
+            // 일반: B0206041 → B02-06-04-1
+            const regex = /^[A-Z][0-9]{7}$/;
+            if (!regex.test(s)) {
+                return s;
+            }
+            const zone = s.slice(0, 3);
+            const row = s.slice(3, 5);
+            const col = s.slice(5, 7);
+            const lvl = s.slice(7);
+            return `${zone}-${row}-${col}-${lvl}`;
+        }
 
         // DC Date & Year Parser
         function parseYearFromDC(dcStr) {
@@ -861,25 +879,6 @@
                 _QTY: totalQty,
                 _SUB_ROWS: rows
             };
-        }
-$/.test(s.slice(2))) {
-                const zone = "AA";
-                const row = s.slice(2, 4);
-                const col = s.slice(4, 6);
-                const lvl = s.slice(6);
-                return `${zone}-${row}-${col}-${lvl}`;
-            }
-
-            // 일반: B0206041 → B02-06-04-1
-            const regex = /^[A-Z][0-9]{7}$/;
-            if (!regex.test(s)) {
-                return s;
-            }
-            const zone = s.slice(0, 3);
-            const row = s.slice(3, 5);
-            const col = s.slice(5, 7);
-            const lvl = s.slice(7);
-            return `${zone}-${row}-${col}-${lvl}`;
         }
 
         // ===== 1. THREE 기본 세팅 =====
