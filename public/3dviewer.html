@@ -1391,26 +1391,20 @@
                         row.Location ||
                         row["로케이션"] ||
                         row["LOCATION"] ||
-                        row["로케이션코드"] ||
-                        row["로케이션ID"] ||
-                        row.LOC ||
-                        row.loc ||
                         "";
                     const loc = normalizeLocationCode(rawLoc);
                     if (!loc) return;
 
                     row._LOCATION = loc;
-                    row._ITEM_CODE = row.ITEM_CODE || row["품목코드"] || row.ItemCode || row.ITEM || row["품번"] || row["자재코드"] || row["자재번호"] || "";
-                    row._ITEM_NAME = row.ITEM_NAME || row["품목명"] || row.ItemName || row.DESCR || row["품명"] || row["자재명"] || "";
-                    row._DC = (row.DC !== undefined && row.DC !== null) ? row.DC.toString().trim() : (row["DC"] !== undefined && row["DC"] !== null ? row["DC"].toString().trim() : (row["창고"] || row["센터"] || ""));
+                    row._ITEM_CODE = row.ITEM_CODE || row["품목코드"] || "";
+                    row._ITEM_NAME = row.ITEM_NAME || row["품목명"] || "";
+                    row._DC = (row.DC !== undefined && row.DC !== null) ? row.DC.toString().trim() : (row["DC"] !== undefined && row["DC"] !== null ? row["DC"].toString().trim() : "");
 
                     row._MANUFACTURER =
                         row.MANUFACTURER ||
                         row.MAKER ||
                         row["제조사"] ||
                         row["제조사명"] ||
-                        row.Maker ||
-                        row.Brand ||
                         "";
 
                     row._FILE_NAME =
@@ -1427,8 +1421,6 @@
                         row.OWNER ||
                         row["화주명"] ||
                         row["화주"] ||
-                        row.Partner ||
-                        row.Vendor ||
                         "";
 
                     row._CUSTOMER =
@@ -1443,9 +1435,6 @@
                         row["재고수량"] ??
                         row["가용수량"] ??
                         row["재고"] ??
-                        row.Quantity ??
-                        row["수량"] ??
-                        row.STOCK_QTY ??
                         0;
                     qty = Number(qty) || 0;
                     row._QTY = qty;
@@ -1615,10 +1604,7 @@
 
             lastFilteredRows = filtered;
 
-            const fragment = document.createDocumentFragment();
-            const displayRows = filtered.length > 2000 ? filtered.slice(0, 2000) : filtered;
-
-            displayRows.forEach(row => {
+            filtered.forEach(row => {
                 const loc = row._LOCATION || "";
                 const item = row._ITEM_NAME || "";
                 const manu = row._MANUFACTURER || "";
@@ -1640,11 +1626,10 @@
         <td>${dc}</td>
         <td>${qty}</td>
       `;
-                fragment.appendChild(tr);
+                tbody.appendChild(tr);
             });
 
-            tbody.appendChild(fragment);
-            rowCountSpanEl.textContent = filtered.length + (filtered.length > 2000 ? " (상위 2000개 리스트 표시)" : "");
+            rowCountSpanEl.textContent = filtered.length;
             applyFiltersToBins();
         }
 
