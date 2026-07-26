@@ -57,41 +57,53 @@
             background: transparent;
         }
 
-        
+
         /* Custom Toggle Switch (iOS style - Compact Black) */
         .toggle-switch-wrapper {
             display: flex;
             align-items: center;
-            gap: 8px;                  /* Close gap between text and button */
+            gap: 8px;
+            /* Close gap between text and button */
             user-select: none;
         }
+
         .toggle-switch-wrapper span {
             font-size: 11px;
             font-weight: 700;
-            color: #9ca3af;            /* Grey text matching theme */
+            color: #9ca3af;
+            /* Grey text matching theme */
             letter-spacing: -0.3px;
         }
+
         .switch {
             position: relative;
             display: inline-block;
             width: 52px;
             height: 22px;
         }
+
         .switch input {
             opacity: 0;
             width: 0;
             height: 0;
         }
+
         .slider {
             position: absolute;
             cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #111827; /* Pure black background */
-            border: 1px solid #374151; /* Dark border */
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #111827;
+            /* Pure black background */
+            border: 1px solid #374151;
+            /* Dark border */
             transition: .3s;
             border-radius: 34px;
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
         }
+
         .slider:before {
             position: absolute;
             content: "";
@@ -102,17 +114,22 @@
             background-color: white;
             transition: .3s;
             border-radius: 50%;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
         }
-        input:checked + .slider {
+
+        input:checked+.slider {
             background-color: #111827;
         }
-        input:not(:checked) + .slider {
+
+        input:not(:checked)+.slider {
             background-color: #111827;
         }
-        input:not(:checked) + .slider:before {
-            transform: translateX(-26px); /* 32 - 26 = 6px left */
+
+        input:not(:checked)+.slider:before {
+            transform: translateX(-26px);
+            /* 32 - 26 = 6px left */
         }
+
         /* Labels inside slider */
         .slider-label {
             color: white;
@@ -126,18 +143,22 @@
             pointer-events: none;
             letter-spacing: 0.5px;
         }
+
         .slider-label.on {
             left: 8px;
             opacity: 1;
         }
+
         .slider-label.off {
             right: 8px;
             opacity: 0;
         }
-        input:not(:checked) + .slider .slider-label.on {
+
+        input:not(:checked)+.slider .slider-label.on {
             opacity: 0;
         }
-        input:not(:checked) + .slider .slider-label.off {
+
+        input:not(:checked)+.slider .slider-label.off {
             opacity: 1;
         }
 
@@ -458,10 +479,12 @@
 
         <div id="panelHeader">
             <div id="panelTitle">WMS 3D Viewer <span>by Jhs</span></div>
-            
+
 
             <div id="colorModeRow">
-                <span style="font-size:13px; font-weight:700; color:#c4b5fd; letter-spacing:-0.3px; white-space:nowrap;">분석 모드</span>
+                <span
+                    style="font-size:13px; font-weight:700; color:#c4b5fd; letter-spacing:-0.3px; white-space:nowrap;">분석
+                    모드</span>
                 <!-- Custom Dropdown -->
                 <div id="colorModeDropdown" style="position:relative; flex:1; user-select:none;">
                     <div id="colorModeBtn" style="
@@ -474,7 +497,8 @@
                         transition: border-color 0.2s, box-shadow 0.2s;
                     ">
                         <span id="colorModeBtnLabel">제조사별</span>
-                        <span id="colorModeBtnArrow" style="color:#a5b4fc; font-size:11px; transition:transform 0.2s;">▼</span>
+                        <span id="colorModeBtnArrow"
+                            style="color:#a5b4fc; font-size:11px; transition:transform 0.2s;">▼</span>
                     </div>
                     <div id="colorModeMenu" style="
                         display:none; position:absolute; top:calc(100% + 6px); left:0; right:0;
@@ -483,26 +507,54 @@
                         box-shadow:0 8px 24px rgba(0,0,0,0.5);
                         z-index:9999;
                     ">
-                        <div class="cm-option" data-value="manufacturer" style="padding:10px 16px; color:#e0e7ff; font-size:13px; font-weight:600; cursor:pointer; transition:background 0.15s;">제조사별</div>
-                        <div class="cm-option" data-value="partner" style="padding:10px 16px; color:#e0e7ff; font-size:13px; font-weight:600; cursor:pointer; transition:background 0.15s;">거래처별</div>
-                        <div class="cm-option" data-value="abc" style="padding:10px 16px; color:#e0e7ff; font-size:13px; font-weight:600; cursor:pointer; transition:background 0.15s;">출고등급</div>
-                        <div class="cm-option" data-value="issue" style="padding:10px 16px; color:#e0e7ff; font-size:13px; font-weight:600; cursor:pointer; transition:background 0.15s;">특이사항</div>
+                        <div class="cm-option" data-value="manufacturer"
+                            style="padding:10px 16px; color:#e0e7ff; font-size:13px; font-weight:600; cursor:pointer; transition:background 0.15s;">
+                            제조사별</div>
+                        <div class="cm-option" data-value="partner"
+                            style="padding:10px 16px; color:#e0e7ff; font-size:13px; font-weight:600; cursor:pointer; transition:background 0.15s;">
+                            거래처별</div>
+                        <div class="cm-option" data-value="abc"
+                            style="padding:10px 16px; color:#e0e7ff; font-size:13px; font-weight:600; cursor:pointer; transition:background 0.15s;">
+                            출고등급</div>
+                        <div class="cm-option" data-value="issue"
+                            style="padding:10px 16px; color:#e0e7ff; font-size:13px; font-weight:600; cursor:pointer; transition:background 0.15s;">
+                            특이사항</div>
                     </div>
                 </div>
             </div>
 
-            <div id="abcLegendRow" style="display:none; flex-direction:column; gap:6px; margin-top:8px; margin-bottom:8px; font-size:13px; font-weight:bold; padding: 10px; background: #1f2933; border-radius: 6px;">
-                
+            <div id="abcLegendRow"
+                style="display:none; flex-direction:column; gap:6px; margin-top:8px; margin-bottom:8px; font-size:13px; font-weight:bold; padding: 10px; background: #1f2933; border-radius: 6px;">
+
                 <div style="display:flex; flex-wrap:wrap; gap:8px;">
-                    <div class="abc-legend-item" data-grade="__ALL__" style="cursor:pointer; display:flex; align-items:center; gap:4px; font-weight:bold; color:#fff; opacity:1.0;">전체보기</div>
-                    <div class="abc-legend-item" data-grade="A" style="cursor:pointer; display:flex; align-items:center; gap:4px; color:#9ca3af; opacity:0.5;"><span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#22c55e;"></span> A등급 (26년)</div>
-                    <div class="abc-legend-item" data-grade="B" style="cursor:pointer; display:flex; align-items:center; gap:4px; color:#9ca3af; opacity:0.5;"><span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#facc15;"></span> B등급 (25년)</div>
-                    <div class="abc-legend-item" data-grade="C" style="cursor:pointer; display:flex; align-items:center; gap:4px; color:#9ca3af; opacity:0.5;"><span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#3b82f6;"></span> C등급 (24년 이하)</div>
-                    <div class="abc-legend-item" data-grade="D" style="cursor:pointer; display:flex; align-items:center; gap:4px; color:#9ca3af; opacity:0.5;"><span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#ef4444;"></span> D등급 (이력없음)</div>
+                    <div class="abc-legend-item" data-grade="__ALL__"
+                        style="cursor:pointer; display:flex; align-items:center; gap:4px; font-weight:bold; color:#fff; opacity:1.0;">
+                        전체보기</div>
+                    <div class="abc-legend-item" data-grade="A"
+                        style="cursor:pointer; display:flex; align-items:center; gap:4px; color:#9ca3af; opacity:0.5;">
+                        <span
+                            style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#22c55e;"></span>
+                        A등급 (26년)</div>
+                    <div class="abc-legend-item" data-grade="B"
+                        style="cursor:pointer; display:flex; align-items:center; gap:4px; color:#9ca3af; opacity:0.5;">
+                        <span
+                            style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#facc15;"></span>
+                        B등급 (25년)</div>
+                    <div class="abc-legend-item" data-grade="C"
+                        style="cursor:pointer; display:flex; align-items:center; gap:4px; color:#9ca3af; opacity:0.5;">
+                        <span
+                            style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#3b82f6;"></span>
+                        C등급 (24년 이하)</div>
+                    <div class="abc-legend-item" data-grade="D"
+                        style="cursor:pointer; display:flex; align-items:center; gap:4px; color:#9ca3af; opacity:0.5;">
+                        <span
+                            style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#ef4444;"></span>
+                        D등급 (이력없음)</div>
                 </div>
             </div>
 
-            <div id="issueLegendRow" style="display:none; flex-direction:column; gap:6px; margin-top:8px; margin-bottom:8px; font-size:13px; font-weight:bold; padding: 10px; background: #1f2933; border-radius: 6px;">
+            <div id="issueLegendRow"
+                style="display:none; flex-direction:column; gap:6px; margin-top:8px; margin-bottom:8px; font-size:13px; font-weight:bold; padding: 10px; background: #1f2933; border-radius: 6px;">
                 <div style="color:#e2e8f0; font-size:12px; font-weight:600; display:flex; align-items:center; gap:6px;">
                     <span>🎨 특이사항 품목별 색상 구분 (동일 품목은 같은 색상)</span>
                 </div>
@@ -524,8 +576,12 @@
                 <!-- KS/GNN checkboxes -->
                 <div id="ksRow" style="margin-top:0; width:100%; display:flex; justify-content:flex-end;">
                     <div style="display:flex; gap:8px;">
-                        <label style="cursor:pointer; display:flex; align-items:center; gap:4px; user-select:none; font-size:11px; color:#9ca3af;"><input type="checkbox" id="toggleKS" style="accent-color:#818cf8;" /> 경신</label>
-                        <label style="cursor:pointer; display:flex; align-items:center; gap:4px; user-select:none; font-size:11px; color:#9ca3af;"><input type="checkbox" id="toggleGNN" style="accent-color:#818cf8;" /> GNN</label>
+                        <label
+                            style="cursor:pointer; display:flex; align-items:center; gap:4px; user-select:none; font-size:11px; color:#9ca3af;"><input
+                                type="checkbox" id="toggleKS" style="accent-color:#818cf8;" /> 경신</label>
+                        <label
+                            style="cursor:pointer; display:flex; align-items:center; gap:4px; user-select:none; font-size:11px; color:#9ca3af;"><input
+                                type="checkbox" id="toggleGNN" style="accent-color:#818cf8;" /> GNN</label>
                     </div>
                 </div>
             </div>
@@ -537,18 +593,21 @@
             <div id="sel_type">종류: -</div>
             <div id="sel_location">로케이션: -</div>
             <div id="sel_item">품목명: -</div>
+            <div id="sel_dc">DC: -</div>
             <div id="sel_abc" style="font-weight:bold; color:#fcd34d;">출고등급: -</div>
             <div id="sel_manu">제조사명: -</div>
             <div id="sel_partner">거래처명: -</div>
             <div id="sel_qty">수량: -</div>
-            <button id="openMemoBtn" style="width:100%; margin-top:10px; background:#374151; color:#e5e7eb; padding:8px; border:1px solid #4b5563; border-radius:4px; cursor:pointer; font-weight:bold; display:none;">📝 이슈/메모 기록</button>
+            <button id="openMemoBtn"
+                style="width:100%; margin-top:10px; background:#374151; color:#e5e7eb; padding:8px; border:1px solid #4b5563; border-radius:4px; cursor:pointer; font-weight:bold; display:none;">📝
+                이슈/메모 기록</button>
         </div>
 
         <!-- 엑셀 업로드 -->
         <div id="uploadArea">
             <div class="uploadLabel">① 현재고 엑셀 (로케이션, 품목코드, 품목명, 제조사명 등)</div>
             <input type="file" id="excelInventoryUpload" accept=".xlsx,.xls" />
-            
+
         </div>
 
         <!-- 필터 -->
@@ -581,6 +640,7 @@
                             <th id="thItem" style="cursor:pointer; user-select:none;">품목명</th>
                             <th id="thManu" style="cursor:pointer; user-select:none;">제조사명</th>
                             <th id="thPart" style="cursor:pointer; user-select:none;">거래처명</th>
+                            <th id="thDC" style="cursor:pointer; user-select:none;">DC</th>
                             <th id="thQty" style="cursor:pointer; user-select:none;">수량</th>
                         </tr>
                     </thead>
@@ -604,73 +664,121 @@
 
     <!-- Memo Modal -->
     <style>
-      #memoModal * { box-sizing: border-box; font-family: 'Segoe UI', -apple-system, sans-serif; }
-      .memo-input {
-        width: 100%; padding: 10px 12px;
-        background: #fff; border: 1.5px solid #e2e8f0; color: #1e293b;
-        border-radius: 10px; font-size: 14px; outline: none;
-        transition: border-color 0.2s, box-shadow 0.2s;
-      }
-      .memo-input:focus { border-color: #818cf8; box-shadow: 0 0 0 3px rgba(129,140,248,0.15); }
-      .memo-input::placeholder { color: #94a3b8; }
-      .memo-history-card {
-        background: #fff; padding: 14px 16px;
-        border-radius: 12px; border: 1.5px solid #f1f5f9;
-        border-left: 4px solid #f472b6;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-      }
+        #memoModal * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', -apple-system, sans-serif;
+        }
+
+        .memo-input {
+            width: 100%;
+            padding: 10px 12px;
+            background: #fff;
+            border: 1.5px solid #e2e8f0;
+            color: #1e293b;
+            border-radius: 10px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .memo-input:focus {
+            border-color: #818cf8;
+            box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.15);
+        }
+
+        .memo-input::placeholder {
+            color: #94a3b8;
+        }
+
+        .memo-history-card {
+            background: #fff;
+            padding: 14px 16px;
+            border-radius: 12px;
+            border: 1.5px solid #f1f5f9;
+            border-left: 4px solid #f472b6;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
     </style>
-    <div id="memoModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:2000; align-items:center; justify-content:center; pointer-events:none;">
-        <div id="memoModalBox" style="background:linear-gradient(135deg,#f8faff 0%,#fff 100%); width:460px; max-height:82vh; border-radius:20px; display:flex; flex-direction:column; box-shadow:0 20px 60px rgba(99,102,241,0.15), 0 4px 20px rgba(0,0,0,0.08); overflow:hidden; border:1.5px solid rgba(255,255,255,0.8); position:fixed; pointer-events:auto;">
+    <div id="memoModal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:2000; align-items:center; justify-content:center; pointer-events:none;">
+        <div id="memoModalBox"
+            style="background:linear-gradient(135deg,#f8faff 0%,#fff 100%); width:460px; max-height:82vh; border-radius:20px; display:flex; flex-direction:column; box-shadow:0 20px 60px rgba(99,102,241,0.15), 0 4px 20px rgba(0,0,0,0.08); overflow:hidden; border:1.5px solid rgba(255,255,255,0.8); position:fixed; pointer-events:auto;">
             <!-- Header -->
-            <div id="memoDragHandle" style="padding:18px 22px 16px; background:linear-gradient(135deg,#818cf8,#a78bfa); display:flex; justify-content:space-between; align-items:center; cursor:move; user-select:none;">
+            <div id="memoDragHandle"
+                style="padding:18px 22px 16px; background:linear-gradient(135deg,#818cf8,#a78bfa); display:flex; justify-content:space-between; align-items:center; cursor:move; user-select:none;">
                 <div style="display:flex; align-items:center; gap:8px;">
                     <span style="font-size:20px;">📋</span>
-                    <h3 style="margin:0; color:#fff; font-size:17px; font-weight:700; letter-spacing:-0.3px;" id="memoModalTitle">메모 작성</h3>
+                    <h3 style="margin:0; color:#fff; font-size:17px; font-weight:700; letter-spacing:-0.3px;"
+                        id="memoModalTitle">메모 작성</h3>
                 </div>
-                <button id="closeMemoBtn" style="background:rgba(255,255,255,0.2); border:none; color:#fff; font-size:18px; width:32px; height:32px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; line-height:1; transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.35)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">&times;</button>
+                <button id="closeMemoBtn"
+                    style="background:rgba(255,255,255,0.2); border:none; color:#fff; font-size:18px; width:32px; height:32px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; line-height:1; transition:background 0.2s;"
+                    onmouseover="this.style.background='rgba(255,255,255,0.35)'"
+                    onmouseout="this.style.background='rgba(255,255,255,0.2)'">&times;</button>
             </div>
             <!-- Scope Tabs -->
-            <div style="display:flex; background:#f1f5f9; padding:4px; gap:4px; border-bottom:1px solid #e2e8f0; border-top:1px solid #e2e8f0;">
-                <button id="memoScopeItemBtn" style="flex:1; padding:8px; border:none; border-radius:10px; background:#fff; color:#4f46e5; font-size:13px; font-weight:700; cursor:pointer; transition:all 0.2s; box-shadow:0 1px 3px rgba(0,0,0,0.1);">품목별</button>
-                <button id="memoScopeManuBtn" style="flex:1; padding:8px; border:none; border-radius:10px; background:transparent; color:#64748b; font-size:13px; font-weight:600; cursor:pointer; transition:all 0.2s;">제조사별</button>
-                <button id="memoScopePartnerBtn" style="flex:1; padding:8px; border:none; border-radius:10px; background:transparent; color:#64748b; font-size:13px; font-weight:600; cursor:pointer; transition:all 0.2s;">거래처별</button>
+            <div
+                style="display:flex; background:#f1f5f9; padding:4px; gap:4px; border-bottom:1px solid #e2e8f0; border-top:1px solid #e2e8f0;">
+                <button id="memoScopeItemBtn"
+                    style="flex:1; padding:8px; border:none; border-radius:10px; background:#fff; color:#4f46e5; font-size:13px; font-weight:700; cursor:pointer; transition:all 0.2s; box-shadow:0 1px 3px rgba(0,0,0,0.1);">품목별</button>
+                <button id="memoScopeManuBtn"
+                    style="flex:1; padding:8px; border:none; border-radius:10px; background:transparent; color:#64748b; font-size:13px; font-weight:600; cursor:pointer; transition:all 0.2s;">제조사별</button>
+                <button id="memoScopePartnerBtn"
+                    style="flex:1; padding:8px; border:none; border-radius:10px; background:transparent; color:#64748b; font-size:13px; font-weight:600; cursor:pointer; transition:all 0.2s;">거래처별</button>
             </div>
             <!-- Body -->
             <div style="padding:20px 22px; overflow-y:auto; flex:1;">
                 <!-- Target Scope Info -->
-                <div id="memoTargetScopeContainer" style="margin-bottom:14px; padding:10px 12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; font-size:13px; color:#334155; font-weight:600;">
+                <div id="memoTargetScopeContainer"
+                    style="margin-bottom:14px; padding:10px 12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; font-size:13px; color:#334155; font-weight:600;">
                     적용 대상: <span id="memoTargetScopeText" style="color:#4f46e5;">-</span>
                 </div>
                 <div style="margin-bottom:14px; display:flex; gap:12px;">
                     <div style="flex:1;">
-                        <label style="display:block; color:#64748b; font-size:12px; font-weight:600; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">날짜</label>
+                        <label
+                            style="display:block; color:#64748b; font-size:12px; font-weight:600; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">날짜</label>
                         <input type="date" id="memoDate" class="memo-input" />
                     </div>
                     <div style="flex:1;">
-                        <label style="display:block; color:#64748b; font-size:12px; font-weight:600; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">작성자</label>
+                        <label
+                            style="display:block; color:#64748b; font-size:12px; font-weight:600; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">작성자</label>
                         <input type="text" id="memoAuthor" placeholder="이름 입력" class="memo-input" />
                     </div>
                 </div>
                 <div style="margin-bottom:18px;">
-                    <label style="display:block; color:#64748b; font-size:12px; font-weight:600; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">특이사항</label>
-                    <textarea id="memoText" rows="4" placeholder="내용을 입력하세요..." class="memo-input" style="resize:vertical;"></textarea>
+                    <label
+                        style="display:block; color:#64748b; font-size:12px; font-weight:600; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">특이사항</label>
+                    <textarea id="memoText" rows="4" placeholder="내용을 입력하세요..." class="memo-input"
+                        style="resize:vertical;"></textarea>
                 </div>
                 <!-- Image Upload Area -->
                 <div style="margin-bottom:18px;">
-                    <label style="display:block; color:#64748b; font-size:12px; font-weight:600; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">이미지 첨부 <span style="color:#94a3b8; font-weight:400; font-size:11px;">(선택사항)</span></label>
-                    <label id="memoImageLabel" for="memoImageInput" style="display:flex; align-items:center; justify-content:center; gap:8px; width:100%; padding:12px; background:#f8faff; border:2px dashed #c7d2fe; border-radius:10px; cursor:pointer; color:#818cf8; font-size:13px; font-weight:600; transition:background 0.2s, border-color 0.2s;" onmouseover="this.style.background='#ede9fe'; this.style.borderColor='#a78bfa';" onmouseout="this.style.background='#f8faff'; this.style.borderColor='#c7d2fe';">
+                    <label
+                        style="display:block; color:#64748b; font-size:12px; font-weight:600; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">이미지
+                        첨부 <span style="color:#94a3b8; font-weight:400; font-size:11px;">(선택사항)</span></label>
+                    <label id="memoImageLabel" for="memoImageInput"
+                        style="display:flex; align-items:center; justify-content:center; gap:8px; width:100%; padding:12px; background:#f8faff; border:2px dashed #c7d2fe; border-radius:10px; cursor:pointer; color:#818cf8; font-size:13px; font-weight:600; transition:background 0.2s, border-color 0.2s;"
+                        onmouseover="this.style.background='#ede9fe'; this.style.borderColor='#a78bfa';"
+                        onmouseout="this.style.background='#f8faff'; this.style.borderColor='#c7d2fe';">
                         <span style="font-size:18px;">📎</span>
                         <span>이미지 선택</span>
                         <span style="color:#c4b5fd; font-weight:400; font-size:11px;">또는 Ctrl+V 붙여넣기</span>
                     </label>
                     <input type="file" id="memoImageInput" accept="image/*" style="display:none;" />
-                    <div id="memoImagePreview" style="display:none; margin-top:10px; position:relative; border-radius:10px; overflow:hidden; border:1.5px solid #e2e8f0;">
-                        <img id="memoImagePreviewImg" src="" alt="미리보기" style="width:100%; display:block; max-height:200px; object-fit:cover;" />
-                        <button id="memoImageRemoveBtn" style="position:absolute; top:8px; right:8px; background:rgba(0,0,0,0.6); border:none; color:#fff; border-radius:50%; width:26px; height:26px; cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center;" title="이미지 제거">×</button>
+                    <div id="memoImagePreview"
+                        style="display:none; margin-top:10px; position:relative; border-radius:10px; overflow:hidden; border:1.5px solid #e2e8f0;">
+                        <img id="memoImagePreviewImg" src="" alt="미리보기"
+                            style="width:100%; display:block; max-height:200px; object-fit:cover;" />
+                        <button id="memoImageRemoveBtn"
+                            style="position:absolute; top:8px; right:8px; background:rgba(0,0,0,0.6); border:none; color:#fff; border-radius:50%; width:26px; height:26px; cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center;"
+                            title="이미지 제거">×</button>
                     </div>
                 </div>
-                <button id="saveMemoBtn" style="width:100%; background:linear-gradient(135deg,#818cf8,#a78bfa); color:#fff; padding:13px; border:none; border-radius:12px; cursor:pointer; font-weight:700; font-size:15px; letter-spacing:-0.2px; transition:opacity 0.2s, transform 0.1s; box-shadow:0 4px 15px rgba(129,140,248,0.4);" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='scale(1)'">✅ 작성 완료</button>
+                <button id="saveMemoBtn"
+                    style="width:100%; background:linear-gradient(135deg,#818cf8,#a78bfa); color:#fff; padding:13px; border:none; border-radius:12px; cursor:pointer; font-weight:700; font-size:15px; letter-spacing:-0.2px; transition:opacity 0.2s, transform 0.1s; box-shadow:0 4px 15px rgba(129,140,248,0.4);"
+                    onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'"
+                    onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='scale(1)'">✅ 작성
+                    완료</button>
                 <div style="display:flex; align-items:center; gap:10px; margin:22px 0 18px;">
                     <div style="flex:1; height:1px; background:#f1f5f9;"></div>
                     <span style="color:#94a3b8; font-size:12px; font-weight:600;">이전 이력</span>
@@ -1167,11 +1275,12 @@
         const rowCountSpan = document.getElementById("rowCount");
         const manufacturerFilterEl = document.getElementById("manufacturerFilter");
         const partnerFilterEl = document.getElementById("partnerFilter");
-        
+
 
         const selTypeEl = document.getElementById("sel_type");
         const selLocEl = document.getElementById("sel_location");
         const selItemEl = document.getElementById("sel_item");
+        const selDcEl = document.getElementById("sel_dc");
         const selManuEl = document.getElementById("sel_manu");
         const selPartEl = document.getElementById("sel_partner");
         const selQtyEl = document.getElementById("sel_qty");
@@ -1184,11 +1293,12 @@
             selTypeEl.textContent = "종류: -";
             selLocEl.textContent = "로케이션: -";
             selItemEl.textContent = "품목명: -";
+            if (selDcEl) selDcEl.textContent = "DC: -";
             selManuEl.textContent = "제조사명: -";
             selPartEl.textContent = "거래처명: -";
             selQtyEl.textContent = "수량: -";
             if (selAbcEl) selAbcEl.textContent = "출고등급: -";
-            
+
             currentItemCodeForMemo = null;
             currentManufacturerForMemo = null;
             currentPartnerForMemo = null;
@@ -1203,7 +1313,7 @@
                 if (key && partnerByFileName[key]) {
                     row._PARTNER = partnerByFileName[key];
                 }
-                
+
                 // 2. Map from partnerData.json
                 const itemCode = (row._ITEM_CODE || "").toString().trim();
                 if (window.partnerData && window.partnerData[itemCode]) {
@@ -1214,7 +1324,7 @@
 
         // 거래처 엑셀
         const elPartner = document.getElementById("excelPartnerUpload");
-        if(elPartner) elPartner.addEventListener("change", (e) => {
+        if (elPartner) elPartner.addEventListener("change", (e) => {
             const file = e.target.files[0];
             if (!file) return;
             const reader = new FileReader();
@@ -1245,10 +1355,10 @@
 
                 applyPartnerMappingToInventory();
                 rebuildFilters();
-                
-        
 
-        updateInventoryTable();
+
+
+                updateInventoryTable();
                 rebuildBinsFromInventory();
             };
             reader.readAsArrayBuffer(file);
@@ -1282,6 +1392,7 @@
                     row._LOCATION = loc;
                     row._ITEM_CODE = row.ITEM_CODE || row["품목코드"] || "";
                     row._ITEM_NAME = row.ITEM_NAME || row["품목명"] || "";
+                    row._DC = (row.DC !== undefined && row.DC !== null) ? row.DC.toString().trim() : (row["DC"] !== undefined && row["DC"] !== null ? row["DC"].toString().trim() : "");
 
                     row._MANUFACTURER =
                         row.MANUFACTURER ||
@@ -1341,7 +1452,7 @@
                 if (row._MANUFACTURER) manuSet.add(row._MANUFACTURER);
                 if (row._PARTNER) partnerSet.add(row._PARTNER);
             });
-            
+
             // Add all partners from partnerData mapping to show in dropdown
             if (window.partnerData) {
                 Object.values(window.partnerData).forEach(p => {
@@ -1379,6 +1490,7 @@
             const manu = (row._MANUFACTURER || "").toString();
             const partn = (row._PARTNER || "").toString();
             const cust = (row._CUSTOMER || "").toString();
+            const dc = (row._DC || "").toString();
 
             if (typeof colorMode !== 'undefined' && colorMode === "issue") {
                 const hasItemIssue = window.itemsWithIssues && window.itemsWithIssues.has(code);
@@ -1386,7 +1498,7 @@
             }
             if (manuFilter && manuFilter !== "__ALL__" && manu !== manuFilter) return false;
             if (partnerFilter && partnerFilter !== "__ALL__" && partn !== partnerFilter) return false;
-            
+
             if (currentAbcFilter && currentAbcFilter !== "__ALL__") {
                 const itemCode = (row._ITEM_CODE || "").toString().trim();
                 const lastDate = window.shipmentData ? window.shipmentData[itemCode] : null;
@@ -1401,7 +1513,7 @@
             }
 
             if (textFilter) {
-                const hay = (loc + " " + item + " " + code + " " + manu + " " + partn + " " + cust).toLowerCase();
+                const hay = (loc + " " + item + " " + code + " " + manu + " " + partn + " " + cust + " " + dc).toLowerCase();
                 if (!hay.includes(textFilter.toLowerCase())) return false;
             }
             return true;
@@ -1418,6 +1530,7 @@
                 'thItem': { text: '품목명', col: '_ITEM_NAME' },
                 'thManu': { text: '제조사명', col: '_MANUFACTURER' },
                 'thPart': { text: '거래처명', col: '_PARTNER' },
+                'thDC': { text: 'DC', col: '_DC' },
                 'thQty': { text: '수량', col: '_QTY' }
             };
 
@@ -1490,6 +1603,7 @@
                 const item = row._ITEM_NAME || "";
                 const manu = row._MANUFACTURER || "";
                 const partn = row._PARTNER || "";
+                const dc = row._DC || "";
                 const qty = row._QTY ?? "";
 
                 const tr = document.createElement("tr");
@@ -1503,6 +1617,7 @@
         <td>${item}</td>
         <td>${manu}</td>
         <td>${partn}</td>
+        <td>${dc}</td>
         <td>${qty}</td>
       `;
                 tbody.appendChild(tr);
@@ -1563,9 +1678,10 @@
             selTypeEl.textContent = "종류: 품목";
             selLocEl.textContent = "로케이션: " + (loc || "-");
             selItemEl.textContent = "품목명: " + (row._ITEM_NAME || "-") + " [" + (row._ITEM_CODE || "-") + "]";
+            if (selDcEl) selDcEl.textContent = "DC: " + (row._DC || "-");
             const hasManuMemo = window.manufacturersWithIssues && window.manufacturersWithIssues.has(row._MANUFACTURER || "");
             selManuEl.innerHTML = "제조사명: " + (row._MANUFACTURER || "-") + (hasManuMemo ? ' <span style="background:#4f46e5; color:#fff; font-size:11px; padding:2px 6px; border-radius:4px; margin-left:6px; font-weight:700; display:inline-block;">💬 메모있음</span>' : '');
-            
+
             const itemCodeForPartner = (row._ITEM_CODE || "").toString().trim();
             const partnerName = (window.partnerData && window.partnerData[itemCodeForPartner]) ? window.partnerData[itemCodeForPartner] : (row._PARTNER || "-");
             const hasPartnerMemo = window.partnersWithIssues && window.partnersWithIssues.has(partnerName || "");
@@ -1584,8 +1700,8 @@
                     abcText = `D등급 (이력없음)`;
                 }
             }
-            if(selAbcEl) selAbcEl.textContent = "출고등급: " + abcText;
-            
+            if (selAbcEl) selAbcEl.textContent = "출고등급: " + abcText;
+
             currentItemCodeForMemo = itemCode;
             currentItemCodeForMemo = itemCode;
             currentManufacturerForMemo = (row._MANUFACTURER || "").toString().trim();
@@ -1593,7 +1709,7 @@
 
             if (itemCode && itemCode !== "") {
                 openMemoBtn.style.display = "block";
-                if(typeof updateMemoBtnUI === 'function') updateMemoBtnUI();
+                if (typeof updateMemoBtnUI === 'function') updateMemoBtnUI();
             } else {
                 openMemoBtn.style.display = "none";
             }
@@ -1611,8 +1727,8 @@
             if (typeof issueIndicators !== 'undefined') {
                 issueIndicators.forEach(ind => {
                     scene.remove(ind);
-                    if(ind.geometry) ind.geometry.dispose();
-                    if(ind.material) ind.material.dispose();
+                    if (ind.geometry) ind.geometry.dispose();
+                    if (ind.material) ind.material.dispose();
                 });
                 issueIndicators.length = 0;
             }
@@ -1704,7 +1820,7 @@
                             color = defaultOwnerColor;
                         }
                     }
-                    
+
                     const geo = new THREE.BoxGeometry(subWidth, subHeight, subDepth);
                     const mat = new THREE.MeshStandardMaterial({
                         color: color,
@@ -1720,7 +1836,7 @@
                     box.position.set(slot.x + localX, slot.y, slot.z + localZ);
                     scene.add(box);
 
-                    
+
 
                     box.userData.rowRef = r;
                     allBins.push(box);
@@ -1747,7 +1863,7 @@
         }
 
         const elOpacity = document.getElementById("boxOpacity");
-        if(elOpacity) elOpacity.addEventListener("input", (e) => {
+        if (elOpacity) elOpacity.addEventListener("input", (e) => {
             boxOpacity = parseFloat(e.target.value) || 1.0;
             allBins.forEach(b => {
                 if (!b.material) return;
@@ -1763,7 +1879,7 @@
             });
         });
 
-        
+
         function setAbcFilter(grade) {
             currentAbcFilter = grade;
             document.querySelectorAll('.abc-legend-item').forEach(el => {
@@ -1789,7 +1905,7 @@
             });
         });
 
-                // ===== Custom colorMode dropdown =====
+        // ===== Custom colorMode dropdown =====
         const colorModeBtn = document.getElementById('colorModeBtn');
         const colorModeMenu = document.getElementById('colorModeMenu');
         const colorModeBtnLabel = document.getElementById('colorModeBtnLabel');
@@ -2002,11 +2118,21 @@
                 selItemEl.textContent = "품목명: (재고 없음)";
                 selManuEl.textContent = "제조사명: -";
                 selPartEl.textContent = "거래처명: -";
+                if (selDcEl) selDcEl.textContent = "DC: -";
                 selQtyEl.textContent = "수량: 0";
             } else {
                 selItemEl.textContent = "품목명: " + itemKinds + "종 재고";
                 selManuEl.textContent = "제조사명: (다수)";
                 selPartEl.textContent = "거래처명: (다수)";
+
+                // Collect unique DCs
+                const uniqueDcs = Array.from(new Set(valid.map(r => r._DC).filter(Boolean)));
+                if (selDcEl) {
+                    if (uniqueDcs.length === 0) selDcEl.textContent = "DC: -";
+                    else if (uniqueDcs.length === 1) selDcEl.textContent = "DC: " + uniqueDcs[0];
+                    else selDcEl.textContent = "DC: (다수)";
+                }
+
                 selQtyEl.textContent = "수량: " + totalQty;
             }
 
@@ -2058,7 +2184,7 @@
         });
 
         // 라벨 / 랙 프레임 토글
-        
+
 
         // ===== 8. 영역 강조 (Highlight Areas: KS & GNN) =====
         let highlightsVisible = false;
@@ -2258,6 +2384,7 @@
                 품목명: r._ITEM_NAME || "",
                 제조사명: r._MANUFACTURER || "",
                 거래처명: r._PARTNER || "",
+                DC: r._DC || "",
                 수량: r._QTY ?? 0
             }));
             let fileName = prompt("저장할 파일명을 입력하세요 (확장자 제외):", "WMS3D_Export");
@@ -2329,7 +2456,7 @@
             renderer.setSize(w, h);
         });
 
-// ===== 9. Memo and Issue Management Logic =====
+        // ===== 9. Memo and Issue Management Logic =====
         const memoModal = document.getElementById("memoModal");
         const closeMemoBtn = document.getElementById("closeMemoBtn");
         const openMemoBtn = document.getElementById("openMemoBtn");
@@ -2338,7 +2465,7 @@
         const memoText = document.getElementById("memoText");
         const memoAuthor = document.getElementById("memoAuthor");
         const memoHistoryList = document.getElementById("memoHistoryList");
-        
+
         let currentItemCodeForMemo = null;
         let currentManufacturerForMemo = null;
         let currentPartnerForMemo = null;
@@ -2374,57 +2501,57 @@
             const itemBtn = document.getElementById('memoScopeItemBtn');
             const manuBtn = document.getElementById('memoScopeManuBtn');
             const partnerBtn = document.getElementById('memoScopePartnerBtn');
-            
+
             if (scope === 'item') {
                 itemBtn.style.background = '#fff';
                 itemBtn.style.color = '#4f46e5';
                 itemBtn.style.fontWeight = '700';
                 itemBtn.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
-                
+
                 manuBtn.style.background = 'transparent';
                 manuBtn.style.color = '#64748b';
                 manuBtn.style.fontWeight = '600';
                 manuBtn.style.boxShadow = 'none';
-                
+
                 partnerBtn.style.background = 'transparent';
                 partnerBtn.style.color = '#64748b';
                 partnerBtn.style.fontWeight = '600';
                 partnerBtn.style.boxShadow = 'none';
-                
+
                 document.getElementById('memoTargetScopeText').textContent = `품목: ${currentItemCodeForMemo || '-'}`;
             } else if (scope === 'manufacturer') {
                 itemBtn.style.background = 'transparent';
                 itemBtn.style.color = '#64748b';
                 itemBtn.style.fontWeight = '600';
                 itemBtn.style.boxShadow = 'none';
-                
+
                 manuBtn.style.background = '#fff';
                 manuBtn.style.color = '#4f46e5';
                 manuBtn.style.fontWeight = '700';
                 manuBtn.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
-                
+
                 partnerBtn.style.background = 'transparent';
                 partnerBtn.style.color = '#64748b';
                 partnerBtn.style.fontWeight = '600';
                 partnerBtn.style.boxShadow = 'none';
-                
+
                 document.getElementById('memoTargetScopeText').textContent = `제조사: ${currentManufacturerForMemo || '-'}`;
             } else if (scope === 'partner') {
                 itemBtn.style.background = 'transparent';
                 itemBtn.style.color = '#64748b';
                 itemBtn.style.fontWeight = '600';
                 itemBtn.style.boxShadow = 'none';
-                
+
                 manuBtn.style.background = 'transparent';
                 manuBtn.style.color = '#64748b';
                 manuBtn.style.fontWeight = '600';
                 manuBtn.style.boxShadow = 'none';
-                
+
                 partnerBtn.style.background = '#fff';
                 partnerBtn.style.color = '#4f46e5';
                 partnerBtn.style.fontWeight = '700';
                 partnerBtn.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
-                
+
                 document.getElementById('memoTargetScopeText').textContent = `거래처: ${currentPartnerForMemo || '-'}`;
             }
 
@@ -2455,14 +2582,14 @@
             const itemBtn = document.getElementById('memoScopeItemBtn');
             const manuBtn = document.getElementById('memoScopeManuBtn');
             const partnerBtn = document.getElementById('memoScopePartnerBtn');
-            
+
             if (!itemBtn || !manuBtn || !partnerBtn) return;
-            
+
             // Set temporary loading status
             const itemText = itemBtn.textContent.split(' ')[0] || "품목별";
             const manuText = manuBtn.textContent.split(' ')[0] || "제조사별";
             const partnerText = partnerBtn.textContent.split(' ')[0] || "거래처별";
-            
+
             itemBtn.textContent = `${itemText} (...)`;
             manuBtn.textContent = `${manuText} (...)`;
             partnerBtn.textContent = `${partnerText} (...)`;
@@ -2489,7 +2616,7 @@
         });
 
         // ===== Draggable memo modal =====
-        (function() {
+        (function () {
             const box = document.getElementById('memoModalBox');
             const handle = document.getElementById('memoDragHandle');
             let dragging = false, ox = 0, oy = 0;
@@ -2530,25 +2657,25 @@
                     div.style.borderRadius = "8px";
                     div.style.border = "1px solid #e5e7eb";
                     div.style.borderLeft = "4px solid #f472b6";
-                    
+
                     const header = document.createElement("div");
                     header.style.display = "flex";
                     header.style.justifyContent = "space-between";
                     header.style.alignItems = "flex-start";
                     header.style.marginBottom = "8px";
                     header.innerHTML = `<div style="font-size:12px; color:#4b5563; font-weight:500;">${memo.date} ${memo.author ? " | " + memo.author : ""}</div>`;
-                    
+
                     const actions = document.createElement("div");
                     const editBtn = document.createElement("button");
                     editBtn.textContent = "수정";
                     editBtn.style = "background:none; border:none; color:#2563eb; cursor:pointer; font-size:12px; padding:0 4px; font-weight:500;";
-                    
+
                     const delBtn = document.createElement("button");
                     delBtn.textContent = "삭제";
                     delBtn.style = "background:none; border:none; color:#ef4444; cursor:pointer; font-size:12px; padding:0 4px; font-weight:500;";
-                    
+
                     delBtn.onclick = async () => {
-                        if(confirm("이 이력을 삭제하시겠습니까?")) {
+                        if (confirm("이 이력을 삭제하시겠습니까?")) {
                             delBtn.textContent = "...";
                             const scopeType = memo.scopeType || 'item';
                             const scopeKey = memo.scopeKey || memo.itemCode || currentItemCodeForMemo;
@@ -2562,7 +2689,7 @@
                             }
                         }
                     };
-                    
+
                     editBtn.onclick = () => {
                         memoDate.value = memo.date;
                         memoText.value = memo.text;
@@ -2579,21 +2706,21 @@
                             clearImagePreview();
                         }
                     };
-                    
+
                     actions.appendChild(editBtn);
                     actions.appendChild(delBtn);
                     header.appendChild(actions);
-                    
+
                     const content = document.createElement("div");
                     content.style.fontSize = "14px";
                     content.style.color = "#1f2937";
                     content.style.lineHeight = "1.5";
                     content.style.whiteSpace = "pre-wrap";
                     content.textContent = memo.text;
-                    
+
                     div.appendChild(header);
                     div.appendChild(content);
-                    
+
                     // Show image if attached
                     if (memo.imageUrl) {
                         const imgWrap = document.createElement("div");
@@ -2608,7 +2735,7 @@
                         imgWrap.appendChild(img);
                         div.appendChild(imgWrap);
                     }
-                    
+
                     memoHistoryList.appendChild(div);
                 });
             }
@@ -2688,7 +2815,7 @@
                 box.style.left = Math.round((window.innerWidth - box.offsetWidth) / 2) + 'px';
                 box.style.top = Math.round((window.innerHeight - box.offsetHeight) / 2) + 'px';
             }
-            
+
             setMemoScope('item');
             if (typeof updateTabCounts === 'function') {
                 updateTabCounts();
@@ -2700,14 +2827,14 @@
             const dateVal = memoDate.value;
             const textVal = memoText.value.trim();
             const authorVal = memoAuthor.value.trim();
-            
+
             if (!textVal) {
                 alert("특이사항을 입력해주세요.");
                 return;
             }
-            
+
             saveMemoBtn.disabled = true;
-            
+
             try {
                 // Upload image if a new one was selected
                 let imageUrl = "";
@@ -2715,9 +2842,9 @@
                 if (pendingImageFile) {
                     saveMemoBtn.textContent = "이미지 업로드 중...";
                     const result = await window.uploadMemoImage(pendingImageFile);
-                    if (result) { 
-                        imageUrl = result.url; 
-                        imagePath = result.path; 
+                    if (result) {
+                        imageUrl = result.url;
+                        imagePath = result.path;
                     } else {
                         throw new Error("이미지 업로드에 실패했습니다. 이미지 파일의 형식이나 네트워크 연결 상태를 확인해주세요.");
                     }
@@ -2725,9 +2852,9 @@
                     imageUrl = saveMemoBtn.dataset.existingImageUrl;
                     imagePath = saveMemoBtn.dataset.existingImagePath || "";
                 }
-                
+
                 saveMemoBtn.textContent = "저장 중...";
-                
+
                 let success = false;
                 if (saveMemoBtn.dataset.editingId) {
                     if (window.updateIssueMemo) {
@@ -2739,21 +2866,21 @@
                         success = await window.saveIssueMemo(currentMemoScope, getCurrentMemoScopeKey(), dateVal, textVal, authorVal, imageUrl, imagePath);
                     }
                 }
-                
+
                 if (!success) {
                     throw new Error("서버 저장 실패: 네트워크 연결이나 데이터베이스 상태를 확인해 주세요.");
                 }
 
                 saveMemoBtn.textContent = "✅ 작성 완료";
                 saveMemoBtn.disabled = false;
-                
-                if(typeof updateMemoBtnUI === 'function') updateMemoBtnUI();
-                
+
+                if (typeof updateMemoBtnUI === 'function') updateMemoBtnUI();
+
                 // Clear inputs for next memo
                 memoText.value = "";
                 memoDate.value = new Date().toISOString().split('T')[0];
                 clearImagePreview();
-                
+
                 // Refresh list instead of closing modal
                 refreshMemoHistory();
                 if (typeof updateTabCounts === 'function') {
@@ -2767,8 +2894,8 @@
         });
 
         window.addEventListener('firebaseReady', () => {
-            if(typeof updateMemoBtnUI === 'function') updateMemoBtnUI();
-            if(typeof colorMode !== 'undefined' && colorMode === 'issue' && typeof rebuildBinsFromInventory === 'function') {
+            if (typeof updateMemoBtnUI === 'function') updateMemoBtnUI();
+            if (typeof colorMode !== 'undefined' && colorMode === 'issue' && typeof rebuildBinsFromInventory === 'function') {
                 rebuildBinsFromInventory();
             }
         });
@@ -2792,6 +2919,7 @@
         bindHeaderSort('thItem', '_ITEM_NAME');
         bindHeaderSort('thManu', '_MANUFACTURER');
         bindHeaderSort('thPart', '_PARTNER');
+        bindHeaderSort('thDC', '_DC');
         bindHeaderSort('thQty', '_QTY');
 
         clearSelectionCard();
@@ -2799,21 +2927,21 @@
         updateClearSearchVisibility();
     </script>
 
-<script>
-                window.shipmentData = {};
+    <script>
+        window.shipmentData = {};
         fetch('./shipmentData.json')
             .then(res => res.json())
             .then(data => { window.shipmentData = data; })
             .catch(err => console.warn('shipmentData fetch error', err));
-            
+
         window.partnerData = {};
         fetch('./partnerData.json')
             .then(res => res.json())
             .then(data => { window.partnerData = data; })
             .catch(err => console.warn('partnerData fetch error', err));
-</script>
+    </script>
 
-    
+
 </body>
 
 </html>
