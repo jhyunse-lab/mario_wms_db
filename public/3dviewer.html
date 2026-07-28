@@ -439,6 +439,11 @@
             transition: background 0.15s ease;
         }
 
+                #inventoryTable.resizing-active th,
+        #inventoryTable.resizing-active td {
+            transition: none !important;
+        }
+
         .col-resizer:hover,
         .col-resizer.resizing {
             background: rgba(129, 140, 248, 0.8);
@@ -3068,7 +3073,7 @@
             if (el) el.addEventListener('dblclick', () => handleHeaderSort(col));
         };
         
-        // Enable mouse dragging to resize inventory table columns
+        // Enable mouse dragging to resize inventory table columns with ultra-smooth 60fps rAF throttling
         function setupTableColumnResizable() {
             const table = document.getElementById("inventoryTable");
             if (!table) return;
@@ -3082,17 +3087,34 @@
                 resizer.addEventListener("click", (e) => e.stopPropagation());
                 resizer.addEventListener("dblclick", (e) => e.stopPropagation());
 
-                let startX, startWidth;
+                let startX, startWidth, rafId = null, latestNewW = null;
+
+                const updateWidth = () => {
+                    if (latestNewW !== null) {
+                        th.style.width = latestNewW + "px";
+                    }
+                    rafId = null;
+                };
 
                 const onMouseMove = (e) => {
                     const diffX = e.pageX - startX;
                     const minW = parseInt(th.style.minWidth, 10) || 40;
-                    const newW = Math.max(minW, startWidth + diffX);
-                    th.style.width = newW + "px";
+                    latestNewW = Math.max(minW, startWidth + diffX);
+                    if (!rafId) {
+                        rafId = requestAnimationFrame(updateWidth);
+                    }
                 };
 
                 const onMouseUp = () => {
+                    if (rafId) {
+                        cancelAnimationFrame(rafId);
+                        rafId = null;
+                    }
+                    if (latestNewW !== null) {
+                        th.style.width = latestNewW + "px";
+                    }
                     resizer.classList.remove("resizing");
+                    table.classList.remove("resizing-active");
                     document.body.style.cursor = "";
                     document.body.style.userSelect = "";
                     window.removeEventListener("mousemove", onMouseMove);
@@ -3104,10 +3126,12 @@
                     e.preventDefault();
                     startX = e.pageX;
                     startWidth = th.offsetWidth;
+                    latestNewW = startWidth;
                     resizer.classList.add("resizing");
+                    table.classList.add("resizing-active");
                     document.body.style.cursor = "col-resize";
                     document.body.style.userSelect = "none";
-                    window.addEventListener("mousemove", onMouseMove);
+                    window.addEventListener("mousemove", onMouseMove, { passive: true });
                     window.addEventListener("mouseup", onMouseUp);
                 });
             });
