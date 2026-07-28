@@ -507,7 +507,21 @@
         <div id="panelResizer"></div>
 
         <div id="panelHeader">
-            <div id="panelTitle">WMS 3D Viewer <span>by Jhs</span></div>
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+                <div id="panelTitle">WMS 3D Viewer <span>by Jhs</span></div>
+                <button id="openManualBtn" style="
+                    display:flex; align-items:center; gap:5px;
+                    padding:5px 12px; cursor:pointer;
+                    background:linear-gradient(135deg, #4f46e5, #7c3aed);
+                    color:#ffffff; font-size:11px; font-weight:700;
+                    border:none; border-radius:999px;
+                    box-shadow:0 2px 8px rgba(99,102,241,0.4);
+                    transition: transform 0.15s, box-shadow 0.15s;
+                    user-select:none;
+                " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    📖 메뉴얼
+                </button>
+            </div>
 
 
             <div id="colorModeRow">
@@ -3127,6 +3141,137 @@
             .catch(err => console.warn('partnerData fetch error', err));
     </script>
 
+
+
+    <!-- 사용법 매뉴얼 팝업 모달 -->
+    <div id="manualModal" style="
+        display: none;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(15, 23, 42, 0.75);
+        backdrop-filter: blur(4px);
+        z-index: 99999;
+        align-items: center;
+        justify-content: center;
+    ">
+        <div style="
+            background: #0f172a;
+            border: 1.5px solid #4f46e5;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 680px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
+            overflow: hidden;
+            color: #f8fafc;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        ">
+            <!-- Modal Header -->
+            <div style="
+                padding: 16px 20px;
+                background: linear-gradient(135deg, #1e1b4b, #312e81);
+                border-bottom: 1px solid #4338ca;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            ">
+                <div style="font-size: 16px; font-weight: 700; color: #e0e7ff; display:flex; align-items:center; gap:8px;">
+                    📖 WMS 3D 대시보드 사용법 매뉴얼
+                </div>
+                <button id="closeManualBtn" style="
+                    background: none; border: none; color: #a5b4fc;
+                    font-size: 22px; font-weight: bold; cursor: pointer;
+                    line-height: 1; padding: 4px;
+                ">&times;</button>
+            </div>
+
+            <!-- Modal Content (Scrollable) -->
+            <div style="
+                padding: 20px 24px;
+                overflow-y: auto;
+                font-size: 13px;
+                line-height: 1.65;
+                color: #cbd5e1;
+            ">
+                <h3 style="color:#818cf8; font-size:14px; margin-top:0; margin-bottom:10px;">🎮 1. 3D 화면 기본 조작법 (카메라 컨트롤)</h3>
+                <table style="width:100%; border-collapse:collapse; margin-bottom:20px; font-size:12px;">
+                    <tr style="background:#1e293b; color:#94a3b8;">
+                        <th style="padding:7px 10px; border:1px solid #334155; text-align:left;">동작</th>
+                        <th style="padding:7px 10px; border:1px solid #334155; text-align:left;">조작 방법</th>
+                        <th style="padding:7px 10px; border:1px solid #334155; text-align:left;">설명</th>
+                    </tr>
+                    <tr>
+                        <td style="padding:7px 10px; border:1px solid #334155; font-weight:bold; color:#f8fafc;">회전 (Rotate)</td>
+                        <td style="padding:7px 10px; border:1px solid #334155;">마우스 좌클릭 + 드래그</td>
+                        <td style="padding:7px 10px; border:1px solid #334155;">3D 창고를 다각도에서 입체적으로 회전하여 봅니다.</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:7px 10px; border:1px solid #334155; font-weight:bold; color:#f8fafc;">이동 (Pan)</td>
+                        <td style="padding:7px 10px; border:1px solid #334155;">마우스 휠(중간) 클릭 + 드래그</td>
+                        <td style="padding:7px 10px; border:1px solid #334155;">화면 시점을 상/하/좌/우로 평행 이동합니다.</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:7px 10px; border:1px solid #334155; font-weight:bold; color:#f8fafc;">확대/축소 (Zoom)</td>
+                        <td style="padding:7px 10px; border:1px solid #334155;">마우스 휠 스크롤</td>
+                        <td style="padding:7px 10px; border:1px solid #334155;">화면을 확대하거나 축소합니다.</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:7px 10px; border:1px solid #334155; font-weight:bold; color:#f8fafc;">객체 선택 (Select)</td>
+                        <td style="padding:7px 10px; border:1px solid #334155;">3D 박스 또는 선반 좌클릭</td>
+                        <td style="padding:7px 10px; border:1px solid #334155;">선택한 객체에 초록색 강조 테두리가 표시됩니다.</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:7px 10px; border:1px solid #334155; font-weight:bold; color:#f8fafc;">선택 해제 (Clear)</td>
+                        <td style="padding:7px 10px; border:1px solid #334155;">3D 바닥(빈 공간) 더블클릭</td>
+                        <td style="padding:7px 10px; border:1px solid #334155;">선택 상태가 모두 해제됩니다.</td>
+                    </tr>
+                </table>
+
+                <h3 style="color:#818cf8; font-size:14px; margin-top:16px; margin-bottom:10px;">🎛️ 2. 오른쪽 컨트롤 패널 활용법</h3>
+                <ul style="margin:0 0 20px 0; padding-left:20px;">
+                    <li style="margin-bottom:8px;"><strong style="color:#e2e8f0;">분석 모드 (색상 시각화)</strong>: 제조사별, 거래처별, 출고등급(A:26년~/B:25년/C:24년이하/D:이력없음), 특이사항 메모별로 재고 색상을 구별합니다.</li>
+                    <li style="margin-bottom:8px;"><strong style="color:#e2e8f0;">선반/기둥 (ON/OFF)</strong>: 스위치를 끄면 철제 선반이 숨겨지고 재고 박스만 공중에 노출되어 내부 시인성이 극대화됩니다.</li>
+                    <li style="margin-bottom:8px;"><strong style="color:#e2e8f0;">경신 / GNN 하이라이트</strong>: B01, A01-25~, A02-25~(경신) 및 C02-09~14(GNN) 구역을 바닥 프레임으로 강조합니다.</li>
+                    <li style="margin-bottom:8px;"><strong style="color:#e2e8f0;">📝 이슈/메모 기록</strong>: 품목별/제조사별/거래처별 메모 작성 및 이전 기록을 조회하며 캡처 이미지(<code style="color:#a5b4fc; background:#1e293b; padding:2px 6px; border-radius:4px;">Ctrl+V</code>)를 첨부합니다.</li>
+                </ul>
+
+                <h3 style="color:#818cf8; font-size:14px; margin-top:16px; margin-bottom:10px;">📊 3. 데이터 엑셀 연동 & 테이블 활용법</h3>
+                <ul style="margin:0 0 10px 0; padding-left:20px;">
+                    <li style="margin-bottom:8px;"><strong style="color:#e2e8f0;">[① 현재고 엑셀]</strong>: 버튼을 눌러 재고현황상세 .xlsx / .xls 엑셀 파일을 업로드합니다.</li>
+                    <li style="margin-bottom:8px;"><strong style="color:#e2e8f0;">통합 검색</strong>: 로케이션, 품목명, 품목코드, 제조사, 거래처, DC 입력 시 실시간 검색됩니다.</li>
+                    <li style="margin-bottom:8px;"><strong style="color:#e2e8f0;">↔️ 열 너비 드래그 조절</strong>: 테이블 헤더 경계선을 마우스 드래그하여 각 컬럼의 너비를 조절합니다.</li>
+                    <li style="margin-bottom:8px;"><strong style="color:#e2e8f0;">🔃 더블클릭 정렬</strong>: 헤더 글씨를 더블클릭하면 오름차순/내림차순 정렬됩니다.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS event listeners for manual modal -->
+    <script>
+        const openManualBtn = document.getElementById("openManualBtn");
+        const closeManualBtn = document.getElementById("closeManualBtn");
+        const manualModal = document.getElementById("manualModal");
+
+        if (openManualBtn && manualModal) {
+            openManualBtn.addEventListener("click", () => {
+                manualModal.style.display = "flex";
+            });
+        }
+        if (closeManualBtn && manualModal) {
+            closeManualBtn.addEventListener("click", () => {
+                manualModal.style.display = "none";
+            });
+        }
+        if (manualModal) {
+            manualModal.addEventListener("click", (e) => {
+                if (e.target === manualModal) {
+                    manualModal.style.display = "none";
+                }
+            });
+        }
+    </script>
 
 </body>
 
