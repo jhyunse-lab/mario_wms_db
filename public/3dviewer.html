@@ -3148,29 +3148,29 @@
         display: none;
         position: fixed;
         top: 0; left: 0; right: 0; bottom: 0;
-        background: rgba(15, 23, 42, 0.75);
-        backdrop-filter: blur(4px);
+        background: rgba(15, 23, 42, 0.8);
+        backdrop-filter: blur(5px);
         z-index: 99999;
         align-items: center;
         justify-content: center;
     ">
         <div style="
             background: #0f172a;
-            border: 1.5px solid #4f46e5;
+            border: 1.5px solid #6366f1;
             border-radius: 16px;
-            width: 90%;
-            max-width: 680px;
-            max-height: 85vh;
+            width: 92%;
+            max-width: 720px;
+            max-height: 88vh;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85);
             overflow: hidden;
             color: #f8fafc;
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
         ">
             <!-- Modal Header -->
             <div style="
-                padding: 16px 20px;
+                padding: 16px 22px;
                 background: linear-gradient(135deg, #1e1b4b, #312e81);
                 border-bottom: 1px solid #4338ca;
                 display: flex;
@@ -3178,72 +3178,129 @@
                 justify-content: space-between;
             ">
                 <div style="font-size: 16px; font-weight: 700; color: #e0e7ff; display:flex; align-items:center; gap:8px;">
-                    📖 WMS 3D 대시보드 사용법 매뉴얼
+                    📦 WMS 3D 대시보드 사용자 매뉴얼
                 </div>
                 <button id="closeManualBtn" style="
                     background: none; border: none; color: #a5b4fc;
-                    font-size: 22px; font-weight: bold; cursor: pointer;
-                    line-height: 1; padding: 4px;
-                ">&times;</button>
+                    font-size: 24px; font-weight: bold; cursor: pointer;
+                    line-height: 1; padding: 4px; transition: color 0.15s;
+                " onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a5b4fc'">&times;</button>
             </div>
 
             <!-- Modal Content (Scrollable) -->
             <div style="
-                padding: 20px 24px;
+                padding: 22px 26px;
                 overflow-y: auto;
                 font-size: 13px;
-                line-height: 1.65;
+                line-height: 1.7;
                 color: #cbd5e1;
             ">
-                <h3 style="color:#818cf8; font-size:14px; margin-top:0; margin-bottom:10px;">🎮 1. 3D 화면 기본 조작법 (카메라 컨트롤)</h3>
+                <p style="margin-top:0; margin-bottom:16px; color:#94a3b8; font-size:12px;">
+                    본 매뉴얼은 <strong>WMS 3D 스마트 창고 대시보드</strong>의 모든 기능과 효율적인 조작 방법을 안내합니다.
+                </p>
+
+                <!-- Section 1 -->
+                <h3 style="color:#818cf8; font-size:14px; margin-top:16px; margin-bottom:10px; border-bottom:1px solid #334155; padding-bottom:4px;">
+                    🎮 1. 3D 화면 기본 조작법 (카메라 컨트롤)
+                </h3>
                 <table style="width:100%; border-collapse:collapse; margin-bottom:20px; font-size:12px;">
                     <tr style="background:#1e293b; color:#94a3b8;">
-                        <th style="padding:7px 10px; border:1px solid #334155; text-align:left;">동작</th>
-                        <th style="padding:7px 10px; border:1px solid #334155; text-align:left;">조작 방법</th>
-                        <th style="padding:7px 10px; border:1px solid #334155; text-align:left;">설명</th>
+                        <th style="padding:8px 10px; border:1px solid #334155; text-align:left; width:22%;">동작</th>
+                        <th style="padding:8px 10px; border:1px solid #334155; text-align:left; width:38%;">조작 방법</th>
+                        <th style="padding:8px 10px; border:1px solid #334155; text-align:left;">설명</th>
                     </tr>
                     <tr>
-                        <td style="padding:7px 10px; border:1px solid #334155; font-weight:bold; color:#f8fafc;">회전 (Rotate)</td>
-                        <td style="padding:7px 10px; border:1px solid #334155;">마우스 좌클릭 + 드래그</td>
-                        <td style="padding:7px 10px; border:1px solid #334155;">3D 창고를 다각도에서 입체적으로 회전하여 봅니다.</td>
+                        <td style="padding:8px 10px; border:1px solid #334155; font-weight:bold; color:#f8fafc;">회전 (Rotate)</td>
+                        <td style="padding:8px 10px; border:1px solid #334155; color:#a5b4fc; font-weight:600;">마우스 좌클릭 + 드래그</td>
+                        <td style="padding:8px 10px; border:1px solid #334155;">3D 창고를 다각도에서 입체적으로 회전하여 봅니다.</td>
                     </tr>
                     <tr>
-                        <td style="padding:7px 10px; border:1px solid #334155; font-weight:bold; color:#f8fafc;">이동 (Pan)</td>
-                        <td style="padding:7px 10px; border:1px solid #334155;">마우스 휠(중간) 클릭 + 드래그</td>
-                        <td style="padding:7px 10px; border:1px solid #334155;">화면 시점을 상/하/좌/우로 평행 이동합니다.</td>
+                        <td style="padding:8px 10px; border:1px solid #334155; font-weight:bold; color:#f8fafc;">이동 (Pan)</td>
+                        <td style="padding:8px 10px; border:1px solid #334155; color:#a5b4fc; font-weight:600;">마우스 휠(중간 버튼) 클릭 + 드래그</td>
+                        <td style="padding:8px 10px; border:1px solid #334155;">화면 시점을 상/하/좌/우로 평행 이동합니다.</td>
                     </tr>
                     <tr>
-                        <td style="padding:7px 10px; border:1px solid #334155; font-weight:bold; color:#f8fafc;">확대/축소 (Zoom)</td>
-                        <td style="padding:7px 10px; border:1px solid #334155;">마우스 휠 스크롤</td>
-                        <td style="padding:7px 10px; border:1px solid #334155;">화면을 확대하거나 축소합니다.</td>
+                        <td style="padding:8px 10px; border:1px solid #334155; font-weight:bold; color:#f8fafc;">확대/축소 (Zoom)</td>
+                        <td style="padding:8px 10px; border:1px solid #334155; color:#a5b4fc; font-weight:600;">마우스 휠 스크롤</td>
+                        <td style="padding:8px 10px; border:1px solid #334155;">화면을 확대하거나 축소합니다.</td>
                     </tr>
                     <tr>
-                        <td style="padding:7px 10px; border:1px solid #334155; font-weight:bold; color:#f8fafc;">객체 선택 (Select)</td>
-                        <td style="padding:7px 10px; border:1px solid #334155;">3D 박스 또는 선반 좌클릭</td>
-                        <td style="padding:7px 10px; border:1px solid #334155;">선택한 객체에 초록색 강조 테두리가 표시됩니다.</td>
+                        <td style="padding:8px 10px; border:1px solid #334155; font-weight:bold; color:#f8fafc;">객체 선택 (Select)</td>
+                        <td style="padding:8px 10px; border:1px solid #334155; color:#a5b4fc; font-weight:600;">3D 박스 또는 선반 좌클릭</td>
+                        <td style="padding:8px 10px; border:1px solid #334155;">선택된 박스/선반에 초록색 강조 테두리가 표시되며 우측 카드가 업데이트됩니다.</td>
                     </tr>
                     <tr>
-                        <td style="padding:7px 10px; border:1px solid #334155; font-weight:bold; color:#f8fafc;">선택 해제 (Clear)</td>
-                        <td style="padding:7px 10px; border:1px solid #334155;">3D 바닥(빈 공간) 더블클릭</td>
-                        <td style="padding:7px 10px; border:1px solid #334155;">선택 상태가 모두 해제됩니다.</td>
+                        <td style="padding:8px 10px; border:1px solid #334155; font-weight:bold; color:#f8fafc;">선택 해제 (Clear)</td>
+                        <td style="padding:8px 10px; border:1px solid #334155; color:#a5b4fc; font-weight:600;">3D 바닥(빈 공간) 더블클릭</td>
+                        <td style="padding:8px 10px; border:1px solid #334155;">선택 상태가 모두 해제됩니다.</td>
                     </tr>
                 </table>
 
-                <h3 style="color:#818cf8; font-size:14px; margin-top:16px; margin-bottom:10px;">🎛️ 2. 오른쪽 컨트롤 패널 활용법</h3>
-                <ul style="margin:0 0 20px 0; padding-left:20px;">
-                    <li style="margin-bottom:8px;"><strong style="color:#e2e8f0;">분석 모드 (색상 시각화)</strong>: 제조사별, 거래처별, 출고등급(A:26년~/B:25년/C:24년이하/D:이력없음), 특이사항 메모별로 재고 색상을 구별합니다.</li>
-                    <li style="margin-bottom:8px;"><strong style="color:#e2e8f0;">선반/기둥 (ON/OFF)</strong>: 스위치를 끄면 철제 선반이 숨겨지고 재고 박스만 공중에 노출되어 내부 시인성이 극대화됩니다.</li>
-                    <li style="margin-bottom:8px;"><strong style="color:#e2e8f0;">경신 / GNN 하이라이트</strong>: B01, A01-25~, A02-25~(경신) 및 C02-09~14(GNN) 구역을 바닥 프레임으로 강조합니다.</li>
-                    <li style="margin-bottom:8px;"><strong style="color:#e2e8f0;">📝 이슈/메모 기록</strong>: 품목별/제조사별/거래처별 메모 작성 및 이전 기록을 조회하며 캡처 이미지(<code style="color:#a5b4fc; background:#1e293b; padding:2px 6px; border-radius:4px;">Ctrl+V</code>)를 첨부합니다.</li>
+                <!-- Section 2 -->
+                <h3 style="color:#818cf8; font-size:14px; margin-top:20px; margin-bottom:10px; border-bottom:1px solid #334155; padding-bottom:4px;">
+                    🎛️ 2. 오른쪽 컨트롤 패널 활용법
+                </h3>
+                
+                <h4 style="color:#e2e8f0; font-size:13px; margin-top:10px; margin-bottom:6px;">2.1. 분석 모드 (Color Modes)</h4>
+                <p style="margin-top:0; margin-bottom:8px; font-size:12px;">우측 상단의 <strong>[분석 모드]</strong> 드롭다운에서 원하는 시각화 기준을 선택합니다.</p>
+                <ul style="margin:0 0 16px 0; padding-left:20px; font-size:12px;">
+                    <li style="margin-bottom:5px;">🏢 <strong style="color:#f8fafc;">제조사별</strong>: 제조사(Maker)에 따라 3D 박스 색상을 다채롭게 구분합니다.</li>
+                    <li style="margin-bottom:5px;">🤝 <strong style="color:#f8fafc;">거래처별</strong>: 거래처/화주(Partner) 단위로 색상을 구별합니다.</li>
+                    <li style="margin-bottom:5px;">🎖️ <strong style="color:#f8fafc;">출고등급</strong>: <strong>마지막 출고정보(최종출고일자)</strong> 기준으로 4단계 색상이 적용됩니다.
+                        <div style="margin-top:4px; margin-left:10px; display:flex; flex-direction:column; gap:3px;">
+                            <span>🟢 <strong style="color:#22c55e;">A등급</strong>: 2026년 이후 출고 이력</span>
+                            <span>🟡 <strong style="color:#facc15;">B등급</strong>: 2025년 출고 이력</span>
+                            <span>🔵 <strong style="color:#60a5fa;">C등급</strong>: 2024년 이전 출고 이력</span>
+                            <span>🔴 <strong style="color:#ef4444;">D등급</strong>: 출고 이력 없음</span>
+                        </div>
+                    </li>
+                    <li style="margin-top:5px; margin-bottom:5px;">🚨 <strong style="color:#f8fafc;">특이사항</strong>: 이슈/메모가 등록된 품목만 고유 색상으로 구별 강조하고, 메모가 없는 품목은 회색으로 보입니다.</li>
                 </ul>
 
-                <h3 style="color:#818cf8; font-size:14px; margin-top:16px; margin-bottom:10px;">📊 3. 데이터 엑셀 연동 & 테이블 활용법</h3>
-                <ul style="margin:0 0 10px 0; padding-left:20px;">
-                    <li style="margin-bottom:8px;"><strong style="color:#e2e8f0;">[① 현재고 엑셀]</strong>: 버튼을 눌러 재고현황상세 .xlsx / .xls 엑셀 파일을 업로드합니다.</li>
-                    <li style="margin-bottom:8px;"><strong style="color:#e2e8f0;">통합 검색</strong>: 로케이션, 품목명, 품목코드, 제조사, 거래처, DC 입력 시 실시간 검색됩니다.</li>
-                    <li style="margin-bottom:8px;"><strong style="color:#e2e8f0;">↔️ 열 너비 드래그 조절</strong>: 테이블 헤더 경계선을 마우스 드래그하여 각 컬럼의 너비를 조절합니다.</li>
-                    <li style="margin-bottom:8px;"><strong style="color:#e2e8f0;">🔃 더블클릭 정렬</strong>: 헤더 글씨를 더블클릭하면 오름차순/내림차순 정렬됩니다.</li>
+                <h4 style="color:#e2e8f0; font-size:13px; margin-top:14px; margin-bottom:6px;">2.2. 선반 시각화 토글 & 경신/GNN 영역 하이라이트</h4>
+                <ul style="margin:0 0 16px 0; padding-left:20px; font-size:12px;">
+                    <li style="margin-bottom:6px;">⬛ <strong style="color:#f8fafc;">선반/기둥 (ON/OFF 스위치)</strong>:
+                        <br/><code style="color:#cbd5e1; background:#1e293b; padding:1px 5px; border-radius:3px;">OFF</code>로 변경하면 철제 선반과 기둥 프레임이 숨겨지고 <strong>재고 박스만 공중에 선명하게 노출</strong>되어 내부 시인성이 극대화됩니다.
+                    </li>
+                    <li style="margin-bottom:6px;">🟧 <strong style="color:#f8fafc;">경신</strong> / 🟦 <strong style="color:#f8fafc;">GNN 체크박스</strong>:
+                        <br/>- <strong style="color:#ea580c;">경신</strong> 체크 시: <strong>B01</strong>, <strong>A01(25번~)</strong>, <strong>A02(25번~)</strong> 영역이 주황색 바닥/프레임으로 강조됩니다.
+                        <br/>- <strong style="color:#3b82f6;">GNN</strong> 체크 시: <strong>C02(09~14번)</strong> 영역이 파란색 바닥/프레임으로 강조됩니다.
+                    </li>
                 </ul>
+
+                <h4 style="color:#e2e8f0; font-size:13px; margin-top:14px; margin-bottom:6px;">2.3. 선택된 객체 카드 & 메모/이슈 기록 기능</h4>
+                <p style="margin-top:0; margin-bottom:8px; font-size:12px;">3D 박스나 하단 테이블 행을 선택하면 우측 <strong>선택된 객체 카드</strong>에 상세 정보가 표기됩니다.</p>
+                <ul style="margin:0 0 16px 0; padding-left:20px; font-size:12px;">
+                    <li style="margin-bottom:5px;"><strong style="color:#f8fafc;">표시 정보</strong>: 종류, 로케이션, 품목명[품목코드], DC, 출고등급, 제조사명, 거래처명, 수량</li>
+                    <li style="margin-bottom:5px;">📝 <strong style="color:#f8fafc;">[이슈/메모 기록] 버튼</strong>:
+                        <br/>- 버튼을 클릭하면 <strong>자유롭게 드래그(Drag) 이동이 가능한 메모 창</strong>이 열립니다.
+                        <br/>- <strong>상단 탭</strong>: <code style="color:#a5b4fc; background:#1e293b; padding:1px 5px; border-radius:3px;">품목별</code>, <code style="color:#a5b4fc; background:#1e293b; padding:1px 5px; border-radius:3px;">제조사별</code>, <code style="color:#a5b4fc; background:#1e293b; padding:1px 5px; border-radius:3px;">거래처별</code> 메모를 독립적으로 작성하고 이전 기록을 조회할 수 있습니다.
+                        <br/>- 📸 <strong>이미지 첨부</strong>: 스크린샷 캡처 이미지를 메모 창에 <code style="color:#a5b4fc; background:#1e293b; padding:1px 5px; border-radius:3px;">Ctrl+V</code>로 직접 붙여넣기 하거나 파일 첨부가 가능합니다.
+                    </li>
+                </ul>
+
+                <!-- Section 3 -->
+                <h3 style="color:#818cf8; font-size:14px; margin-top:20px; margin-bottom:10px; border-bottom:1px solid #334155; padding-bottom:4px;">
+                    📊 3. 데이터 엑셀 연동 & 테이블 활용법
+                </h3>
+                
+                <h4 style="color:#e2e8f0; font-size:13px; margin-top:10px; margin-bottom:6px;">3.1. 현재고 엑셀 업로드</h4>
+                <ul style="margin:0 0 16px 0; padding-left:20px; font-size:12px;">
+                    <li><strong style="color:#f8fafc;">[① 현재고 엑셀]</strong> 버튼을 눌러 재고현황상세 .xlsx / .xls 엑셀 파일을 업로드합니다.</li>
+                </ul>
+
+                <h4 style="color:#e2e8f0; font-size:13px; margin-top:14px; margin-bottom:6px;">3.2. 재고 인벤토리 테이블 조작</h4>
+                <ul style="margin:0 0 16px 0; padding-left:20px; font-size:12px;">
+                    <li style="margin-bottom:6px;">🔍 <strong style="color:#f8fafc;">통합 검색창</strong>: 로케이션, 품목명, 품목코드, 제조사, 거래처, DC 입력 시 실시간으로 테이블과 3D 뷰어가 동시에 필터링됩니다.</li>
+                    <li style="margin-bottom:6px;">↔️ <strong style="color:#f8fafc;">열 너비 마우스 드래그 조절</strong>: 테이블 헤더(<code style="color:#cbd5e1; background:#1e293b; padding:1px 4px;">로케이션</code>, <code style="color:#cbd5e1; background:#1e293b; padding:1px 4px;">품목명</code>, <code style="color:#cbd5e1; background:#1e293b; padding:1px 4px;">제조사명</code>, <code style="color:#cbd5e1; background:#1e293b; padding:1px 4px;">거래처명</code>, <code style="color:#cbd5e1; background:#1e293b; padding:1px 4px;">DC</code>, <code style="color:#cbd5e1; background:#1e293b; padding:1px 4px;">수량</code>)의 <strong>경계선을 클릭 후 마우스로 좌우 드래그</strong>하여 원하는 넓이로 조절합니다.</li>
+                    <li style="margin-bottom:6px;">🔃 <strong style="color:#f8fafc;">더블클릭 정렬</strong>: 테이블 헤더 글씨를 <strong>더블클릭</strong>하면 해당 열 기준으로 오름차순(▲) / 내림차순(▼) 정렬됩니다.</li>
+                    <li style="margin-bottom:6px;">📥 <strong style="color:#f8fafc;">[엑셀로 내보내기]</strong>: 현재 화면 및 필터에 조회된 인벤토리 데이터를 .xlsx 엑셀 파일로 바로 다운로드합니다.</li>
+                </ul>
+
+                <!-- Footer Tip -->
+                <div style="margin-top:20px; padding:12px 16px; background:#1e293b; border-left:4px solid #6366f1; border-radius:0 8px 8px 0; font-size:12px; color:#cbd5e1;">
+                    💡 <strong>Tip</strong>: 3D 화면이 어두울 경우 우측 투명도 슬라이더나 선반 ON/OFF 스위치를 조작해 보세요!
+                </div>
             </div>
         </div>
     </div>
@@ -3272,7 +3329,6 @@
             });
         }
     </script>
-
 </body>
 
 </html>
