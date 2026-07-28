@@ -1826,18 +1826,14 @@
             selPartEl.innerHTML = "거래처명: " + partnerName + (hasPartnerMemo ? ' <span style="background:#10b981; color:#fff; font-size:11px; padding:2px 6px; border-radius:4px; margin-left:6px; font-weight:700; display:inline-block;">💬 메모있음</span>' : '');
             selQtyEl.textContent = "수량: " + (row._QTY ?? "-");
             let abcText = "-";
-            let yr = row._LATEST_DC_YEAR;
             const itemCodeForAbc = (row._ITEM_CODE || "").toString().trim();
+            const lastDate = (window.shipmentData && itemCodeForAbc) ? window.shipmentData[itemCodeForAbc] : null;
 
-            if (!yr && window.shipmentData && itemCodeForAbc) {
-                const lastDate = window.shipmentData[itemCodeForAbc];
-                if (lastDate) yr = parseInt(lastDate.substring(0, 4), 10);
-            }
-
-            if (yr && yr > 0) {
-                if (yr >= 2026) abcText = `A등급 (최신DC: ${row._DC || yr+'년'})`;
-                else if (yr === 2025) abcText = `B등급 (최신DC: ${row._DC || yr+'년'})`;
-                else if (yr <= 2024) abcText = `C등급 (최신DC: ${row._DC || yr+'년'})`;
+            if (lastDate) {
+                const yr = parseInt(lastDate.substring(0, 4), 10);
+                if (yr >= 2026) abcText = `A등급 (최종출고: ${lastDate})`;
+                else if (yr === 2025) abcText = `B등급 (최종출고: ${lastDate})`;
+                else if (yr <= 2024 && yr > 0) abcText = `C등급 (최종출고: ${lastDate})`;
                 else abcText = `D등급 (이력없음)`;
             } else {
                 abcText = `D등급 (이력없음)`;
@@ -1936,17 +1932,13 @@
                     let color;
                     if (colorMode === "abc") {
                         const itemCode = (r._ITEM_CODE || "").toString().trim();
-                        let yr = r._LATEST_DC_YEAR;
-                        if (!yr && window.shipmentData) {
-                            const lastDate = window.shipmentData[itemCode];
-                            if (lastDate) yr = parseInt(lastDate.substring(0, 4), 10);
-                        }
-
-                        if (yr && yr > 0) {
+                        const lastDate = window.shipmentData ? window.shipmentData[itemCode] : null;
+                        if (lastDate) {
+                            const yr = parseInt(lastDate.substring(0, 4), 10);
                             if (yr >= 2026) color = new THREE.Color(0x22c55e);      // A등급 (녹색)
                             else if (yr === 2025) color = new THREE.Color(0xfacc15); // B등급 (노란색)
-                            else if (yr <= 2024) color = new THREE.Color(0x3b82f6);  // C등급 (파란색)
-                            else color = new THREE.Color(0xef4444);                  // D등급 (빨간색)
+                            else if (yr <= 2024 && yr > 0) color = new THREE.Color(0x3b82f6); // C등급 (파란색)
+                            else color = new THREE.Color(0xef4444);                 // D등급 (빨간색)
                         } else {
                             color = new THREE.Color(0xef4444);                      // D등급 (이력없음)
                         }
