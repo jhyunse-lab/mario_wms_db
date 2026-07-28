@@ -395,6 +395,7 @@
 
         #inventoryTable {
             width: 100%;
+            table-layout: fixed;
             border-collapse: collapse;
             font-size: 11px;
             color: #e5e7eb;
@@ -407,12 +408,40 @@
             z-index: 1;
         }
 
-        #inventoryTable th,
+        #inventoryTable th {
+            position: relative;
+            padding: 4px 6px;
+            border-bottom: 1px solid rgba(31, 41, 55, 0.9);
+            text-align: left;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
         #inventoryTable td {
             padding: 4px 6px;
             border-bottom: 1px solid rgba(31, 41, 55, 0.9);
             text-align: left;
             white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .col-resizer {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 7px;
+            cursor: col-resize;
+            user-select: none;
+            z-index: 10;
+            transition: background 0.15s ease;
+        }
+
+        .col-resizer:hover,
+        .col-resizer.resizing {
+            background: rgba(129, 140, 248, 0.8);
         }
 
         #inventoryTable tbody tr {
@@ -636,12 +665,12 @@
                 <table id="inventoryTable">
                     <thead>
                         <tr>
-                            <th id="thLoc" style="cursor:pointer; user-select:none;">로케이션</th>
-                            <th id="thItem" style="cursor:pointer; user-select:none;">품목명</th>
-                            <th id="thManu" style="cursor:pointer; user-select:none;">제조사명</th>
-                            <th id="thPart" style="cursor:pointer; user-select:none;">거래처명</th>
-                            <th id="thDC" style="cursor:pointer; user-select:none;">DC</th>
-                            <th id="thQty" style="cursor:pointer; user-select:none;">수량</th>
+                            <th id="thLoc" style="width: 90px; min-width: 50px; cursor:pointer; user-select:none;"><span>로케이션</span><div class="col-resizer"></div></th>
+                            <th id="thItem" style="width: 180px; min-width: 60px; cursor:pointer; user-select:none;"><span>품목명</span><div class="col-resizer"></div></th>
+                            <th id="thManu" style="width: 100px; min-width: 50px; cursor:pointer; user-select:none;"><span>제조사명</span><div class="col-resizer"></div></th>
+                            <th id="thPart" style="width: 120px; min-width: 50px; cursor:pointer; user-select:none;"><span>거래처명</span><div class="col-resizer"></div></th>
+                            <th id="thDC" style="width: 110px; min-width: 50px; cursor:pointer; user-select:none;"><span>DC</span><div class="col-resizer"></div></th>
+                            <th id="thQty" style="width: 60px; min-width: 40px; cursor:pointer; user-select:none;"><span>수량</span><div class="col-resizer"></div></th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -1614,11 +1643,12 @@
                 const el = document.getElementById(id);
                 if (!el) return;
                 const h = headers[id];
+                const span = el.querySelector('span') || el;
                 if (currentSortCol === h.col) {
-                    el.textContent = h.text + (currentSortDir === 'asc' ? ' ▲' : ' ▼');
+                    span.textContent = h.text + (currentSortDir === 'asc' ? ' ▲' : ' ▼');
                     el.style.color = '#c4b5fd';
                 } else {
-                    el.textContent = h.text;
+                    span.textContent = h.text;
                     el.style.color = '';
                 }
             });
@@ -3031,6 +3061,54 @@
             const el = document.getElementById(id);
             if (el) el.addEventListener('dblclick', () => handleHeaderSort(col));
         };
+        
+        // Enable mouse dragging to resize inventory table columns
+        function setupTableColumnResizable() {
+            const table = document.getElementById("inventoryTable");
+            if (!table) return;
+            const cols = table.querySelectorAll("th");
+
+            cols.forEach(th => {
+                const resizer = th.querySelector(".col-resizer");
+                if (!resizer) return;
+
+                // Stop sorting triggers when clicking/double-clicking on resizer
+                resizer.addEventListener("click", (e) => e.stopPropagation());
+                resizer.addEventListener("dblclick", (e) => e.stopPropagation());
+
+                let startX, startWidth;
+
+                const onMouseMove = (e) => {
+                    const diffX = e.pageX - startX;
+                    const minW = parseInt(th.style.minWidth, 10) || 40;
+                    const newW = Math.max(minW, startWidth + diffX);
+                    th.style.width = newW + "px";
+                };
+
+                const onMouseUp = () => {
+                    resizer.classList.remove("resizing");
+                    document.body.style.cursor = "";
+                    document.body.style.userSelect = "";
+                    window.removeEventListener("mousemove", onMouseMove);
+                    window.removeEventListener("mouseup", onMouseUp);
+                };
+
+                resizer.addEventListener("mousedown", (e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    startX = e.pageX;
+                    startWidth = th.offsetWidth;
+                    resizer.classList.add("resizing");
+                    document.body.style.cursor = "col-resize";
+                    document.body.style.userSelect = "none";
+                    window.addEventListener("mousemove", onMouseMove);
+                    window.addEventListener("mouseup", onMouseUp);
+                });
+            });
+        }
+
+        setupTableColumnResizable();
+
         bindHeaderSort('thLoc', '_LOCATION');
         bindHeaderSort('thItem', '_ITEM_NAME');
         bindHeaderSort('thManu', '_MANUFACTURER');
