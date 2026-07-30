@@ -1,0 +1,17 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Memo images upload security rules
+    match /memo_images/{allPaths=**} {
+      // Allow public read for attached memo images
+      allow read: if true;
+      
+      // Allow upload only if file is an image and size <= 10MB
+      allow write: if request.resource.contentType.matches('image/.*')
+                   && request.resource.size < 10 * 1024 * 1024;
+                   
+      // Allow delete
+      allow delete: if true;
+    }
+  }
+}

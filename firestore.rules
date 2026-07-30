@@ -1,0 +1,18 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Memos collection security rules
+    match /memos/{memoId} {
+      // Allow reading all memos
+      allow read: if true;
+      
+      // Allow creating memos if required fields are present
+      allow create: if request.resource.data.text is string
+                   && request.resource.data.text.size() > 0
+                   && request.resource.data.text.size() <= 5000;
+                   
+      // Allow updating & deleting memos
+      allow update, delete: if true;
+    }
+  }
+}
