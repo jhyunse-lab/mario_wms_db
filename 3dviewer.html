@@ -1469,22 +1469,22 @@
         function applyPartnerMappingToInventory() {
             if (!inventoryData || inventoryData.length === 0) return;
             inventoryData.forEach(row => {
-                // 1. If row already has a partner from excel, preserve it!
-                if (row._PARTNER && row._PARTNER.toString().trim() !== "") {
-                    return;
-                }
-
-                // 2. Map from file name if empty
-                const key = (row._FILE_NAME || "").toString().trim();
-                if (key && partnerByFileName[key]) {
-                    row._PARTNER = partnerByFileName[key];
-                    return;
-                }
-
-                // 3. Map from partnerData.json if still empty
+                // 1. If row has partner from partnerData.json (shipment data based), use shipment partners!
                 const itemCode = (row._ITEM_CODE || "").toString().trim();
                 if (window.partnerData && window.partnerData[itemCode]) {
                     row._PARTNER = window.partnerData[itemCode];
+                    return;
+                }
+
+                // 2. If row already has a valid partner from excel (excluding Mario Tronics)
+                if (row._PARTNER && row._PARTNER.toString().trim() !== "" && !row._PARTNER.includes("마리오트로닉스")) {
+                    return;
+                }
+
+                // 3. Map from file name if empty
+                const key = (row._FILE_NAME || "").toString().trim();
+                if (key && partnerByFileName[key]) {
+                    row._PARTNER = partnerByFileName[key];
                 }
             });
         }
@@ -1581,7 +1581,7 @@
                         row._ITEM_NAME ||
                         "";
 
-                    row._PARTNER =
+                    let rawPartner =
                         row.BUSINESS_PARTNER ||
                         row["거래처"] ||
                         row["거래처명"] ||
@@ -1591,6 +1591,11 @@
                         row.Partner ||
                         row.Vendor ||
                         "";
+                    rawPartner = (rawPartner || "").toString().trim();
+                    if (rawPartner === "(주)마리오트로닉스" || rawPartner === "마리오트로닉스" || rawPartner.includes("마리오트로닉스")) {
+                        rawPartner = "";
+                    }
+                    row._PARTNER = rawPartner;
 
                     row._CUSTOMER =
                         row.CUSTOMER_CODE ||
@@ -1628,16 +1633,33 @@
             const manuSet = new Set();
             const partnerSet = new Set();
             inventoryData.forEach(row => {
-                if (row._MANUFACTURER) manuSet.add(row._MANUFACTURER);
-                if (row._PARTNER) partnerSet.add(row._PARTNER);
+                if (row._ALL_MANUS) {
+                    row._ALL_MANUS.forEach(m => { if (m) manuSet.add(m); });
+                } else if (row._MANUFACTURER) {
+                    manuSet.add(row._MANUFACTURER);
+                }
+
+                if (row._ALL_PARTNERS) {
+                    row._ALL_PARTNERS.forEach(p => {
+                        if (p && !p.includes("마리오트로닉스")) {
+                            p.split(',').map(s => s.trim()).forEach(subP => { if (subP) partnerSet.add(subP); });
+                        }
+                    });
+                } else if (row._PARTNER && !row._PARTNER.includes("마리오트로닉스")) {
+                    row._PARTNER.split(',').map(s => s.trim()).forEach(subP => { if (subP) partnerSet.add(subP); });
+                }
             });
 
             // Add all partners from partnerData mapping to show in dropdown
             if (window.partnerData) {
-                Object.values(window.partnerData).forEach(p => {
-                    if (p) partnerSet.add(p);
+                Object.values(window.partnerData).forEach(pStr => {
+                    if (pStr) {
+                        pStr.split(',').map(s => s.trim()).forEach(p => {
+                            if (p && !p.includes("마리오트로닉스")) partnerSet.add(p);
+                        });
+                    }
                 });
-            };
+            }
 
             const manuArr = Array.from(manuSet).sort();
             const partnerArr = Array.from(partnerSet).sort();
