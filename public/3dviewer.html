@@ -3503,10 +3503,14 @@
                     </li>
                 </ul>
 
-                <h4 style="color:#e2e8f0; font-size:13px; margin-top:14px; margin-bottom:6px;">2.3. 선택된 객체 카드 & 메모/이슈 기록 기능</h4>
+                <h4 style="color:#e2e8f0; font-size:13px; margin-top:14px; margin-bottom:6px;">2.3. 선택된 객체 카드 & 다중 거래처/제조사 표기</h4>
                 <p style="margin-top:0; margin-bottom:8px; font-size:12px;">3D 박스나 하단 테이블 행을 선택하면 우측 <strong>선택된 객체 카드</strong>에 상세 정보가 표기됩니다.</p>
                 <ul style="margin:0 0 16px 0; padding-left:20px; font-size:12px;">
                     <li style="margin-bottom:5px;"><strong style="color:#f8fafc;">표시 정보</strong>: 종류, 로케이션, 품목명[품목코드], DC, 출고등급, 제조사명, 거래처명, 수량</li>
+                    <li style="margin-bottom:5px;">💡 <strong style="color:#f8fafc;">다중 거래처/제조사 집계</strong>:
+                        <br/>- 2024~2026 전체 출고 데이터를 기반으로 <strong>누적 출고량이 가장 많은 주력 고객사(1위)</strong>가 맨 앞에 배치되며, 수량별 상세 내역이 함께 표시됩니다.
+                        <br/>- 품목명이 같아도 <strong>고유 품목코드(ITEM_CODE)</strong>와 제조사를 기준으로 독립적으로 구별되어 관리됩니다.
+                    </li>
                     <li style="margin-bottom:5px;">📝 <strong style="color:#f8fafc;">[이슈/메모 기록] 버튼</strong>:
                         <br/>- 버튼을 클릭하면 <strong>자유롭게 드래그(Drag) 이동이 가능한 메모 창</strong>이 열립니다.
                         <br/>- <strong>상단 탭</strong>: <code style="color:#a5b4fc; background:#1e293b; padding:1px 5px; border-radius:3px;">품목별</code>, <code style="color:#a5b4fc; background:#1e293b; padding:1px 5px; border-radius:3px;">제조사별</code>, <code style="color:#a5b4fc; background:#1e293b; padding:1px 5px; border-radius:3px;">거래처별</code> 메모를 독립적으로 작성하고 이전 기록을 조회할 수 있습니다.
@@ -3521,15 +3525,26 @@
                 
                 <h4 style="color:#e2e8f0; font-size:13px; margin-top:10px; margin-bottom:6px;">3.1. 현재고 엑셀 업로드</h4>
                 <ul style="margin:0 0 16px 0; padding-left:20px; font-size:12px;">
-                    <li><strong style="color:#f8fafc;">[① 현재고 엑셀]</strong> 버튼을 눌러 재고현황상세 .xlsx / .xls 엑셀 파일을 업로드합니다.</li>
+                    <li><strong style="color:#f8fafc;">[① 현재고 엑셀]</strong> 버튼을 눌러 재고현황상세 .xlsx / .xls 엑셀 파일을 업로드합니다. 자사명은 자동 제외되고 실제 출고 고객사 데이터가 자동 연동됩니다.</li>
                 </ul>
 
-                <h4 style="color:#e2e8f0; font-size:13px; margin-top:14px; margin-bottom:6px;">3.2. 재고 인벤토리 테이블 조작</h4>
+                <h4 style="color:#e2e8f0; font-size:13px; margin-top:14px; margin-bottom:6px;">3.2. 재고 인벤토리 테이블 조작 & 3D 줌인</h4>
                 <ul style="margin:0 0 16px 0; padding-left:20px; font-size:12px;">
-                    <li style="margin-bottom:6px;">🔍 <strong style="color:#f8fafc;">통합 검색창</strong>: 로케이션, 품목명, 품목코드, 제조사, 거래처, DC 입력 시 실시간으로 테이블과 3D 뷰어가 동시에 필터링됩니다.</li>
-                    <li style="margin-bottom:6px;">↔️ <strong style="color:#f8fafc;">열 너비 마우스 드래그 조절</strong>: 테이블 헤더(<code style="color:#cbd5e1; background:#1e293b; padding:1px 4px;">로케이션</code>, <code style="color:#cbd5e1; background:#1e293b; padding:1px 4px;">품목명</code>, <code style="color:#cbd5e1; background:#1e293b; padding:1px 4px;">제조사명</code>, <code style="color:#cbd5e1; background:#1e293b; padding:1px 4px;">거래처명</code>, <code style="color:#cbd5e1; background:#1e293b; padding:1px 4px;">DC</code>, <code style="color:#cbd5e1; background:#1e293b; padding:1px 4px;">수량</code>)의 <strong>경계선을 클릭 후 마우스로 좌우 드래그</strong>하여 원하는 넓이로 조절합니다.</li>
+                    <li style="margin-bottom:6px;">🔍 <strong style="color:#f8fafc;">출고 거래처 및 통합 검색</strong>: 거래처명(<code style="color:#a5b4fc; background:#1e293b; padding:1px 4px;">경신</code> 등), 품목코드, 품목명, 로케이션 입력 시 실시간으로 테이블과 3D 뷰어가 동시에 필터링됩니다.</li>
+                    <li style="margin-bottom:6px;">🏷️ <strong style="color:#f8fafc;">인기 출고 거래처 퀵 태그 (Quick Filter)</strong>: 검색창 아래의 거래처 칩 버튼(<code style="color:#cbd5e1; background:#1e293b; padding:1px 4px;">경신</code>, <code style="color:#cbd5e1; background:#1e293b; padding:1px 4px;">엘에스오토모티브</code>, <code style="color:#cbd5e1; background:#1e293b; padding:1px 4px;">대동모벨</code> 등)을 클릭하여 해당 고객사 출고 품목을 한 번에 모아봅니다.</li>
+                    <li style="margin-bottom:6px;">🎯 <strong style="color:#f8fafc;">품목 더블클릭 3D 카메라 줌인 (Focus Zoom)</strong>: 테이블의 특정 품목 행을 <strong>더블클릭</strong>하면 3D 뷰어 카메라가 해당 위치로 부드럽게 줌인(Zoom-in) 이동하여 선반 위치를 한눈에 보여줍니다.</li>
+                    <li style="margin-bottom:6px;">↔️ <strong style="color:#f8fafc;">열 너비 마우스 드래그 조절</strong>: 테이블 헤더의 <strong>경계선을 클릭 후 마우스로 좌우 드래그</strong>하여 원하는 넓이로 조절합니다.</li>
                     <li style="margin-bottom:6px;">🔃 <strong style="color:#f8fafc;">더블클릭 정렬</strong>: 테이블 헤더 글씨를 <strong>더블클릭</strong>하면 해당 열 기준으로 오름차순(▲) / 내림차순(▼) 정렬됩니다.</li>
                     <li style="margin-bottom:6px;">📥 <strong style="color:#f8fafc;">[엑셀로 내보내기]</strong>: 현재 화면 및 필터에 조회된 인벤토리 데이터를 .xlsx 엑셀 파일로 바로 다운로드합니다.</li>
+                </ul>
+
+                <!-- Section 4 -->
+                <h3 style="color:#818cf8; font-size:14px; margin-top:20px; margin-bottom:10px; border-bottom:1px solid #334155; padding-bottom:4px;">
+                    🌐 4. 테스트 서버 & 운영 서버 환경 안내
+                </h3>
+                <ul style="margin:0 0 16px 0; padding-left:20px; font-size:12px;">
+                    <li style="margin-bottom:5px;">🧪 <strong style="color:#f8fafc;">테스트 서버 (검증용)</strong>: <code style="color:#a5b4fc; background:#1e293b; padding:1px 5px; border-radius:3px;">jhyunse-lab.github.io/mario_wms_db/3dviewer.html</code> (기능 사전 검증)</li>
+                    <li style="margin-bottom:5px;">🚀 <strong style="color:#f8fafc;">운영 서버 (실서버)</strong>: <code style="color:#34d399; background:#1e293b; padding:1px 5px; border-radius:3px;">mario-wms-db.vercel.app/3dviewer.html</code> (공식 안정 버전)</li>
                 </ul>
 
                 <!-- Footer Tip -->
