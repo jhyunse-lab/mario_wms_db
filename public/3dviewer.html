@@ -2405,12 +2405,12 @@
 
             focusItemIn3D(location, itemCode);
 
-            // Calculate close-up camera position
+            // Calculate comfortably zoomed camera position (wider view)
             const boxPos = box.position.clone();
             const targetCamPos = new THREE.Vector3(
-                boxPos.x + 3.5,
-                boxPos.y + 2.5,
-                boxPos.z + 4.5
+                boxPos.x + 6.0,
+                boxPos.y + 4.5,
+                boxPos.z + 7.5
             );
             smoothMoveCamera(targetCamPos, boxPos, 700);
         }
