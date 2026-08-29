@@ -882,12 +882,16 @@
             const base = rows[0];
             let totalQty = 0;
             const dcMap = {};
+            const partnerMap = {};
+            const manuMap = {};
             let latestYear = 0;
             let latestDCStr = "";
 
             rows.forEach(r => {
                 const q = Number(r._QTY || 0);
                 totalQty += q;
+                
+                // DC aggregation
                 const dc = (r._DC || "").toString().trim();
                 if (dc) {
                     dcMap[dc] = (dcMap[dc] || 0) + q;
@@ -899,10 +903,23 @@
                         latestDCStr = dc;
                     }
                 }
+
+                // Partner aggregation
+                const p = (r._PARTNER || "").toString().trim();
+                if (p) {
+                    partnerMap[p] = (partnerMap[p] || 0) + q;
+                }
+
+                // Manufacturer aggregation
+                const m = (r._MANUFACTURER || "").toString().trim();
+                if (m) {
+                    manuMap[m] = (manuMap[m] || 0) + q;
+                }
             });
 
+            // DC Summary
             const dcEntries = Object.entries(dcMap);
-            let dcSummaryText = "";
+            let dcSummaryText = "-";
             if (dcEntries.length > 0) {
                 if (dcEntries.length === 1) {
                     dcSummaryText = dcEntries[0][0];
@@ -910,8 +927,36 @@
                     const details = dcEntries.map(([k, v]) => `${k}:${v}개`).join(', ');
                     dcSummaryText = `${latestDCStr || dcEntries[0][0]} (${details})`;
                 }
-            } else {
-                dcSummaryText = "-";
+            }
+
+            // Partner Summary & List
+            const partnerEntries = Object.entries(partnerMap);
+            let partnerSummaryText = "-";
+            let partnerMainText = base._PARTNER || "";
+            const allPartners = Object.keys(partnerMap);
+            if (partnerEntries.length > 0) {
+                partnerMainText = partnerEntries.map(([k]) => k).join(', ');
+                if (partnerEntries.length === 1) {
+                    partnerSummaryText = partnerEntries[0][0];
+                } else {
+                    const details = partnerEntries.map(([k, v]) => `${k}:${v}개`).join(', ');
+                    partnerSummaryText = `${partnerMainText} (${details})`;
+                }
+            }
+
+            // Manufacturer Summary & List
+            const manuEntries = Object.entries(manuMap);
+            let manuSummaryText = "-";
+            let manuMainText = base._MANUFACTURER || "";
+            const allManus = Object.keys(manuMap);
+            if (manuEntries.length > 0) {
+                manuMainText = manuEntries.map(([k]) => k).join(', ');
+                if (manuEntries.length === 1) {
+                    manuSummaryText = manuEntries[0][0];
+                } else {
+                    const details = manuEntries.map(([k, v]) => `${k}:${v}개`).join(', ');
+                    manuSummaryText = `${manuMainText} (${details})`;
+                }
             }
 
             return {
@@ -919,8 +964,12 @@
                 _LOCATION: base._LOCATION,
                 _ITEM_CODE: base._ITEM_CODE,
                 _ITEM_NAME: base._ITEM_NAME,
-                _MANUFACTURER: base._MANUFACTURER,
-                _PARTNER: base._PARTNER,
+                _MANUFACTURER: manuMainText || base._MANUFACTURER || "",
+                _MANUFACTURER_SUMMARY: manuSummaryText,
+                _ALL_MANUS: allManus.length > 0 ? allManus : (base._MANUFACTURER ? [base._MANUFACTURER] : []),
+                _PARTNER: partnerMainText || base._PARTNER || "",
+                _PARTNER_SUMMARY: partnerSummaryText,
+                _ALL_PARTNERS: allPartners.length > 0 ? allPartners : (base._PARTNER ? [base._PARTNER] : []),
                 _DC: latestDCStr || base._DC || "",
                 _LATEST_DC_YEAR: latestYear,
                 _DC_SUMMARY: dcSummaryText,
@@ -1420,13 +1469,19 @@
         function applyPartnerMappingToInventory() {
             if (!inventoryData || inventoryData.length === 0) return;
             inventoryData.forEach(row => {
-                // 1. Map from file name
+                // 1. If row already has a partner from excel, preserve it!
+                if (row._PARTNER && row._PARTNER.toString().trim() !== "") {
+                    return;
+                }
+
+                // 2. Map from file name if empty
                 const key = (row._FILE_NAME || "").toString().trim();
                 if (key && partnerByFileName[key]) {
                     row._PARTNER = partnerByFileName[key];
+                    return;
                 }
 
-                // 2. Map from partnerData.json
+                // 3. Map from partnerData.json if still empty
                 const itemCode = (row._ITEM_CODE || "").toString().trim();
                 if (window.partnerData && window.partnerData[itemCode]) {
                     row._PARTNER = window.partnerData[itemCode];
@@ -1620,8 +1675,14 @@
                 const hasItemIssue = window.itemsWithIssues && window.itemsWithIssues.has(code);
                 if (!hasItemIssue) return false;
             }
-            if (manuFilter && manuFilter !== "__ALL__" && manu !== manuFilter) return false;
-            if (partnerFilter && partnerFilter !== "__ALL__" && partn !== partnerFilter) return false;
+            if (manuFilter && manuFilter !== "__ALL__") {
+                const allManus = row._ALL_MANUS || (manu ? [manu] : []);
+                if (!allManus.includes(manuFilter) && !manu.includes(manuFilter)) return false;
+            }
+            if (partnerFilter && partnerFilter !== "__ALL__") {
+                const allPartners = row._ALL_PARTNERS || (partn ? [partn] : []);
+                if (!allPartners.includes(partnerFilter) && !partn.includes(partnerFilter)) return false;
+            }
 
             if (currentAbcFilter && currentAbcFilter !== "__ALL__") {
                 const itemCode = (row._ITEM_CODE || "").toString().trim();
@@ -1836,13 +1897,15 @@
             selLocEl.textContent = "로케이션: " + (loc || "-");
             selItemEl.textContent = "품목명: " + (row._ITEM_NAME || "-") + " [" + (row._ITEM_CODE || "-") + "]";
             if (selDcEl) selDcEl.textContent = "DC: " + (row._DC_SUMMARY || row._DC || "-");
-            const hasManuMemo = window.manufacturersWithIssues && window.manufacturersWithIssues.has(row._MANUFACTURER || "");
-            selManuEl.innerHTML = "제조사명: " + (row._MANUFACTURER || "-") + (hasManuMemo ? ' <span style="background:#4f46e5; color:#fff; font-size:11px; padding:2px 6px; border-radius:4px; margin-left:6px; font-weight:700; display:inline-block;">💬 메모있음</span>' : '');
+            const manuDisplayText = row._MANUFACTURER_SUMMARY && row._MANUFACTURER_SUMMARY !== "-" ? row._MANUFACTURER_SUMMARY : (row._MANUFACTURER || "-");
+            const allManus = row._ALL_MANUS || (row._MANUFACTURER ? [row._MANUFACTURER] : []);
+            const hasManuMemo = allManus.some(m => window.manufacturersWithIssues && window.manufacturersWithIssues.has(m));
+            selManuEl.innerHTML = "제조사명: " + manuDisplayText + (hasManuMemo ? ' <span style="background:#4f46e5; color:#fff; font-size:11px; padding:2px 6px; border-radius:4px; margin-left:6px; font-weight:700; display:inline-block;">💬 메모있음</span>' : '');
 
-            const itemCodeForPartner = (row._ITEM_CODE || "").toString().trim();
-            const partnerName = (window.partnerData && window.partnerData[itemCodeForPartner]) ? window.partnerData[itemCodeForPartner] : (row._PARTNER || "-");
-            const hasPartnerMemo = window.partnersWithIssues && window.partnersWithIssues.has(partnerName || "");
-            selPartEl.innerHTML = "거래처명: " + partnerName + (hasPartnerMemo ? ' <span style="background:#10b981; color:#fff; font-size:11px; padding:2px 6px; border-radius:4px; margin-left:6px; font-weight:700; display:inline-block;">💬 메모있음</span>' : '');
+            const partnerDisplayText = row._PARTNER_SUMMARY && row._PARTNER_SUMMARY !== "-" ? row._PARTNER_SUMMARY : (row._PARTNER || "-");
+            const allPartners = row._ALL_PARTNERS || (row._PARTNER ? [row._PARTNER] : []);
+            const hasPartnerMemo = allPartners.some(p => window.partnersWithIssues && window.partnersWithIssues.has(p));
+            selPartEl.innerHTML = "거래처명: " + partnerDisplayText + (hasPartnerMemo ? ' <span style="background:#10b981; color:#fff; font-size:11px; padding:2px 6px; border-radius:4px; margin-left:6px; font-weight:700; display:inline-block;">💬 메모있음</span>' : '');
             selQtyEl.textContent = "수량: " + (row._QTY ?? "-");
             let abcText = "-";
             const itemCodeForAbc = (row._ITEM_CODE || "").toString().trim();
