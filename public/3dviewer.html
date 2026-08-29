@@ -664,14 +664,19 @@
                 <option value="__ALL__">제조사: 전체</option>
             </select>
             <select id="partnerFilter">
-                <option value="__ALL__">거래처: 전체</option>
+                <option value="__ALL__">🏢 출고거래처: 전체</option>
             </select>
         </div>
 
         <!-- 검색 + X 버튼 -->
         <div id="searchWrapper">
-            <input id="searchBox" placeholder="검색: 로케이션 / 품목명 / 코드 / 제조사명 / 거래처명 / 고객명" />
+            <input id="searchBox" placeholder="🔍 출고거래처(경신 등) / 품목명 / 코드 / 로케이션 검색" />
             <button id="clearSearch" type="button">×</button>
+        </div>
+
+        <!-- 인기 출고거래처 퀵 필터 태그 -->
+        <div id="partnerQuickTags" style="display:flex; gap:5px; overflow-x:auto; padding:2px 0 6px; scrollbar-width:none; -webkit-overflow-scrolling:touch;">
+            <!-- Generated dynamically -->
         </div>
 
         <!-- 테이블 -->
@@ -1672,13 +1677,75 @@
                 manufacturerFilterEl.appendChild(opt);
             });
 
-            partnerFilterEl.innerHTML = '<option value="__ALL__">거래처: 전체</option>';
+            partnerFilterEl.innerHTML = '<option value="__ALL__">🏢 출고거래처: 전체</option>';
             partnerArr.forEach(p => {
                 const opt = document.createElement("option");
                 opt.value = p;
                 opt.textContent = p;
                 partnerFilterEl.appendChild(opt);
             });
+
+            // Populate Quick Partner Filter Tags
+            const quickTagsEl = document.getElementById("partnerQuickTags");
+            if (quickTagsEl) {
+                quickTagsEl.innerHTML = "";
+                const allTag = document.createElement("button");
+                allTag.type = "button";
+                allTag.textContent = "전체";
+                allTag.style.cssText = "padding:3px 8px; font-size:11px; font-weight:600; border-radius:999px; border:1px solid #4338ca; background:#312e81; color:#e0e7ff; cursor:pointer; white-space:nowrap; transition:all 0.15s;";
+                allTag.onclick = () => {
+                    partnerFilterEl.value = "__ALL__";
+                    currentPartnerFilter = "__ALL__";
+                    updateQuickTagStyles("__ALL__");
+                    updateInventoryTable();
+                };
+                quickTagsEl.appendChild(allTag);
+
+                // Top popular shipment partners (경신, 엘에스오토모티브, 대동모벨, 덕일산업 등)
+                const popularKeywords = ["경신", "엘에스오토모티브", "대동모벨", "덕일산업", "디엔에이테크", "유라", "유성전자", "행성", "한덕", "명성"];
+                const addedPartners = new Set();
+
+                popularKeywords.forEach(kw => {
+                    const match = partnerArr.find(p => p.includes(kw));
+                    if (match && !addedPartners.has(match)) {
+                        addedPartners.add(match);
+                        const tag = document.createElement("button");
+                        tag.type = "button";
+                        // Shorten name for tag
+                        let shortName = match.replace(/주식회사|\(주\)|㈜/g, '').trim();
+                        if (shortName.length > 8) shortName = shortName.slice(0, 8);
+                        tag.textContent = shortName;
+                        tag.title = match;
+                        tag.dataset.partner = match;
+                        tag.style.cssText = "padding:3px 8px; font-size:11px; font-weight:500; border-radius:999px; border:1px solid #334155; background:#1e293b; color:#94a3b8; cursor:pointer; white-space:nowrap; transition:all 0.15s;";
+                        tag.onclick = () => {
+                            partnerFilterEl.value = match;
+                            currentPartnerFilter = match;
+                            updateQuickTagStyles(match);
+                            updateInventoryTable();
+                        };
+                        quickTagsEl.appendChild(tag);
+                    }
+                });
+            }
+
+            function updateQuickTagStyles(selectedPartner) {
+                const tags = document.querySelectorAll("#partnerQuickTags button");
+                tags.forEach(btn => {
+                    const isSelected = (selectedPartner === "__ALL__" && btn.textContent === "전체") || (btn.dataset.partner === selectedPartner);
+                    if (isSelected) {
+                        btn.style.borderColor = "#818cf8";
+                        btn.style.background = "#4f46e5";
+                        btn.style.color = "#ffffff";
+                        btn.style.fontWeight = "700";
+                    } else {
+                        btn.style.borderColor = "#334155";
+                        btn.style.background = "#1e293b";
+                        btn.style.color = "#94a3b8";
+                        btn.style.fontWeight = "500";
+                    }
+                });
+            }
 
             currentManufacturerFilter = "__ALL__";
             currentPartnerFilter = "__ALL__";
@@ -1720,8 +1787,12 @@
             }
 
             if (textFilter) {
-                const hay = (loc + " " + item + " " + code + " " + manu + " " + partn + " " + cust + " " + dc).toLowerCase();
-                if (!hay.includes(textFilter.toLowerCase())) return false;
+                const allP = (row._ALL_PARTNERS || []).join(" ");
+                const allM = (row._ALL_MANUS || []).join(" ");
+                const hay = (loc + " " + item + " " + code + " " + manu + " " + allM + " " + partn + " " + allP + " " + cust + " " + dc).toLowerCase();
+                const terms = textFilter.toLowerCase().trim().split(/\s+/);
+                const allMatched = terms.every(term => hay.includes(term));
+                if (!allMatched) return false;
             }
             return true;
         }
