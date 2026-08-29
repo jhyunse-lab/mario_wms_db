@@ -1923,6 +1923,10 @@
                 tr.onclick = () => {
                     selectItemFromRow(row);
                 };
+                tr.ondblclick = () => {
+                    selectItemFromRow(row);
+                    zoomToItemIn3D(loc, row._ITEM_CODE || "");
+                };
                 tr.innerHTML = `
         <td>${loc}</td>
         <td>${item}</td>
@@ -2016,9 +2020,8 @@
             if (selAbcEl) selAbcEl.textContent = "출고등급: " + abcText;
 
             currentItemCodeForMemo = itemCode;
-            currentItemCodeForMemo = itemCode;
-            currentManufacturerForMemo = (row._MANUFACTURER || "").toString().trim();
-            currentPartnerForMemo = partnerName !== "-" ? partnerName : "";
+            currentManufacturerForMemo = (row._MANUFACTURER || (allManus.length > 0 ? allManus[0] : "")).toString().trim();
+            currentPartnerForMemo = (row._PARTNER || (allPartners.length > 0 ? allPartners[0] : "")).toString().trim();
 
             if (itemCode && itemCode !== "") {
                 openMemoBtn.style.display = "block";
@@ -2362,6 +2365,54 @@
             clearSelectionOnly();
             priorityLocation = null;
             updateInventoryTable();
+        }
+
+        let cameraAnimId = null;
+        function smoothMoveCamera(targetPos, lookAtPos, duration = 600) {
+            if (cameraAnimId) cancelAnimationFrame(cameraAnimId);
+            const startCamPos = camera.position.clone();
+            const startTargetPos = controls.target.clone();
+            const startTime = performance.now();
+
+            function animate(time) {
+                const elapsed = time - startTime;
+                const progress = Math.min(elapsed / duration, 1.0);
+                // Ease out cubic
+                const ease = 1 - Math.pow(1 - progress, 3);
+
+                camera.position.lerpVectors(startCamPos, targetPos, ease);
+                controls.target.lerpVectors(startTargetPos, lookAtPos, ease);
+                controls.update();
+
+                if (progress < 1.0) {
+                    cameraAnimId = requestAnimationFrame(animate);
+                } else {
+                    cameraAnimId = null;
+                }
+            }
+            cameraAnimId = requestAnimationFrame(animate);
+        }
+
+        function zoomToItemIn3D(location, itemCode) {
+            const box = allBins.find(b => {
+                const r = b.userData.rowRef;
+                if (!r) return false;
+                if (r._LOCATION !== location) return false;
+                if (itemCode && r._ITEM_CODE !== itemCode) return false;
+                return true;
+            });
+            if (!box) return;
+
+            focusItemIn3D(location, itemCode);
+
+            // Calculate close-up camera position
+            const boxPos = box.position.clone();
+            const targetCamPos = new THREE.Vector3(
+                boxPos.x + 3.5,
+                boxPos.y + 2.5,
+                boxPos.z + 4.5
+            );
+            smoothMoveCamera(targetCamPos, boxPos, 700);
         }
 
         function focusItemIn3D(location, itemCode) {
