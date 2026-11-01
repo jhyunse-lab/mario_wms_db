@@ -174,19 +174,30 @@ window.updateIssueMemo = async function(memoId, date, text, author, imageUrl, im
 
 // ==========================================
 // 마스터 출고 데이터 & 거래처 데이터 클라우드 동기화
+// (테스트 서버와 운영 본서버의 클라우드 저장소 완전 분리)
 // ==========================================
+function getMasterCollectionName() {
+    const host = window.location.hostname || "";
+    // 테스트 서버(github.io 또는 로컬 테스트)는 테스트 전용 DB 컬렉션 사용
+    if (host.includes("github.io") || host.includes("localhost") || host.includes("127.0.0.1")) {
+        return "test_system_master";
+    }
+    // 운영 본서버(mario-wms-db.vercel.app)는 운영 전용 독립 DB 컬렉션 사용
+    return "prod_system_master";
+}
+
 window.loadMasterDataFromFirebase = async function() {
     try {
-        const shipDoc = await getDoc(doc(db, "system_master", "shipment_data"));
-        const partDoc = await getDoc(doc(db, "system_master", "partner_data"));
-        const shipMetaDoc = await getDoc(doc(db, "system_master", "shipment_meta"));
-        const partMetaDoc = await getDoc(doc(db, "system_master", "partner_meta"));
-        const legacyMetaDoc = await getDoc(doc(db, "system_master", "meta"));
+        const colName = getMasterCollectionName();
+        const shipDoc = await getDoc(doc(db, colName, "shipment_data"));
+        const partDoc = await getDoc(doc(db, colName, "partner_data"));
+        const shipMetaDoc = await getDoc(doc(db, colName, "shipment_meta"));
+        const partMetaDoc = await getDoc(doc(db, colName, "partner_meta"));
 
         let shipmentData = null;
         let partnerData = null;
-        let shipmentMeta = shipMetaDoc.exists() ? shipMetaDoc.data() : (legacyMetaDoc.exists() ? legacyMetaDoc.data() : null);
-        let partnerMeta = partMetaDoc.exists() ? partMetaDoc.data() : (legacyMetaDoc.exists() ? legacyMetaDoc.data() : null);
+        let shipmentMeta = shipMetaDoc.exists() ? shipMetaDoc.data() : null;
+        let partnerMeta = partMetaDoc.exists() ? partMetaDoc.data() : null;
 
         if (shipDoc.exists()) {
             const shipData = shipDoc.data();
@@ -216,13 +227,14 @@ window.loadMasterShipmentDataFromFirebase = window.loadMasterDataFromFirebase;
 // 1. 출고일자 & 출고등급 데이터 독립 저장
 window.saveMasterShipmentDataToFirebase = async function(shipmentData, meta) {
     try {
-        await setDoc(doc(db, "system_master", "shipment_data"), {
+        const colName = getMasterCollectionName();
+        await setDoc(doc(db, colName, "shipment_data"), {
             json: JSON.stringify(shipmentData),
             count: Object.keys(shipmentData).length,
             updatedAt: serverTimestamp()
         });
 
-        await setDoc(doc(db, "system_master", "shipment_meta"), {
+        await setDoc(doc(db, colName, "shipment_meta"), {
             ...meta,
             updatedAt: serverTimestamp()
         });
@@ -237,13 +249,14 @@ window.saveMasterShipmentDataToFirebase = async function(shipmentData, meta) {
 // 2. 거래처 매핑 데이터 독립 저장
 window.saveMasterPartnerDataToFirebase = async function(partnerData, meta) {
     try {
-        await setDoc(doc(db, "system_master", "partner_data"), {
+        const colName = getMasterCollectionName();
+        await setDoc(doc(db, colName, "partner_data"), {
             json: JSON.stringify(partnerData),
             count: Object.keys(partnerData).length,
             updatedAt: serverTimestamp()
         });
 
-        await setDoc(doc(db, "system_master", "partner_meta"), {
+        await setDoc(doc(db, colName, "partner_meta"), {
             ...meta,
             updatedAt: serverTimestamp()
         });
