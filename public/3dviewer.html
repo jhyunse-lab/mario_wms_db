@@ -4190,7 +4190,7 @@
                             window.shipmentMeta = meta;
 
                             if (shipmentSyncText) {
-                                shipmentSyncText.textContent = updatedAtStr.split(" ")[0];
+                                shipmentSyncText.textContent = `${updatedAtStr.split(" ")[0]} (${uploaderName})`;
                                 shipmentSyncText.style.color = "#38bdf8";
                             }
 
@@ -4396,7 +4396,7 @@
                             window.partnerMeta = meta;
 
                             if (partnerSyncText) {
-                                partnerSyncText.textContent = updatedAtStr.split(" ")[0];
+                                partnerSyncText.textContent = `${updatedAtStr.split(" ")[0]} (${uploaderName})`;
                                 partnerSyncText.style.color = "#34d399";
                             }
 
@@ -4465,16 +4465,16 @@
                             if (cloud.partnerMeta) window.partnerMeta = cloud.partnerMeta;
 
                             if (shipmentSyncText && cloud.shipmentMeta) {
-                                const dt = cloud.shipmentMeta.updatedAtStr || "최신";
-                                const auth = cloud.shipmentMeta.updatedBy || "직원";
-                                shipmentSyncText.textContent = (dt || "").split(" ")[0];
+                                const dt = (cloud.shipmentMeta.updatedAtStr || "최신").split(" ")[0];
+                                const auth = cloud.shipmentMeta.updatedBy ? ` (${cloud.shipmentMeta.updatedBy})` : "";
+                                shipmentSyncText.textContent = `${dt}${auth}`;
                                 shipmentSyncText.style.color = "#38bdf8";
                             }
 
                             if (partnerSyncText && cloud.partnerMeta) {
-                                const dt = cloud.partnerMeta.updatedAtStr || "최신";
-                                const auth = cloud.partnerMeta.updatedBy || "직원";
-                                partnerSyncText.textContent = (dt || "").split(" ")[0];
+                                const dt = (cloud.partnerMeta.updatedAtStr || "최신").split(" ")[0];
+                                const auth = cloud.partnerMeta.updatedBy ? ` (${cloud.partnerMeta.updatedBy})` : "";
+                                partnerSyncText.textContent = `${dt}${auth}`;
                                 partnerSyncText.style.color = "#34d399";
                             }
 
