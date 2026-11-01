@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, serverTimestamp, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, serverTimestamp, doc, deleteDoc, updateDoc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 const firebaseConfig = {
@@ -169,6 +169,73 @@ window.updateIssueMemo = async function(memoId, date, text, author, imageUrl, im
     } catch (e) {
         console.error("Error updating memo", e);
         return false;
+    }
+};
+
+// ==========================================
+// 마스터 출고 데이터 & 거래처 데이터 클라우드 동기화
+// ==========================================
+window.loadMasterShipmentDataFromFirebase = async function() {
+    try {
+        const metaDoc = await getDoc(doc(db, "system_master", "meta"));
+        if (!metaDoc.exists()) {
+            return null;
+        }
+        const meta = metaDoc.data();
+
+        const shipDoc = await getDoc(doc(db, "system_master", "shipment_data"));
+        const partDoc = await getDoc(doc(db, "system_master", "partner_data"));
+
+        let shipmentData = null;
+        let partnerData = null;
+
+        if (shipDoc.exists()) {
+            const shipData = shipDoc.data();
+            shipmentData = typeof shipData.json === "string" ? JSON.parse(shipData.json) : shipData.json;
+        }
+
+        if (partDoc.exists()) {
+            const partData = partDoc.data();
+            partnerData = typeof partData.json === "string" ? JSON.parse(partData.json) : partData.json;
+        }
+
+        return {
+            meta: meta || null,
+            shipmentData: shipmentData || null,
+            partnerData: partnerData || null
+        };
+    } catch (e) {
+        console.warn("Could not load master shipment data from Firebase (fallback to local json):", e);
+        return null;
+    }
+};
+
+window.saveMasterShipmentDataToFirebase = async function(shipmentData, partnerData, meta) {
+    try {
+        // 1. Save shipmentData
+        await setDoc(doc(db, "system_master", "shipment_data"), {
+            json: JSON.stringify(shipmentData),
+            count: Object.keys(shipmentData).length,
+            updatedAt: serverTimestamp()
+        });
+
+        // 2. Save partnerData
+        await setDoc(doc(db, "system_master", "partner_data"), {
+            json: JSON.stringify(partnerData),
+            count: Object.keys(partnerData).length,
+            updatedAt: serverTimestamp()
+        });
+
+        // 3. Save meta
+        await setDoc(doc(db, "system_master", "meta"), {
+            ...meta,
+            updatedAt: serverTimestamp()
+        });
+
+        return true;
+    } catch (e) {
+        console.error("Failed to save master shipment data to Firebase:", e);
+        throw e;
     }
 };
 
