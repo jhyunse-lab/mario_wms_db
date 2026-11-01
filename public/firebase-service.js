@@ -175,19 +175,18 @@ window.updateIssueMemo = async function(memoId, date, text, author, imageUrl, im
 // ==========================================
 // 마스터 출고 데이터 & 거래처 데이터 클라우드 동기화
 // ==========================================
-window.loadMasterShipmentDataFromFirebase = async function() {
+window.loadMasterDataFromFirebase = async function() {
     try {
-        const metaDoc = await getDoc(doc(db, "system_master", "meta"));
-        if (!metaDoc.exists()) {
-            return null;
-        }
-        const meta = metaDoc.data();
-
         const shipDoc = await getDoc(doc(db, "system_master", "shipment_data"));
         const partDoc = await getDoc(doc(db, "system_master", "partner_data"));
+        const shipMetaDoc = await getDoc(doc(db, "system_master", "shipment_meta"));
+        const partMetaDoc = await getDoc(doc(db, "system_master", "partner_meta"));
+        const legacyMetaDoc = await getDoc(doc(db, "system_master", "meta"));
 
         let shipmentData = null;
         let partnerData = null;
+        let shipmentMeta = shipMetaDoc.exists() ? shipMetaDoc.data() : (legacyMetaDoc.exists() ? legacyMetaDoc.data() : null);
+        let partnerMeta = partMetaDoc.exists() ? partMetaDoc.data() : (legacyMetaDoc.exists() ? legacyMetaDoc.data() : null);
 
         if (shipDoc.exists()) {
             const shipData = shipDoc.data();
@@ -200,41 +199,58 @@ window.loadMasterShipmentDataFromFirebase = async function() {
         }
 
         return {
-            meta: meta || null,
             shipmentData: shipmentData || null,
-            partnerData: partnerData || null
+            partnerData: partnerData || null,
+            shipmentMeta: shipmentMeta || null,
+            partnerMeta: partnerMeta || null
         };
     } catch (e) {
-        console.warn("Could not load master shipment data from Firebase (fallback to local json):", e);
+        console.warn("Could not load master data from Firebase (fallback to local json):", e);
         return null;
     }
 };
 
-window.saveMasterShipmentDataToFirebase = async function(shipmentData, partnerData, meta) {
+// Legacy compatibility wrapper
+window.loadMasterShipmentDataFromFirebase = window.loadMasterDataFromFirebase;
+
+// 1. 출고일자 & 출고등급 데이터 독립 저장
+window.saveMasterShipmentDataToFirebase = async function(shipmentData, meta) {
     try {
-        // 1. Save shipmentData
         await setDoc(doc(db, "system_master", "shipment_data"), {
             json: JSON.stringify(shipmentData),
             count: Object.keys(shipmentData).length,
             updatedAt: serverTimestamp()
         });
 
-        // 2. Save partnerData
-        await setDoc(doc(db, "system_master", "partner_data"), {
-            json: JSON.stringify(partnerData),
-            count: Object.keys(partnerData).length,
-            updatedAt: serverTimestamp()
-        });
-
-        // 3. Save meta
-        await setDoc(doc(db, "system_master", "meta"), {
+        await setDoc(doc(db, "system_master", "shipment_meta"), {
             ...meta,
             updatedAt: serverTimestamp()
         });
 
         return true;
     } catch (e) {
-        console.error("Failed to save master shipment data to Firebase:", e);
+        console.error("Failed to save shipment data to Firebase:", e);
+        throw e;
+    }
+};
+
+// 2. 거래처 매핑 데이터 독립 저장
+window.saveMasterPartnerDataToFirebase = async function(partnerData, meta) {
+    try {
+        await setDoc(doc(db, "system_master", "partner_data"), {
+            json: JSON.stringify(partnerData),
+            count: Object.keys(partnerData).length,
+            updatedAt: serverTimestamp()
+        });
+
+        await setDoc(doc(db, "system_master", "partner_meta"), {
+            ...meta,
+            updatedAt: serverTimestamp()
+        });
+
+        return true;
+    } catch (e) {
+        console.error("Failed to save partner data to Firebase:", e);
         throw e;
     }
 };

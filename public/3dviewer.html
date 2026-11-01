@@ -651,7 +651,7 @@
                 이슈/메모 기록</button>
         </div>
 
-        <!-- 엑셀 업로드 영역 (현재고 & 출고데이터) -->
+        <!-- 엑셀 업로드 영역 (현재고 & 출고데이터 & 거래처데이터) -->
         <div id="uploadArea" style="display:flex; flex-direction:column; gap:8px;">
             <div>
                 <div class="uploadLabel">① 현재고 엑셀 (로케이션, 품목코드, 제조사명 등)</div>
@@ -660,7 +660,7 @@
             
             <div style="border-top: 1px dashed #374151; padding-top: 6px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                    <span class="uploadLabel" style="margin-bottom:0;">② 출고 엑셀 등록 (거래처/출고등급)</span>
+                    <span class="uploadLabel" style="margin-bottom:0;">② 출고 엑셀 등록 (출고일자/등급)</span>
                     <button id="openShipmentModalBtn" type="button" style="
                         background: linear-gradient(135deg, #4f46e5, #4338ca);
                         color: #ffffff;
@@ -682,6 +682,33 @@
                 <div id="shipmentSyncStatus" style="font-size: 10.5px; color: #94a3b8; display:flex; align-items:center; gap:4px; line-height: 1.3;">
                     <span>📦 최근 출고 갱신:</span>
                     <span id="shipmentSyncText" style="color: #38bdf8; font-weight: 500;">확인 중...</span>
+                </div>
+            </div>
+
+            <div style="border-top: 1px dashed #374151; padding-top: 6px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                    <span class="uploadLabel" style="margin-bottom:0;">③ 거래처 엑셀 등록 (거래처 매핑)</span>
+                    <button id="openPartnerModalBtn" type="button" style="
+                        background: linear-gradient(135deg, #059669, #047857);
+                        color: #ffffff;
+                        border: 1px solid #10b981;
+                        padding: 4px 10px;
+                        border-radius: 6px;
+                        font-size: 11px;
+                        font-weight: 600;
+                        cursor: pointer;
+                        display: flex;
+                        align-items: center;
+                        gap: 4px;
+                        box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+                        transition: all 0.2s;
+                    " onmouseover="this.style.background='#10b981'" onmouseout="this.style.background='linear-gradient(135deg, #059669, #047857)'">
+                        <span>🤝 거래처 엑셀 등록</span>
+                    </button>
+                </div>
+                <div id="partnerSyncStatus" style="font-size: 10.5px; color: #94a3b8; display:flex; align-items:center; gap:4px; line-height: 1.3;">
+                    <span>🏢 최근 거래처 갱신:</span>
+                    <span id="partnerSyncText" style="color: #34d399; font-weight: 500;">확인 중...</span>
                 </div>
             </div>
         </div>
@@ -3553,17 +3580,20 @@
                 
                 <h4 style="color:#e2e8f0; font-size:13px; margin-top:10px; margin-bottom:6px;">3.1. 현재고 엑셀 업로드</h4>
                 <ul style="margin:0 0 16px 0; padding-left:20px; font-size:12px;">
-                    <li><strong style="color:#f8fafc;">[① 현재고 엑셀]</strong> 버튼을 눌러 재고현황상세 .xlsx / .xls 엑셀 파일을 업로드합니다. 자사명은 자동 제외되고 실제 출고 고객사 데이터가 자동 연동됩니다.</li>
+                    <li><strong style="color:#f8fafc;">[① 현재고 엑셀]</strong>: 평소에 재고현황상세 .xlsx / .xls 엑셀 파일을 업로드합니다. 내장된 거래처 및 출고등급 데이터가 자동 연동됩니다.</li>
                 </ul>
 
-                <h4 style="color:#e2e8f0; font-size:13px; margin-top:14px; margin-bottom:6px;">3.2. 출고 엑셀 등록 (거래처 & 출고등급 전사 실시간 갱신) ✨</h4>
+                <h4 style="color:#e2e8f0; font-size:13px; margin-top:14px; margin-bottom:6px;">3.2. 출고 엑셀 등록 (출고일자 & 출고등급 전사 실시간 갱신) 📤</h4>
                 <ul style="margin:0 0 16px 0; padding-left:20px; font-size:12px;">
-                    <li style="margin-bottom:6px;">📤 <strong style="color:#f8fafc;">[② 출고 엑셀 등록]</strong>: 버튼을 클릭하여 ERP 출고 엑셀 파일을 업로드합니다.</li>
-                    <li style="margin-bottom:6px;">💡 <strong style="color:#f8fafc;">파일명 무관 & 자율 등록</strong>: 파일명이 무엇이든 시스템이 엑셀 내부 컬럼을 자동 인식하므로 어떤 직원이든 본인 이름만 적고 바로 등록할 수 있습니다.</li>
-                    <li style="margin-bottom:6px;">🔄 <strong style="color:#f8fafc;">클라우드 전사 실시간 전파</strong>: 등록 즉시 기존 누적 데이터와 안전하게 합산(Merge)되어 구글 클라우드 DB에 저장되며, 다른 모든 직원들의 화면에도 실시간으로 자동 반영됩니다.</li>
+                    <li style="margin-bottom:6px;"><strong style="color:#f8fafc;">[② 출고 엑셀 등록]</strong>: 출고 내역이 누적되었을 때 ERP 출고 엑셀을 업로드합니다. 품목별 최종 출고일자 및 출고등급(A/B/C/D)이 갱신되어 전 직원의 화면에 클라우드 실시간 반영됩니다.</li>
                 </ul>
 
-                <h4 style="color:#e2e8f0; font-size:13px; margin-top:14px; margin-bottom:6px;">3.3. 재고 인벤토리 테이블 조작 & 3D 줌인</h4>
+                <h4 style="color:#e2e8f0; font-size:13px; margin-top:14px; margin-bottom:6px;">3.3. 거래처 매핑 엑셀 등록 (품목별 거래처 전용 전사 갱신) 🤝</h4>
+                <ul style="margin:0 0 16px 0; padding-left:20px; font-size:12px;">
+                    <li style="margin-bottom:6px;"><strong style="color:#f8fafc;">[③ 거래처 엑셀 등록]</strong>: 거래처가 새로 추가되거나 변경되었을 때 품목코드와 거래처명이 적힌 엑셀을 업로드합니다. 품목별 거래처 매핑 데이터가 갱신되어 전 직원의 화면에 클라우드 실시간 반영됩니다.</li>
+                </ul>
+
+                <h4 style="color:#e2e8f0; font-size:13px; margin-top:14px; margin-bottom:6px;">3.4. 재고 인벤토리 테이블 조작 & 3D 줌인</h4>
                 <ul style="margin:0 0 16px 0; padding-left:20px; font-size:12px;">
                     <li style="margin-bottom:6px;">🔍 <strong style="color:#f8fafc;">출고 거래처 및 통합 검색</strong>: 거래처명(<code style="color:#a5b4fc; background:#1e293b; padding:1px 4px;">경신</code> 등), 품목코드, 품목명, 로케이션 입력 시 실시간으로 테이블과 3D 뷰어가 동시에 필터링됩니다.</li>
                     <li style="margin-bottom:6px;">🏷️ <strong style="color:#f8fafc;">인기 출고 거래처 퀵 태그 (Quick Filter)</strong>: 검색창 아래의 거래처 칩 버튼(<code style="color:#cbd5e1; background:#1e293b; padding:1px 4px;">경신</code>, <code style="color:#cbd5e1; background:#1e293b; padding:1px 4px;">엘에스오토모티브</code>, <code style="color:#cbd5e1; background:#1e293b; padding:1px 4px;">대동모벨</code> 등)을 클릭하여 해당 고객사 출고 품목을 한 번에 모아봅니다.</li>
@@ -3607,7 +3637,7 @@
     </script>
 
     <!-- ========================================== -->
-    <!-- 출고 엑셀 업로드 팝업 모달 (직원 자율 갱신용) -->
+    <!-- 출고 엑셀 업로드 팝업 모달 (출고일자/등급 갱신) -->
     <!-- ========================================== -->
     <div id="shipmentModal" style="
         display: none;
@@ -3642,7 +3672,7 @@
                 justify-content: space-between;
             ">
                 <div style="font-size: 16px; font-weight: 700; color: #e0e7ff; display:flex; align-items:center; gap:8px;">
-                    📤 출고 엑셀 등록 (거래처 & 출고등급 갱신)
+                    📤 출고 엑셀 등록 (출고일자 & 출고등급 갱신)
                 </div>
                 <button id="closeShipmentModalBtn" style="
                     background: none; border: none; color: #a5b4fc;
@@ -3655,7 +3685,7 @@
             <div style="padding: 20px; display:flex; flex-direction:column; gap:16px;">
                 <div style="background:#1e293b; border-left:4px solid #6366f1; padding:10px 14px; border-radius:0 8px 8px 0; font-size:12px; color:#cbd5e1; line-height:1.5;">
                     💡 <strong>파일명은 어떤 것이든 상관없습니다!</strong><br/>
-                    ERP에서 다운로드받은 출고 엑셀 파일을 그대로 등록하시면, 시스템이 자동으로 품목별 <strong>최종 출고일자(등급)</strong>와 <strong>실제 거래처(누적 1위 우선)</strong>를 분석하여 <strong>전 직원의 화면에 실시간 자동 반영</strong>됩니다.
+                    ERP에서 다운로드받은 출고 엑셀 파일을 그대로 등록하시면, 시스템이 자동으로 품목별 <strong>최종 출고일자(등급)</strong>를 분석하여 <strong>전 직원의 화면에 실시간 자동 반영</strong>됩니다.
                 </div>
 
                 <!-- 등록자 이름 입력 -->
@@ -3755,6 +3785,156 @@
         </div>
     </div>
 
+
+    <!-- ========================================== -->
+    <!-- 거래처 엑셀 업로드 팝업 모달 (거래처 매핑 전용 갱신) -->
+    <!-- ========================================== -->
+    <div id="partnerModal" style="
+        display: none;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(15, 23, 42, 0.7);
+        backdrop-filter: blur(4px);
+        z-index: 99999;
+        align-items: center;
+        justify-content: center;
+    ">
+        <div style="
+            background: #0f172a;
+            border: 1.5px solid #10b981;
+            border-radius: 16px;
+            width: 92%;
+            max-width: 580px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85);
+            overflow: hidden;
+            color: #f8fafc;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            display: flex;
+            flex-direction: column;
+        ">
+            <!-- Header -->
+            <div style="
+                padding: 16px 20px;
+                background: linear-gradient(135deg, #064e3b, #047857);
+                border-bottom: 1px solid #059669;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            ">
+                <div style="font-size: 16px; font-weight: 700; color: #a7f3d0; display:flex; align-items:center; gap:8px;">
+                    🤝 거래처 매핑 엑셀 등록 (품목별 거래처 전용 갱신)
+                </div>
+                <button id="closePartnerModalBtn" style="
+                    background: none; border: none; color: #6ee7b7;
+                    font-size: 24px; font-weight: bold; cursor: pointer;
+                    line-height: 1; padding: 4px;
+                " onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#6ee7b7'">&times;</button>
+            </div>
+
+            <!-- Body -->
+            <div style="padding: 20px; display:flex; flex-direction:column; gap:16px;">
+                <div style="background:#1e293b; border-left:4px solid #10b981; padding:10px 14px; border-radius:0 8px 8px 0; font-size:12px; color:#cbd5e1; line-height:1.5;">
+                    💡 <strong>파일명은 어떤 것이든 상관없습니다!</strong><br/>
+                    품목코드(또는 품목명)와 거래처명이 적힌 엑셀 파일을 그대로 등록하시면, 시스템이 자동으로 거래처 매핑을 갱신하여 <strong>전 직원의 화면에 실시간 자동 반영</strong>됩니다.
+                </div>
+
+                <!-- 등록자 이름 입력 -->
+                <div>
+                    <label style="display:block; font-size:12px; font-weight:600; color:#cbd5e1; margin-bottom:6px;">
+                        👤 등록자 이름 (필수)
+                    </label>
+                    <input type="text" id="partnerUploaderName" placeholder="예: 홍길동 대리, 김철수 등 본인 이름 입력" style="
+                        width: 100%;
+                        background: #1e293b;
+                        border: 1px solid #475569;
+                        border-radius: 8px;
+                        padding: 9px 12px;
+                        color: #f8fafc;
+                        font-size: 13px;
+                        outline: none;
+                        box-sizing: border-box;
+                    " onfocus="this.style.borderColor='#34d399'" onblur="this.style.borderColor='#475569'" />
+                </div>
+
+                <!-- 파일 드래그앤드롭 영역 -->
+                <div>
+                    <label style="display:block; font-size:12px; font-weight:600; color:#cbd5e1; margin-bottom:6px;">
+                        📁 거래처 매핑 엑셀 파일 (.xlsx, .xls)
+                    </label>
+                    <div id="partnerDropZone" style="
+                        border: 2px dashed #475569;
+                        border-radius: 12px;
+                        padding: 24px 16px;
+                        text-align: center;
+                        background: #1e293b;
+                        cursor: pointer;
+                        transition: all 0.2s;
+                    ">
+                        <div style="font-size: 28px; margin-bottom: 6px;">📑</div>
+                        <div style="font-size: 13px; font-weight:600; color: #e2e8f0; margin-bottom: 4px;">
+                            클릭하여 엑셀 파일 선택 또는 여기에 드래그
+                        </div>
+                        <div style="font-size: 11px; color: #94a3b8;">
+                            컬럼: 품목코드(또는 품목명), 거래처명(또는 고객사/판매처)
+                        </div>
+                    </div>
+                    <input type="file" id="partnerFileInput" accept=".xlsx,.xls" style="display:none;" />
+                    <div id="selectedPartnerFileDisplay" style="
+                        display: none;
+                        margin-top: 8px;
+                        padding: 8px 12px;
+                        background: #064e3b;
+                        border: 1px solid #059669;
+                        border-radius: 6px;
+                        font-size: 12px;
+                        color: #a7f3d0;
+                        align-items: center;
+                        justify-content: space-between;
+                    ">
+                        <span id="selectedPartnerFileName" style="font-weight:600;">파일명</span>
+                        <span id="selectedPartnerFileSize" style="color:#6ee7b7; font-size:11px;">0 KB</span>
+                    </div>
+                </div>
+
+                <!-- 상태 표시 / 프로그레스 -->
+                <div id="partnerProcessIndicator" style="display:none; padding:12px; background:#1e293b; border-radius:8px; border:1px solid #334155;">
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                        <span style="display:inline-block; width:14px; height:14px; border:2px solid #10b981; border-top-color:transparent; border-radius:50%; animation:spinIndicator 0.8s linear infinite;"></span>
+                        <span id="partnerProcessText" style="font-size:12px; color:#34d399; font-weight:600;">거래처 데이터 분석 및 클라우드 동기화 중...</span>
+                    </div>
+                    <div style="width:100%; height:4px; background:#334155; border-radius:2px; overflow:hidden;">
+                        <div id="partnerProgressBar" style="width:30%; height:100%; background:linear-gradient(90deg, #10b981, #34d399); transition:width 0.3s;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div style="
+                padding: 14px 20px;
+                background: #064e3b;
+                border-top: 1px solid #047857;
+                display: flex;
+                justify-content: flex-end;
+                gap: 10px;
+            ">
+                <button id="cancelPartnerModalBtn" style="
+                    background: #334155; color: #cbd5e1; border: none;
+                    padding: 8px 16px; border-radius: 6px; font-size: 12px;
+                    font-weight: 600; cursor: pointer;
+                ">취소</button>
+                <button id="executePartnerUploadBtn" style="
+                    background: linear-gradient(135deg, #059669, #047857);
+                    color: #ffffff; border: 1px solid #10b981;
+                    padding: 8px 18px; border-radius: 6px; font-size: 12px;
+                    font-weight: 600; cursor: pointer;
+                    display: flex; align-items: center; gap: 6px;
+                ">
+                    <span>🚀 거래처 데이터 전사 갱신</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <style>
         @keyframes spinIndicator {
             0% { transform: rotate(0deg); }
@@ -3762,96 +3942,69 @@
         }
     </style>
 
-
-    <!-- JS Logic: 출고 엑셀 업로드 & Firebase 클라우드 마스터 동기화 -->
+    <!-- JS Logic: 출고 엑셀 & 거래처 엑셀 업로드 및 클라우드 동기화 -->
     <script>
         (function() {
-            const openBtn = document.getElementById("openShipmentModalBtn");
-            const closeBtn = document.getElementById("closeShipmentModalBtn");
-            const cancelBtn = document.getElementById("cancelShipmentModalBtn");
-            const modal = document.getElementById("shipmentModal");
-            const dropZone = document.getElementById("shipmentDropZone");
-            const fileInput = document.getElementById("shipmentFileInput");
-            const fileDisplay = document.getElementById("selectedShipmentFileDisplay");
-            const fileNameEl = document.getElementById("selectedShipmentFileName");
-            const fileSizeEl = document.getElementById("selectedShipmentFileSize");
-            const uploaderNameInput = document.getElementById("shipmentUploaderName");
-            const executeBtn = document.getElementById("executeShipmentUploadBtn");
-            const indicator = document.getElementById("shipmentProcessIndicator");
-            const processText = document.getElementById("shipmentProcessText");
-            const progressBar = document.getElementById("shipmentProgressBar");
-            const syncTextEl = document.getElementById("shipmentSyncText");
+            // Shipment Elements
+            const openShipmentBtn = document.getElementById("openShipmentModalBtn");
+            const closeShipmentBtn = document.getElementById("closeShipmentModalBtn");
+            const cancelShipmentBtn = document.getElementById("cancelShipmentModalBtn");
+            const shipmentModal = document.getElementById("shipmentModal");
+            const shipmentDropZone = document.getElementById("shipmentDropZone");
+            const shipmentFileInput = document.getElementById("shipmentFileInput");
+            const selectedShipmentFileDisplay = document.getElementById("selectedShipmentFileDisplay");
+            const selectedShipmentFileName = document.getElementById("selectedShipmentFileName");
+            const selectedShipmentFileSize = document.getElementById("selectedShipmentFileSize");
+            const shipmentUploaderNameInput = document.getElementById("shipmentUploaderName");
+            const executeShipmentBtn = document.getElementById("executeShipmentUploadBtn");
+            const shipmentProcessIndicator = document.getElementById("shipmentProcessIndicator");
+            const shipmentProcessText = document.getElementById("shipmentProcessText");
+            const shipmentProgressBar = document.getElementById("shipmentProgressBar");
+            const shipmentSyncText = document.getElementById("shipmentSyncText");
 
-            let selectedFile = null;
+            // Partner Elements
+            const openPartnerBtn = document.getElementById("openPartnerModalBtn");
+            const closePartnerBtn = document.getElementById("closePartnerModalBtn");
+            const cancelPartnerBtn = document.getElementById("cancelPartnerModalBtn");
+            const partnerModal = document.getElementById("partnerModal");
+            const partnerDropZone = document.getElementById("partnerDropZone");
+            const partnerFileInput = document.getElementById("partnerFileInput");
+            const selectedPartnerFileDisplay = document.getElementById("selectedPartnerFileDisplay");
+            const selectedPartnerFileName = document.getElementById("selectedPartnerFileName");
+            const selectedPartnerFileSize = document.getElementById("selectedPartnerFileSize");
+            const partnerUploaderNameInput = document.getElementById("partnerUploaderName");
+            const executePartnerBtn = document.getElementById("executePartnerUploadBtn");
+            const partnerProcessIndicator = document.getElementById("partnerProcessIndicator");
+            const partnerProcessText = document.getElementById("partnerProcessText");
+            const partnerProgressBar = document.getElementById("partnerProgressBar");
+            const partnerSyncText = document.getElementById("partnerSyncText");
+
+            let selectedShipmentFile = null;
+            let selectedPartnerFile = null;
 
             // Remember previous uploader name in localStorage
             try {
                 const savedName = localStorage.getItem("mario_wms_uploader_name");
-                if (savedName && uploaderNameInput) uploaderNameInput.value = savedName;
+                if (savedName) {
+                    if (shipmentUploaderNameInput) shipmentUploaderNameInput.value = savedName;
+                    if (partnerUploaderNameInput) partnerUploaderNameInput.value = savedName;
+                }
             } catch(e) {}
 
-            function openModal() {
-                if (modal) modal.style.display = "flex";
-                if (indicator) indicator.style.display = "none";
-                if (executeBtn) executeBtn.disabled = false;
-            }
-            function closeModal() {
-                if (modal) modal.style.display = "none";
-            }
-
-            if (openBtn) openBtn.addEventListener("click", openModal);
-            if (closeBtn) closeBtn.addEventListener("click", closeModal);
-            if (cancelBtn) cancelBtn.addEventListener("click", closeModal);
-            if (modal) {
-                modal.addEventListener("click", (e) => {
-                    if (e.target === modal) closeModal();
-                });
-            }
-
-            // File selection
-            if (dropZone && fileInput) {
-                dropZone.addEventListener("click", () => fileInput.click());
-                dropZone.addEventListener("dragover", (e) => {
-                    e.preventDefault();
-                    dropZone.style.borderColor = "#818cf8";
-                    dropZone.style.background = "#312e81";
-                });
-                dropZone.addEventListener("dragleave", (e) => {
-                    e.preventDefault();
-                    dropZone.style.borderColor = "#475569";
-                    dropZone.style.background = "#1e293b";
-                });
-                dropZone.addEventListener("drop", (e) => {
-                    e.preventDefault();
-                    dropZone.style.borderColor = "#475569";
-                    dropZone.style.background = "#1e293b";
-                    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-                        handleFileSelection(e.dataTransfer.files[0]);
-                    }
-                });
-                fileInput.addEventListener("change", (e) => {
-                    if (e.target.files && e.target.files.length > 0) {
-                        handleFileSelection(e.target.files[0]);
-                    }
-                });
-            }
-
-            function handleFileSelection(file) {
-                if (!file.name.match(/\.(xlsx|xls)$/i)) {
-                    alert("엑셀 파일(.xlsx, .xls)만 업로드 가능합니다.");
-                    return;
-                }
-                selectedFile = file;
-                if (fileNameEl) fileNameEl.textContent = file.name;
-                if (fileSizeEl) fileSizeEl.textContent = (file.size / (1024 * 1024)).toFixed(2) + " MB";
-                if (fileDisplay) fileDisplay.style.display = "flex";
+            function formatNowString() {
+                const now = new Date();
+                const y = now.getFullYear();
+                const m = String(now.getMonth() + 1).padStart(2, '0');
+                const d = String(now.getDate()).padStart(2, '0');
+                const hh = String(now.getHours()).padStart(2, '0');
+                const mm = String(now.getMinutes()).padStart(2, '0');
+                return `${y}.${m}.${d} ${hh}:${mm}`;
             }
 
             // Date parser helper
             function parseShipmentDate(val) {
                 if (!val) return "";
                 if (typeof val === "number") {
-                    // Excel serial date to JS Date
                     try {
                         const dateObj = new Date(Math.round((val - 25569) * 86400 * 1000));
                         const y = dateObj.getFullYear();
@@ -3871,53 +4024,98 @@
                 return s.length >= 10 ? s.substring(0, 10) : s;
             }
 
-            // Execute Upload & Parse
-            if (executeBtn) {
-                executeBtn.addEventListener("click", async () => {
-                    const uploaderName = (uploaderNameInput ? uploaderNameInput.value : "").trim();
+            // ==========================================
+            // 1. Shipment Modal Logic
+            // ==========================================
+            function openShipmentModal() {
+                if (shipmentModal) shipmentModal.style.display = "flex";
+                if (shipmentProcessIndicator) shipmentProcessIndicator.style.display = "none";
+                if (executeShipmentBtn) executeShipmentBtn.disabled = false;
+            }
+            function closeShipmentModal() {
+                if (shipmentModal) shipmentModal.style.display = "none";
+            }
+            if (openShipmentBtn) openShipmentBtn.addEventListener("click", openShipmentModal);
+            if (closeShipmentBtn) closeShipmentBtn.addEventListener("click", closeShipmentModal);
+            if (cancelShipmentBtn) cancelShipmentBtn.addEventListener("click", closeShipmentModal);
+            if (shipmentModal) {
+                shipmentModal.addEventListener("click", (e) => {
+                    if (e.target === shipmentModal) closeShipmentModal();
+                });
+            }
+
+            if (shipmentDropZone && shipmentFileInput) {
+                shipmentDropZone.addEventListener("click", () => shipmentFileInput.click());
+                shipmentDropZone.addEventListener("dragover", (e) => {
+                    e.preventDefault();
+                    shipmentDropZone.style.borderColor = "#818cf8";
+                    shipmentDropZone.style.background = "#312e81";
+                });
+                shipmentDropZone.addEventListener("dragleave", (e) => {
+                    e.preventDefault();
+                    shipmentDropZone.style.borderColor = "#475569";
+                    shipmentDropZone.style.background = "#1e293b";
+                });
+                shipmentDropZone.addEventListener("drop", (e) => {
+                    e.preventDefault();
+                    shipmentDropZone.style.borderColor = "#475569";
+                    shipmentDropZone.style.background = "#1e293b";
+                    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                        handleShipmentFileSelection(e.dataTransfer.files[0]);
+                    }
+                });
+                shipmentFileInput.addEventListener("change", (e) => {
+                    if (e.target.files && e.target.files.length > 0) {
+                        handleShipmentFileSelection(e.target.files[0]);
+                    }
+                });
+            }
+
+            function handleShipmentFileSelection(file) {
+                if (!file.name.match(/\.(xlsx|xls)$/i)) {
+                    alert("엑셀 파일(.xlsx, .xls)만 업로드 가능합니다.");
+                    return;
+                }
+                selectedShipmentFile = file;
+                if (selectedShipmentFileName) selectedShipmentFileName.textContent = file.name;
+                if (selectedShipmentFileSize) selectedShipmentFileSize.textContent = (file.size / (1024 * 1024)).toFixed(2) + " MB";
+                if (selectedShipmentFileDisplay) selectedShipmentFileDisplay.style.display = "flex";
+            }
+
+            if (executeShipmentBtn) {
+                executeShipmentBtn.addEventListener("click", async () => {
+                    const uploaderName = (shipmentUploaderNameInput ? shipmentUploaderNameInput.value : "").trim();
                     if (!uploaderName) {
                         alert("등록자 이름을 입력해 주세요.");
-                        if (uploaderNameInput) uploaderNameInput.focus();
+                        if (shipmentUploaderNameInput) shipmentUploaderNameInput.focus();
                         return;
                     }
-                    if (!selectedFile) {
+                    if (!selectedShipmentFile) {
                         alert("출고 엑셀 파일을 선택해 주세요.");
                         return;
                     }
+                    try { localStorage.setItem("mario_wms_uploader_name", uploaderName); } catch(e) {}
 
-                    try {
-                        localStorage.setItem("mario_wms_uploader_name", uploaderName);
-                    } catch(e) {}
-
-                    // UI progress
-                    if (indicator) indicator.style.display = "block";
-                    if (processText) processText.textContent = "엑셀 파일을 읽고 분석하는 중입니다...";
-                    if (progressBar) progressBar.style.width = "25%";
-                    executeBtn.disabled = true;
+                    if (shipmentProcessIndicator) shipmentProcessIndicator.style.display = "block";
+                    if (shipmentProcessText) shipmentProcessText.textContent = "엑셀 파일을 읽고 분석하는 중입니다...";
+                    if (shipmentProgressBar) shipmentProgressBar.style.width = "25%";
+                    executeShipmentBtn.disabled = true;
 
                     const reader = new FileReader();
                     reader.onload = async function(e) {
                         try {
                             const data = new Uint8Array(e.target.result);
-                            if (processText) processText.textContent = "엑셀 시트 파싱 중...";
-                            if (progressBar) progressBar.style.width = "50%";
+                            if (shipmentProcessText) shipmentProcessText.textContent = "엑셀 시트 파싱 중...";
+                            if (shipmentProgressBar) shipmentProgressBar.style.width = "50%";
 
                             const workbook = XLSX.read(data, { type: 'array' });
-                            const sheetName = workbook.SheetNames[0];
-                            const sheet = workbook.Sheets[sheetName];
+                            const sheet = workbook.Sheets[workbook.SheetNames[0]];
                             const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
 
-                            if (!rows || rows.length < 2) {
-                                throw new Error("엑셀 파일에 유효한 데이터가 없습니다.");
-                            }
+                            if (!rows || rows.length < 2) throw new Error("엑셀 파일에 유효한 데이터가 없습니다.");
 
-                            // Smart column detection
                             let headerRowIdx = -1;
-                            let colItem = -1;
-                            let colPartner = -1;
-                            let colFallbackPartner = -1;
-                            let colDate = -1;
-                            let colQty = -1;
+                            let colItem = -1, colDate = -1, colQty = -1;
 
                             for (let r = 0; r < Math.min(rows.length, 25); r++) {
                                 const row = rows[r];
@@ -3927,12 +4125,6 @@
                                         colItem = c;
                                         headerRowIdx = r;
                                     }
-                                    if (colPartner === -1 && (val.includes("판매처명") || val.includes("판매처") || val.includes("거래처명") || val.includes("거래처"))) {
-                                        colPartner = c;
-                                    }
-                                    if (colFallbackPartner === -1 && (val.includes("인도처명") || val.includes("인도처"))) {
-                                        colFallbackPartner = c;
-                                    }
                                     if (colDate === -1 && (val.includes("출고요청일자") || val.includes("출고일자") || val.includes("출하일자") || val.includes("일자") || val === "date")) {
                                         colDate = c;
                                     }
@@ -3940,42 +4132,20 @@
                                         colQty = c;
                                     }
                                 }
-                                if (colItem !== -1 && (colPartner !== -1 || colDate !== -1)) break;
+                                if (colItem !== -1 && colDate !== -1) break;
                             }
 
-                            // Fallback standard ERP column indexes (Col 26, 19, 21, 11, 33)
                             if (colItem === -1) colItem = 25;
-                            if (colPartner === -1) colPartner = 18;
-                            if (colFallbackPartner === -1) colFallbackPartner = 20;
                             if (colDate === -1) colDate = 10;
                             if (colQty === -1) colQty = 32;
                             if (headerRowIdx === -1) headerRowIdx = 0;
 
-                            if (processText) processText.textContent = "품목별 출고일자 및 거래처 누적 집계 병합 중...";
-                            if (progressBar) progressBar.style.width = "75%";
+                            if (shipmentProcessText) shipmentProcessText.textContent = "품목별 최종 출고일자 및 출고등급 갱신 중...";
+                            if (shipmentProgressBar) shipmentProgressBar.style.width = "75%";
 
-                            // 1. Prepare base data to merge
                             const updatedShipment = { ...(window.shipmentData || {}) };
-                            
-                            // 2. Prepare partner quantity map: itemCode -> { partner -> qty }
-                            const itemPartnerQty = {};
-                            // Seed from current window.partnerData to preserve previous history
-                            if (window.partnerData) {
-                                Object.keys(window.partnerData).forEach(code => {
-                                    const partnerStr = window.partnerData[code];
-                                    if (partnerStr) {
-                                        itemPartnerQty[code] = {};
-                                        // Higher weight to the first partner
-                                        const pList = partnerStr.split(',').map(s => s.trim()).filter(Boolean);
-                                        pList.forEach((p, idx) => {
-                                            // Assign a base weight so top partners remain top unless superseded
-                                            itemPartnerQty[code][p] = Math.max(100 - idx * 10, 10);
-                                        });
-                                    }
-                                });
-                            }
-
                             let rowProcessedCount = 0;
+
                             for (let r = headerRowIdx + 1; r < rows.length; r++) {
                                 const row = rows[r];
                                 const rawCode = row[colItem];
@@ -3984,81 +4154,244 @@
                                 if (!itemCode) continue;
 
                                 rowProcessedCount++;
-
-                                // Partner
-                                let pVal = row[colPartner];
-                                if (!pVal && colFallbackPartner !== -1) pVal = row[colFallbackPartner];
-                                const partner = String(pVal || "").trim();
-
-                                // Qty
-                                let rawQty = row[colQty];
-                                let qty = Number(rawQty) || 1;
-
-                                // Date
                                 const dateVal = parseShipmentDate(row[colDate]);
-
-                                // Update latest shipment date
                                 if (dateVal) {
                                     if (!updatedShipment[itemCode] || dateVal > updatedShipment[itemCode]) {
                                         updatedShipment[itemCode] = dateVal;
                                     }
                                 }
-
-                                // Update partner cumulative qty
-                                if (partner && !partner.includes("마리오트로닉스")) {
-                                    if (!itemPartnerQty[itemCode]) itemPartnerQty[itemCode] = {};
-                                    itemPartnerQty[itemCode][partner] = (itemPartnerQty[itemCode][partner] || 0) + qty;
-                                }
                             }
 
-                            // Build final partner string (sorted by qty descending)
-                            const updatedPartner = { ...(window.partnerData || {}) };
-                            Object.keys(itemPartnerQty).forEach(code => {
-                                const pObj = itemPartnerQty[code];
-                                const sorted = Object.entries(pObj).sort((a, b) => b[1] - a[1]);
-                                if (sorted.length > 0) {
-                                    updatedPartner[code] = sorted.map(pair => pair[0]).join(", ");
-                                }
-                            });
+                            if (shipmentProcessText) shipmentProcessText.textContent = "Firebase 클라우드 DB에 출고 데이터 저장 중...";
+                            if (shipmentProgressBar) shipmentProgressBar.style.width = "90%";
 
-                            if (processText) processText.textContent = "Firebase 클라우드 DB에 전사 동기화 저장 중...";
-                            if (progressBar) progressBar.style.width = "90%";
-
-                            const now = new Date();
-                            const y = now.getFullYear();
-                            const m = String(now.getMonth() + 1).padStart(2, '0');
-                            const d = String(now.getDate()).padStart(2, '0');
-                            const hh = String(now.getHours()).padStart(2, '0');
-                            const mm = String(now.getMinutes()).padStart(2, '0');
-                            const updatedAtStr = `${y}.${m}.${d} ${hh}:${mm}`;
-
+                            const updatedAtStr = formatNowString();
                             const meta = {
                                 updatedBy: uploaderName,
-                                fileName: selectedFile.name,
+                                fileName: selectedShipmentFile.name,
                                 rowCount: rowProcessedCount,
                                 itemCount: Object.keys(updatedShipment).length,
                                 updatedAtStr: updatedAtStr
                             };
 
-                            // Save to Firebase
                             if (typeof window.saveMasterShipmentDataToFirebase === "function") {
-                                await window.saveMasterShipmentDataToFirebase(updatedShipment, updatedPartner, meta);
-                            } else {
-                                console.warn("saveMasterShipmentDataToFirebase is not defined yet.");
+                                await window.saveMasterShipmentDataToFirebase(updatedShipment, meta);
                             }
 
-                            // Update in-memory window variables
                             window.shipmentData = updatedShipment;
-                            window.partnerData = updatedPartner;
                             window.shipmentMeta = meta;
 
-                            // Update header status badge
-                            if (syncTextEl) {
-                                syncTextEl.textContent = `${updatedAtStr} (${uploaderName})`;
-                                syncTextEl.style.color = "#34d399";
+                            if (shipmentSyncText) {
+                                shipmentSyncText.textContent = `${updatedAtStr} (${uploaderName})`;
+                                shipmentSyncText.style.color = "#38bdf8";
                             }
 
-                            // Re-apply to current inventory if loaded
+                            if (typeof applyPartnerMappingToInventory === "function") {
+                                buildAggregatedInventory();
+                                rebuildFilters();
+                                updateInventoryTable();
+                                rebuildBinsFromInventory();
+                                if (typeof updateSelectionCard === "function") updateSelectionCard();
+                            }
+
+                            if (shipmentProgressBar) shipmentProgressBar.style.width = "100%";
+                            if (shipmentProcessText) shipmentProcessText.textContent = "출고 데이터 갱신 완료!";
+
+                            setTimeout(() => {
+                                alert(`🎉 [출고 데이터 갱신 완료]\n\n- 등록자: ${uploaderName}\n- 파일명: ${selectedShipmentFile.name}\n- 처리 행 수: ${rowProcessedCount.toLocaleString()}건\n- 관리 품목: ${Object.keys(updatedShipment).length}개\n\n전 직원의 화면에 최신 출고일자 및 출고등급(A/B/C/D)이 실시간 동기화되었습니다!`);
+                                closeShipmentModal();
+                            }, 500);
+
+                        } catch(err) {
+                            console.error("Shipment upload error:", err);
+                            alert("출고 엑셀 처리 중 오류가 발생했습니다: " + err.message);
+                            if (shipmentProcessIndicator) shipmentProcessIndicator.style.display = "none";
+                            executeShipmentBtn.disabled = false;
+                        }
+                    };
+
+                    reader.onerror = function() {
+                        alert("파일을 읽는 중 오류가 발생했습니다.");
+                        if (shipmentProcessIndicator) shipmentProcessIndicator.style.display = "none";
+                        executeShipmentBtn.disabled = false;
+                    };
+
+                    reader.readAsArrayBuffer(selectedShipmentFile);
+                });
+            }
+
+            // ==========================================
+            // 2. Partner Modal Logic (거래처 매핑 전용)
+            // ==========================================
+            function openPartnerModal() {
+                if (partnerModal) partnerModal.style.display = "flex";
+                if (partnerProcessIndicator) partnerProcessIndicator.style.display = "none";
+                if (executePartnerBtn) executePartnerBtn.disabled = false;
+            }
+            function closePartnerModal() {
+                if (partnerModal) partnerModal.style.display = "none";
+            }
+            if (openPartnerBtn) openPartnerBtn.addEventListener("click", openPartnerModal);
+            if (closePartnerBtn) closePartnerBtn.addEventListener("click", closePartnerModal);
+            if (cancelPartnerBtn) cancelPartnerBtn.addEventListener("click", closePartnerModal);
+            if (partnerModal) {
+                partnerModal.addEventListener("click", (e) => {
+                    if (e.target === partnerModal) closePartnerModal();
+                });
+            }
+
+            if (partnerDropZone && partnerFileInput) {
+                partnerDropZone.addEventListener("click", () => partnerFileInput.click());
+                partnerDropZone.addEventListener("dragover", (e) => {
+                    e.preventDefault();
+                    partnerDropZone.style.borderColor = "#34d399";
+                    partnerDropZone.style.background = "#064e3b";
+                });
+                partnerDropZone.addEventListener("dragleave", (e) => {
+                    e.preventDefault();
+                    partnerDropZone.style.borderColor = "#475569";
+                    partnerDropZone.style.background = "#1e293b";
+                });
+                partnerDropZone.addEventListener("drop", (e) => {
+                    e.preventDefault();
+                    partnerDropZone.style.borderColor = "#475569";
+                    partnerDropZone.style.background = "#1e293b";
+                    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                        handlePartnerFileSelection(e.dataTransfer.files[0]);
+                    }
+                });
+                partnerFileInput.addEventListener("change", (e) => {
+                    if (e.target.files && e.target.files.length > 0) {
+                        handlePartnerFileSelection(e.target.files[0]);
+                    }
+                });
+            }
+
+            function handlePartnerFileSelection(file) {
+                if (!file.name.match(/\.(xlsx|xls)$/i)) {
+                    alert("엑셀 파일(.xlsx, .xls)만 업로드 가능합니다.");
+                    return;
+                }
+                selectedPartnerFile = file;
+                if (selectedPartnerFileName) selectedPartnerFileName.textContent = file.name;
+                if (selectedPartnerFileSize) selectedPartnerFileSize.textContent = (file.size / (1024 * 1024)).toFixed(2) + " MB";
+                if (selectedPartnerFileDisplay) selectedPartnerFileDisplay.style.display = "flex";
+            }
+
+            if (executePartnerBtn) {
+                executePartnerBtn.addEventListener("click", async () => {
+                    const uploaderName = (partnerUploaderNameInput ? partnerUploaderNameInput.value : "").trim();
+                    if (!uploaderName) {
+                        alert("등록자 이름을 입력해 주세요.");
+                        if (partnerUploaderNameInput) partnerUploaderNameInput.focus();
+                        return;
+                    }
+                    if (!selectedPartnerFile) {
+                        alert("거래처 매핑 엑셀 파일을 선택해 주세요.");
+                        return;
+                    }
+                    try { localStorage.setItem("mario_wms_uploader_name", uploaderName); } catch(e) {}
+
+                    if (partnerProcessIndicator) partnerProcessIndicator.style.display = "block";
+                    if (partnerProcessText) partnerProcessText.textContent = "거래처 엑셀 파일을 읽고 분석하는 중입니다...";
+                    if (partnerProgressBar) partnerProgressBar.style.width = "25%";
+                    executePartnerBtn.disabled = true;
+
+                    const reader = new FileReader();
+                    reader.onload = async function(e) {
+                        try {
+                            const data = new Uint8Array(e.target.result);
+                            if (partnerProcessText) partnerProcessText.textContent = "거래처 엑셀 시트 파싱 중...";
+                            if (partnerProgressBar) partnerProgressBar.style.width = "50%";
+
+                            const workbook = XLSX.read(data, { type: 'array' });
+                            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                            const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
+
+                            if (!rows || rows.length < 2) throw new Error("엑셀 파일에 유효한 데이터가 없습니다.");
+
+                            let headerRowIdx = -1;
+                            let colItem = -1, colPartner = -1, colFallbackPartner = -1;
+
+                            for (let r = 0; r < Math.min(rows.length, 25); r++) {
+                                const row = rows[r];
+                                for (let c = 0; c < row.length; c++) {
+                                    const val = String(row[c] || "").trim().toLowerCase();
+                                    if (colItem === -1 && (val.includes("품목코드") || val.includes("자재코드") || val === "품목" || val === "item_code" || val.includes("파일명") || val === "filename" || val.includes("품목명"))) {
+                                        colItem = c;
+                                        headerRowIdx = r;
+                                    }
+                                    if (colPartner === -1 && (val.includes("거래처명") || val.includes("거래처") || val.includes("판매처명") || val.includes("판매처") || val.includes("고객사") || val === "partner" || val === "vendor")) {
+                                        colPartner = c;
+                                    }
+                                    if (colFallbackPartner === -1 && (val.includes("인도처명") || val.includes("인도처"))) {
+                                        colFallbackPartner = c;
+                                    }
+                                }
+                                if (colItem !== -1 && colPartner !== -1) break;
+                            }
+
+                            // Fallbacks
+                            if (colItem === -1) colItem = 0;
+                            if (colPartner === -1) colPartner = 1;
+                            if (headerRowIdx === -1) headerRowIdx = 0;
+
+                            if (partnerProcessText) partnerProcessText.textContent = "품목별 거래처 매핑 데이터 병합 중...";
+                            if (partnerProgressBar) partnerProgressBar.style.width = "75%";
+
+                            const updatedPartner = { ...(window.partnerData || {}) };
+                            let mappedRowCount = 0;
+
+                            for (let r = headerRowIdx + 1; r < rows.length; r++) {
+                                const row = rows[r];
+                                const rawCode = row[colItem];
+                                if (!rawCode) continue;
+                                const itemKey = String(rawCode).trim();
+                                if (!itemKey) continue;
+
+                                let pVal = row[colPartner];
+                                if (!pVal && colFallbackPartner !== -1) pVal = row[colFallbackPartner];
+                                const partnerName = String(pVal || "").trim();
+
+                                if (partnerName && !partnerName.includes("마리오트로닉스")) {
+                                    mappedRowCount++;
+                                    // Merge or replace
+                                    if (!updatedPartner[itemKey]) {
+                                        updatedPartner[itemKey] = partnerName;
+                                    } else {
+                                        // If already has partners, ensure new partner is placed at front if not present
+                                        const existing = updatedPartner[itemKey].split(',').map(s => s.trim()).filter(Boolean);
+                                        const newParts = partnerName.split(',').map(s => s.trim()).filter(Boolean);
+                                        const merged = Array.from(new Set([...newParts, ...existing]));
+                                        updatedPartner[itemKey] = merged.join(", ");
+                                    }
+                                }
+                            }
+
+                            if (partnerProcessText) partnerProcessText.textContent = "Firebase 클라우드 DB에 거래처 데이터 저장 중...";
+                            if (partnerProgressBar) partnerProgressBar.style.width = "90%";
+
+                            const updatedAtStr = formatNowString();
+                            const meta = {
+                                updatedBy: uploaderName,
+                                fileName: selectedPartnerFile.name,
+                                rowCount: mappedRowCount,
+                                itemCount: Object.keys(updatedPartner).length,
+                                updatedAtStr: updatedAtStr
+                            };
+
+                            if (typeof window.saveMasterPartnerDataToFirebase === "function") {
+                                await window.saveMasterPartnerDataToFirebase(updatedPartner, meta);
+                            }
+
+                            window.partnerData = updatedPartner;
+                            window.partnerMeta = meta;
+
+                            if (partnerSyncText) {
+                                partnerSyncText.textContent = `${updatedAtStr} (${uploaderName})`;
+                                partnerSyncText.style.color = "#34d399";
+                            }
+
                             if (typeof applyPartnerMappingToInventory === "function") {
                                 applyPartnerMappingToInventory();
                                 buildAggregatedInventory();
@@ -4068,34 +4401,36 @@
                                 if (typeof updateSelectionCard === "function") updateSelectionCard();
                             }
 
-                            if (progressBar) progressBar.style.width = "100%";
-                            if (processText) processText.textContent = "전사 동기화 갱신 완료!";
+                            if (partnerProgressBar) partnerProgressBar.style.width = "100%";
+                            if (partnerProcessText) partnerProcessText.textContent = "거래처 매핑 갱신 완료!";
 
                             setTimeout(() => {
-                                alert(`🎉 [출고 데이터 갱신 완료]\n\n- 등록자: ${uploaderName}\n- 파일명: ${selectedFile.name}\n- 처리 행 수: ${rowProcessedCount.toLocaleString()}건\n- 관리 품목: ${Object.keys(updatedShipment).length}개\n\n모든 직원의 화면에 최신 출고일자 및 거래처 정보가 실시간으로 반영되었습니다!`);
-                                closeModal();
+                                alert(`🎉 [거래처 매핑 데이터 갱신 완료]\n\n- 등록자: ${uploaderName}\n- 파일명: ${selectedPartnerFile.name}\n- 처리 행 수: ${mappedRowCount.toLocaleString()}건\n- 총 매핑 품목: ${Object.keys(updatedPartner).length}개\n\n전 직원의 화면에 최신 거래처 매핑 정보가 실시간 동기화되었습니다!`);
+                                closePartnerModal();
                             }, 500);
 
                         } catch(err) {
-                            console.error("Shipment upload error:", err);
-                            alert("출고 엑셀 처리 중 오류가 발생했습니다: " + err.message);
-                            if (indicator) indicator.style.display = "none";
-                            executeBtn.disabled = false;
+                            console.error("Partner upload error:", err);
+                            alert("거래처 엑셀 처리 중 오류가 발생했습니다: " + err.message);
+                            if (partnerProcessIndicator) partnerProcessIndicator.style.display = "none";
+                            executePartnerBtn.disabled = false;
                         }
                     };
 
                     reader.onerror = function() {
                         alert("파일을 읽는 중 오류가 발생했습니다.");
-                        if (indicator) indicator.style.display = "none";
-                        executeBtn.disabled = false;
+                        if (partnerProcessIndicator) partnerProcessIndicator.style.display = "none";
+                        executePartnerBtn.disabled = false;
                     };
 
-                    reader.readAsArrayBuffer(selectedFile);
+                    reader.readAsArrayBuffer(selectedPartnerFile);
                 });
             }
 
-            // Sync master data on load
-            async function syncMasterShipmentDataOnLoad() {
+            // ==========================================
+            // 3. Sync master data on load
+            // ==========================================
+            async function syncMasterDataOnLoad() {
                 // 1. Fallback local json fetch
                 try {
                     const [sRes, pRes] = await Promise.all([
@@ -4108,22 +4443,31 @@
                     console.warn("Local json fallback error", e);
                 }
 
-                if (syncTextEl) syncTextEl.textContent = "2026.08.30 (시스템 기본 22.7만 건)";
+                if (shipmentSyncText) shipmentSyncText.textContent = "2026.08.30 (시스템 기본)";
+                if (partnerSyncText) partnerSyncText.textContent = "2026.08.30 (시스템 기본)";
 
                 // 2. Load latest cloud master data
-                if (typeof window.loadMasterShipmentDataFromFirebase === "function") {
+                if (typeof window.loadMasterDataFromFirebase === "function") {
                     try {
-                        const cloud = await window.loadMasterShipmentDataFromFirebase();
-                        if (cloud && cloud.shipmentData && cloud.partnerData) {
-                            window.shipmentData = cloud.shipmentData;
-                            window.partnerData = cloud.partnerData;
-                            window.shipmentMeta = cloud.meta;
+                        const cloud = await window.loadMasterDataFromFirebase();
+                        if (cloud) {
+                            if (cloud.shipmentData) window.shipmentData = cloud.shipmentData;
+                            if (cloud.partnerData) window.partnerData = cloud.partnerData;
+                            if (cloud.shipmentMeta) window.shipmentMeta = cloud.shipmentMeta;
+                            if (cloud.partnerMeta) window.partnerMeta = cloud.partnerMeta;
 
-                            if (syncTextEl && cloud.meta) {
-                                const dt = cloud.meta.updatedAtStr || "최신";
-                                const auth = cloud.meta.updatedBy || "직원";
-                                syncTextEl.textContent = `${dt} (${auth})`;
-                                syncTextEl.style.color = "#34d399";
+                            if (shipmentSyncText && cloud.shipmentMeta) {
+                                const dt = cloud.shipmentMeta.updatedAtStr || "최신";
+                                const auth = cloud.shipmentMeta.updatedBy || "직원";
+                                shipmentSyncText.textContent = `${dt} (${auth})`;
+                                shipmentSyncText.style.color = "#38bdf8";
+                            }
+
+                            if (partnerSyncText && cloud.partnerMeta) {
+                                const dt = cloud.partnerMeta.updatedAtStr || "최신";
+                                const auth = cloud.partnerMeta.updatedBy || "직원";
+                                partnerSyncText.textContent = `${dt} (${auth})`;
+                                partnerSyncText.style.color = "#34d399";
                             }
 
                             if (typeof applyPartnerMappingToInventory === "function") {
@@ -4141,8 +4485,8 @@
             }
 
             // Execute on startup and on firebase ready
-            window.addEventListener("DOMContentLoaded", syncMasterShipmentDataOnLoad);
-            window.addEventListener("firebaseReady", syncMasterShipmentDataOnLoad);
+            window.addEventListener("DOMContentLoaded", syncMasterDataOnLoad);
+            window.addEventListener("firebaseReady", syncMasterDataOnLoad);
         })();
     </script>
 
